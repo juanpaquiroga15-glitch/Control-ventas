@@ -1,370 +1,349 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Ventas Kosmik</title>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f7fafc; margin: 0; padding: 15px; color: #2d3748; }
-        .container { max-width: 950px; margin: 0 auto; }
-        .card { background: white; padding: 18px; border-radius: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        h2, h3 { margin-top: 0; color: #1a202c; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 12px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #4a5568; }
-        input, select { padding: 8px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 13px; }
-        button { background: #3182ce; color: white; border: none; padding: 10px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .btn-green { background: #38a169; }
-        .btn-orange { background: #dd6b20; }
-        .btn-red { background: #e53e3e; padding: 4px 8px; font-size: 11px; }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-        .metric { background: white; padding: 12px; border-radius: 8px; text-align: center; border-left: 5px solid #3182ce; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .metric h4 { margin: 0; font-size: 11px; color: #718096; text-transform: uppercase; }
-        .metric p { margin: 6px 0 0 0; font-size: 18px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; }
-        th, td { padding: 9px; border-bottom: 1px solid #e2e8f0; text-align: left; }
-        th { background: #ebf8ff; color: #2b6cb0; }
-        .status-bar { padding: 10px; border-radius: 8px; font-size: 12px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .off { background: #feebc8; color: #744210; }
-        .on { background: #c6f6d5; color: #22543d; }
-        .badge { background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Registro de Ventas</title>
+  <style>
+    :root {
+      --primary-color: #007bff;
+      --success-color: #28a745;
+      --bg-color: #f4f6f8;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #cccccc;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      margin-bottom: 25px;
+    }
+
+    h2, h3 {
+      margin-top: 0;
+      color: #1a1a1a;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 600;
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+
+    select, input {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      border-color: var(--primary-color);
+    }
+
+    button {
+      background-color: var(--success-color);
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 12px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      margin-top: 10px;
+    }
+
+    button:hover {
+      background-color: #218838;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      background: var(--card-bg);
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+    }
+
+    tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .badge-ganancia {
+      color: var(--success-color);
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>🚀 Control de Ventas Kosmik</h2>
+  <!-- FORMULARIO DE REGISTRO DE VENTA -->
+  <div class="card">
+    <h2>Registrar Nueva Venta</h2>
+    
+    <div class="form-grid">
+      <div class="form-group full-width">
+        <label for="vProducto">Producto / Combo</label>
+        <select id="vProducto">
+          <option value="">-- Seleccionar Producto --</option>
+          <option value="cable_individual">Cable (Unidad) - $800</option>
+          <option value="menta_individual">Menta (Unidad) - $2.000</option>
+          <option value="combo_1">Combo 1 (1 Cable + 1 Menta) - $2.500</option>
+          <option value="combo_2">Combo 2 (2 Cables + 1 Menta) - $3.000</option>
+          <option value="combo_3">Combo 3 (2 Cables + 2 Mentas) - $4.500</option>
+        </select>
+      </div>
 
-    <!-- ESTADO CONEXION -->
-    <div class="status-bar off" id="statusBar">
-        <span id="txtStatus">⚠️ Modo Local (Conecte Firebase para sincronizar)</span>
-        <button class="btn-orange" onclick="abrirConfigDB()" style="font-size: 11px;">⚙️ Conectar Nube</button>
+      <div class="form-group">
+        <label for="vCantidad">Cantidad</label>
+        <input type="number" id="vCantidad" value="1" min="1">
+      </div>
+
+      <div class="form-group">
+        <label for="vUni">Unidad / Sede</label>
+        <input type="text" id="vUni" placeholder="Ej: Local Central">
+      </div>
+
+      <div class="form-group full-width">
+        <label for="vVendedor">Vendedor</label>
+        <input type="text" id="vVendedor" placeholder="Nombre del vendedor">
+      </div>
     </div>
 
-    <!-- MODAL CLAVES FIREBASE -->
-    <div class="card" id="boxFirebase" style="display:none; border: 2px solid #dd6b20;">
-        <h3>⚙️ Configuración Firebase</h3>
-        <div class="form-grid">
-            <div class="form-group"><label>apiKey</label><input type="text" id="fbApiKey" placeholder="AIzaSy..."></div>
-            <div class="form-group"><label>authDomain</label><input type="text" id="fbAuthDomain" placeholder="ventas-kosmik.firebaseapp.com"></div>
-            <div class="form-group"><label>projectId</label><input type="text" id="fbProjectId" placeholder="ventas-kosmik"></div>
-        </div>
-        <button class="btn-green" onclick="conectarFirebase()">Guardar y Sincronizar</button>
-        <button onclick="document.getElementById('boxFirebase').style.display='none'" style="background:#718096;">Cancelar</button>
+    <button type="button" onclick="registrarVenta()">Registrar Venta</button>
+  </div>
+
+  <!-- TABLA DE HISTORIAL DE VENTAS -->
+  <div class="card">
+    <h3>Historial de Ventas</h3>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Cant</th>
+            <th>Vendedor</th>
+            <th>Total</th>
+            <th>Ganancia</th>
+          </tr>
+        </thead>
+        <tbody id="tablaVentas">
+          <!-- Filas dinámicas creadas por JS -->
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- PERFIL USUARIO -->
-    <div class="card">
-        <h3>👤 Administrador: <span id="lblUsuario" style="color:#3182ce;">Admin</span></h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <input type="text" id="txtUsuario" placeholder="Escriba su nombre">
-            </div>
-            <button onclick="guardarUsuario()">Cambiar Nombre</button>
-        </div>
-    </div>
-
-    <!-- CREAR PRODUCTO / COMBO -->
-    <div class="card">
-        <h3>📦 Inventario: Crear Artículo o Combo</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Tipo</label>
-                <select id="pEsCombo">
-                    <option value="false">Producto Individual / Caja</option>
-                    <option value="true">Combo Promocional</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Nombre</label><input type="text" id="pNombre" placeholder="Ej: Chao / Combo 2x1"></div>
-            <div class="form-group"><label>Precio Venta ($)</label><input type="number" id="pPrecio" placeholder="2000"></div>
-            <div class="form-group"><label>Costo Insumo ($)</label><input type="number" id="pCosto" placeholder="843"></div>
-            <div class="form-group"><label>Unidades por Caja</label><input type="number" id="pUnidadesCaja" placeholder="10" value="1"></div>
-            <div class="form-group">
-                <label>Comisión</label>
-                <select id="pTipoComision">
-                    <option value="porcentaje">Porcentaje (%)</option>
-                    <option value="fijo">Monto Fijo ($)</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Valor Com. (0.25 ó $)</label><input type="number" id="pValorComision" step="0.01" placeholder="0.25 o 500"></div>
-        </div>
-        <button class="btn-green" onclick="crearProducto()">+ Guardar en Inventario</button>
-    </div>
-
-    <!-- METRICAS -->
-    <div class="dashboard">
-        <div class="metric"><h4>Ventas Totales</h4><p id="mVentas">$0</p></div>
-        <div class="metric"><h4>Comisiones</h4><p id="mComisiones">$0</p></div>
-        <div class="metric"><h4>Costos Insumos</h4><p id="mCostos">$0</p></div>
-        <div class="metric" style="border-left-color:#38a169;"><h4>Ganancia Neta</h4><p id="mGanancia">$0</p></div>
-    </div>
-
-    <!-- REGISTRAR VENTA -->
-    <div class="card">
-        <h3>🛒 Registrar Nueva Venta</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Universidad</label>
-                <select id="vUni">
-                    <option value="Javeriana">Javeriana</option>
-                    <option value="Rosario">Rosario</option>
-                    <option value="Externado">Externado</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Vendedor</label><input type="text" id="vVendedor" placeholder="Nombre vendedor"></div>
-            <div class="form-group"><label>Producto / Combo</label><select id="vProducto"></select></div>
-            <div class="form-group">
-                <label>Presentación</label>
-                <select id="vPresentacion">
-                    <option value="unidad">Unidad / Combo</option>
-                    <option value="caja">Caja Completa</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Cantidad</label><input type="number" id="vCantidad" value="1" min="1"></div>
-        </div>
-        <button class="btn-green" onclick="registrarVenta()" style="width: 100%; font-size: 15px; padding: 12px; margin-top: 5px;">💸 REGISTRAR VENTA</button>
-    </div>
-
-    <!-- HISTORIAL -->
-    <div class="card" style="overflow-x:auto;">
-        <h3>📋 Historial de Ventas</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Por</th>
-                    <th>Uni</th>
-                    <th>Vendedor</th>
-                    <th>Detalle Venta</th>
-                    <th>Total Venta</th>
-                    <th>Ganancia Neta</th>
-                    <th>Acción</th>
-                </tr>
-            </thead>
-            <tbody id="tbHistorial"></tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    let db = null;
-    let usuario = localStorage.getItem('usr') || 'Admin';
-
-    let productos = JSON.parse(localStorage.getItem('prods')) || {
-        'prod1': { nombre: 'Menta Chao', precio: 2000, costo: 843, unidadesCaja: 24, tipoComision: 'porcentaje', valorComision: 0.25, esCombo: false },
-        'prod2': { nombre: 'Cable Ácido', precio: 800, costo: 283, unidadesCaja: 12, tipoComision: 'porcentaje', valorComision: 0.25, esCombo: false },
-        'combo1': { nombre: 'Combo 2x1 Chao', precio: 3500, costo: 1686, unidadesCaja: 1, tipoComision: 'fijo', valorComision: 500, esCombo: true }
-    };
+  <script>
+    // Configuración inicial de variables globales
+    let usuario = "Usuario_Sistema"; // Se puede sustituir por la sesión activa
+    let db = null; // Si usas Firebase SDK, asigna aquí: firebase.firestore()
     let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
 
-    window.onload = function() {
-        document.getElementById('lblUsuario').innerText = usuario;
-        actualizarSelectProductos();
-
-        const configSaved = JSON.parse(localStorage.getItem('fbCfg'));
-        if(configSaved) {
-            iniciarFirebase(configSaved);
-        } else {
-            actualizarTabla();
-        }
+    // Catálogo con la parametrización exacta acordada
+    const productos = {
+      'cable_individual': { 
+        nombre: 'Cable (Unidad)', 
+        precio: 800, 
+        costo: 300, 
+        valorComision: 100, 
+        tipoComision: 'fijo' 
+      },
+      'menta_individual': { 
+        nombre: 'Menta (Unidad)', 
+        precio: 2000, 
+        costo: 800, 
+        valorComision: 200, 
+        tipoComision: 'fijo' 
+      },
+      'combo_1': { 
+        nombre: 'Combo 1 (1 Cable + 1 Menta)', 
+        precio: 2500, 
+        costo: 1100, 
+        valorComision: 250, 
+        tipoComision: 'fijo' 
+      },
+      'combo_2': { 
+        nombre: 'Combo 2 (2 Cables + 1 Menta)', 
+        precio: 3000, 
+        costo: 1400, 
+        valorComision: 300, 
+        tipoComision: 'fijo' 
+      },
+      'combo_3': { 
+        nombre: 'Combo 3 (2 Cables + 2 Mentas)', 
+        precio: 4500, 
+        costo: 2200, 
+        valorComision: 450, 
+        tipoComision: 'fijo' 
+      }
     };
 
-    function abrirConfigDB() {
-        document.getElementById('boxFirebase').style.display = 'block';
-    }
+    // Renderizar la tabla de historial al cargar el DOM
+    document.addEventListener("DOMContentLoaded", actualizarTabla);
 
-    function conectarFirebase() {
-        const apiKey = document.getElementById('fbApiKey').value.trim();
-        const authDomain = document.getElementById('fbAuthDomain').value.trim();
-        const projectId = document.getElementById('fbProjectId').value.trim();
-
-        if(!apiKey || !projectId) return alert('Por favor llene las claves requeridas');
-
-        const cfg = { apiKey, authDomain, projectId };
-        localStorage.setItem('fbCfg', JSON.stringify(cfg));
-        document.getElementById('boxFirebase').style.display = 'none';
-        iniciarFirebase(cfg);
-    }
-
-    function iniciarFirebase(cfg) {
-        try {
-            if(!firebase.apps.length) firebase.initializeApp(cfg);
-            db = firebase.firestore();
-
-            document.getElementById('statusBar').className = 'status-bar on';
-            document.getElementById('txtStatus').innerText = '✅ Nube Conectada y Sincronizada en Tiempo Real';
-
-            db.collection("ventas").orderBy("timestamp", "desc").onSnapshot(snap => {
-                ventas = [];
-                snap.forEach(doc => {
-                    let d = doc.data();
-                    d.id = doc.id;
-                    ventas.push(d);
-                });
-                localStorage.setItem('vnts', JSON.stringify(ventas));
-                actualizarTabla();
-            });
-
-            db.collection("productos").onSnapshot(snap => {
-                if(!snap.empty) {
-                    snap.forEach(doc => productos[doc.id] = doc.data());
-                    localStorage.setItem('prods', JSON.stringify(productos));
-                    actualizarSelectProductos();
-                }
-            });
-
-        } catch(e) {
-            alert('Error conectando a Firebase. Verifique sus claves.');
-        }
-    }
-
-    function guardarUsuario() {
-        let val = document.getElementById('txtUsuario').value.trim();
-        if(val) {
-            usuario = val;
-            localStorage.setItem('usr', usuario);
-            document.getElementById('lblUsuario').innerText = usuario;
-            alert('Usuario actualizado');
-        }
-    }
-
-    function actualizarSelectProductos() {
-        let sel = document.getElementById('vProducto');
-        sel.innerHTML = '';
-        for(let id in productos) {
-            let p = productos[id];
-            let tag = p.esCombo ? '[COMBO]' : `[$${p.precio}]`;
-            sel.innerHTML += `<option value="${id}">${tag} ${p.nombre}</option>`;
-        }
-    }
-
-    async function crearProducto() {
-        let nom = document.getElementById('pNombre').value.trim();
-        let pre = parseFloat(document.getElementById('pPrecio').value);
-        let cos = parseFloat(document.getElementById('pCosto').value);
-        let uCaja = parseInt(document.getElementById('pUnidadesCaja').value) || 1;
-        let tip = document.getElementById('pTipoComision').value;
-        let val = parseFloat(document.getElementById('pValorComision').value);
-        let esCombo = document.getElementById('pEsCombo').value === 'true';
-
-        if(!nom || isNaN(pre)) return alert('Ingrese Nombre y Precio');
-
-        let id = 'prod_' + Date.now();
-        let nuevoP = { 
-            nombre: nom, 
-            precio: pre, 
-            costo: cos||0, 
-            unidadesCaja: uCaja, 
-            tipoComision: tip, 
-            valorComision: val||0,
-            esCombo: esCombo 
-        };
-
-        productos[id] = nuevoP;
-        localStorage.setItem('prods', JSON.stringify(productos));
-        actualizarSelectProductos();
-
-        if(db) await db.collection("productos").doc(id).set(nuevoP);
-
-        document.getElementById('pNombre').value = '';
-        document.getElementById('pPrecio').value = '';
-        document.getElementById('pCosto').value = '';
-        document.getElementById('pValorComision').value = '';
-
-        alert('Artículo guardado correctamente');
-    }
-
+    // Lógica principal de procesamiento
     async function registrarVenta() {
-        let pId = document.getElementById('vProducto').value;
-        let p = productos[pId];
-        let pres = document.getElementById('vPresentacion').value;
-        let cant = parseInt(document.getElementById('vCantidad').value) || 1;
-        
-        let multiplicador = (pres === 'caja' && !p.esCombo) ? p.unidadesCaja : 1;
-        
-        let precioUnitario = parseFloat(p.precio) || 0;
-        let costoUnitario = parseFloat(p.costo) || 0;
-        let valComision = parseFloat(p.valorComision) || 0;
+      const pId = document.getElementById('vProducto').value;
+      const p = productos[pId];
 
-        let totalVenta = precioUnitario * multiplicador * cant;
-        let totalCosto = costoUnitario * multiplicador * cant;
-        let totalComision = 0;
+      if (!p) {
+        alert('Por favor, selecciona un producto o combo válido.');
+        return;
+      }
 
-        if (p.tipoComision === 'porcentaje') {
-            let porcentaje = valComision > 1 ? valComision / 100 : valComision;
-            totalComision = totalVenta * porcentaje;
+      const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
+      const uni = document.getElementById('vUni').value.trim() || 'General';
+      const vendedor = document.getElementById('vVendedor').value.trim() || 'N/A';
+
+      // Conversiones numéricas explícitas
+      const precioVenta = Number(p.precio) || 0;
+      const costoInsumo = Number(p.costo) || 0;
+      const valComision = Number(p.valorComision) || 0;
+
+      // Totales
+      const totalVenta = precioVenta * cant;
+      const totalCosto = costoInsumo * cant;
+      let totalComision = 0;
+
+      if (p.tipoComision === 'porcentaje') {
+        const porcentaje = valComision > 1 ? valComision / 100 : valComision;
+        totalComision = totalVenta * porcentaje;
+      } else {
+        totalComision = valComision * cant;
+      }
+
+      const gananciaNeta = totalVenta - totalCosto - totalComision;
+
+      // Estructura del registro
+      const reg = {
+        fecha: new Date().toLocaleString([], { 
+          year: 'numeric', 
+          month: '2-digit', 
+          day: '2-digit', 
+          hour: '2-digit', 
+          minute: '2-digit' 
+        }),
+        timestamp: Date.now(),
+        usr: typeof usuario !== 'undefined' ? usuario : 'Anonimo',
+        uni: uni,
+        vendedor: vendedor,
+        prod: p.nombre,
+        cant: cant,
+        total: totalVenta,
+        com: totalComision,
+        cos: totalCosto,
+        gan: gananciaNeta
+      };
+
+      try {
+        if (typeof db !== 'undefined' && db) {
+          // Guardar asíncronamente en Firestore si la conexión existe
+          await db.collection("ventas").add(reg);
         } else {
-            totalComision = valComision * multiplicador * cant;
+          // Guardar de forma local en el navegador (fallback)
+          reg.id = 'local_' + Date.now();
+          ventas.unshift(reg);
+          localStorage.setItem('vnts', JSON.stringify(ventas));
+          actualizarTabla();
         }
 
-        let gananciaNeta = totalVenta - totalCosto - totalComision;
-
-        let reg = {
-            fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            timestamp: Date.now(),
-            usr: usuario,
-            uni: document.getElementById('vUni').value,
-            vendedor: document.getElementById('vVendedor').value.trim() || 'N/A',
-            prod: p.nombre + (pres === 'caja' ? ' (Caja x' + p.unidadesCaja + ')' : ''),
-            cant: cant,
-            total: totalVenta,
-            com: totalComision,
-            cos: totalCosto,
-            gan: gananciaNeta
-        };
-
-        if(db) {
-            await db.collection("ventas").add(reg);
-        } else {
-            reg.id = 'local_' + Date.now();
-            ventas.unshift(reg);
-            localStorage.setItem('vnts', JSON.stringify(ventas));
-            actualizarTabla();
-        }
-
-        alert('Venta registrada');
+        alert(`Venta registrada con éxito:\n${cant}x ${p.nombre}\nTotal: $${totalVenta.toLocaleString()}`);
+        limpiarFormulario();
+      } catch (error) {
+        console.error('Error al registrar la venta:', error);
+        alert('Ocurrió un error al intentar guardar la venta.');
+      }
     }
 
-    async function eliminarVenta(id) {
-        if(!confirm('¿Seguro que desea eliminar esta venta?')) return;
-        
-        if(db && !id.startsWith('local_')) {
-            await db.collection("ventas").doc(id).delete();
-        } else {
-            ventas = ventas.filter(v => v.id !== id);
-            localStorage.setItem('vnts', JSON.stringify(ventas));
-            actualizarTabla();
-        }
-    }
-
+    // Renderizado dinámico de la tabla
     function actualizarTabla() {
-        let tb = document.getElementById('tbHistorial');
-        tb.innerHTML = '';
-        let totV = 0, totC = 0, totCos = 0, totG = 0;
+      const tbody = document.getElementById('tablaVentas');
+      tbody.innerHTML = '';
 
-        ventas.forEach(v => {
-            totV += v.total; totC += v.com; totCos += v.cos; totG += v.gan;
-            tb.innerHTML += `<tr>
-                <td>${v.fecha}</td>
-                <td><b>${v.usr}</b></td>
-                <td>${v.uni}</td>
-                <td>${v.vendedor}</td>
-                <td>${v.cant}x ${v.prod}</td>
-                <td>$${v.total.toLocaleString()}</td>
-                <td style="color:#276749; font-weight:bold;">$${v.gan.toLocaleString()}</td>
-                <td><button class="btn-red" onclick="eliminarVenta('${v.id}')">Eliminar</button></td>
-            </tr>`;
-        });
+      if (ventas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888;">No hay ventas registradas aún</td></tr>`;
+        return;
+      }
 
-        document.getElementById('mVentas').innerText = '$' + totV.toLocaleString();
-        document.getElementById('mComisiones').innerText = '$' + totC.toLocaleString();
-        document.getElementById('mCostos').innerText = '$' + totCos.toLocaleString();
-        document.getElementById('mGanancia').innerText = '$' + totG.toLocaleString();
+      ventas.forEach(v => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${v.fecha}</td>
+          <td><strong>${v.prod}</strong></td>
+          <td>${v.cant}</td>
+          <td>${v.vendedor}</td>
+          <td>$${v.total.toLocaleString()}</td>
+          <td class="badge-ganancia">$${v.gan.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
-</script>
+
+    // Limpieza de campos tras registro exitoso
+    function limpiarFormulario() {
+      document.getElementById('vProducto').value = '';
+      document.getElementById('vCantidad').value = '1';
+      document.getElementById('vUni').value = '';
+      document.getElementById('vVendedor').value = '';
+    }
+  </script>
 </body>
 </html>
