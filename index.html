@@ -1,207 +1,52 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Ventas Universitarias</title>
-    <style>
-        * { box-sizing: border-box; font-family: sans-serif; }
-        body { background-color: #f4f7f6; margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px; }
-        .form-group { display: flex; flex-direction: column; }
-        label { font-size: 12px; font-weight: bold; margin-bottom: 3px; }
-        input, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #2b6cb0; color: white; border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .btn-green { background: #38a169; }
-        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 15px; }
-        .metric { background: white; padding: 10px; border-radius: 6px; text-align: center; border-left: 4px solid #2b6cb0; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .metric h4 { margin: 0; font-size: 11px; color: #666; }
-        .metric p { margin: 5px 0 0 0; font-size: 16px; font-weight: bold; }
-        table { width: 100%; border-collapse: collapse; background: white; font-size: 12px; }
-        th, td { padding: 8px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background: #ebf8ff; }
-    </style>
-</head>
-<body>
+async function registrarVenta() {
+    let pId = document.getElementById('vProducto').value;
+    let p = productos[pId];
+    let cant = parseInt(document.getElementById('vCantidad').value) || 1;
+    
+    // Convertir todos los valores a números explícitos para evitar errores de cálculo
+    let precioVenta = parseFloat(p.precio) || 0;
+    let costoInsumo = parseFloat(p.costo) || 0;
+    let valComision = parseFloat(p.valorComision) || 0;
 
-<div class="container">
-    <h2>🚀 Control de Ventas</h2>
+    let totalVenta = precioVenta * cant;
+    let totalCosto = costoInsumo * cant;
+    let totalComision = 0;
 
-    <!-- PERFIL -->
-    <div class="card">
-        <h3>1. Usuario Actual: <span id="lblUsuario" style="color:#2b6cb0;">Admin</span></h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <input type="text" id="txtUsuario" placeholder="Escriba su nombre">
-            </div>
-            <button onclick="guardarUsuario()">Cambiar Nombre</button>
-        </div>
-    </div>
+    // Cálculo exacto de la comisión
+    if (p.tipoComision === 'porcentaje') {
+        // Si puso 25 (como 25%) o 0.25, el código ajusta el porcentaje automáticamente
+        let porcentaje = valComision > 1 ? valComision / 100 : valComision;
+        totalComision = totalVenta * porcentaje;
+    } else {
+        // Monto fijo por unidad vendida
+        totalComision = valComision * cant;
+    }
 
-    <!-- CREAR PRODUCTO -->
-    <div class="card">
-        <h3>2. Agregar Producto Nuevo</h3>
-        <div class="form-grid">
-            <div class="form-group"><label>Nombre</label><input type="text" id="pNombre" placeholder="Ej: Bonbonbum"></div>
-            <div class="form-group"><label>Precio Venta</label><input type="number" id="pPrecio" placeholder="2000"></div>
-            <div class="form-group"><label>Costo</label><input type="number" id="pCosto" placeholder="1000"></div>
-            <div class="form-group">
-                <label>Comisión</label>
-                <select id="pTipoComision">
-                    <option value="porcentaje">Porcentaje (%)</option>
-                    <option value="fijo">Monto Fijo ($)</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Valor Com.</label><input type="number" id="pValorComision" placeholder="0.25 ó 300"></div>
-        </div>
-        <button class="btn-green" onclick="crearProducto()">+ Guardar Producto</button>
-    </div>
+    // Ganancia Neta = Lo que ingresa - Costo de compra - Comisión del vendedor
+    let gananciaNeta = totalVenta - totalCosto - totalComision;
 
-    <!-- DASHBOARD METRICAS -->
-    <div class="dashboard">
-        <div class="metric"><h4>Ventas Totales</h4><p id="mVentas">$0</p></div>
-        <div class="metric"><h4>Comisiones</h4><p id="mComisiones">$0</p></div>
-        <div class="metric"><h4>Costos</h4><p id="mCostos">$0</p></div>
-        <div class="metric" style="border-left-color:#38a169;"><h4>Ganancia Neta</h4><p id="mGanancia">$0</p></div>
-    </div>
-
-    <!-- REGISTRAR VENTA -->
-    <div class="card">
-        <h3>3. Registrar Venta</h3>
-        <div class="form-grid">
-            <div class="form-group">
-                <label>Universidad</label>
-                <select id="vUni">
-                    <option value="Javeriana">Javeriana</option>
-                    <option value="Rosario">Rosario</option>
-                    <option value="Externado">Externado</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Vendedor</label><input type="text" id="vVendedor" placeholder="Nombre"></div>
-            <div class="form-group"><label>Producto</label><select id="vProducto"></select></div>
-            <div class="form-group"><label>Cantidad</label><input type="number" id="vCantidad" value="1"></div>
-        </div>
-        <button onclick="registrarVenta()">Guardar Venta</button>
-    </div>
-
-    <!-- TABLA -->
-    <div class="card" style="overflow-x:auto;">
-        <h3>Historial</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Por</th>
-                    <th>Uni</th>
-                    <th>Vendedor</th>
-                    <th>Producto</th>
-                    <th>Total</th>
-                    <th>Ganancia</th>
-                </tr>
-            </thead>
-            <tbody id="tbHistorial"></tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-    let usuario = localStorage.getItem('usr') || 'Admin';
-    let productos = JSON.parse(localStorage.getItem('prods')) || {
-        'prod1': { nombre: 'Producto Ejemplo', precio: 2000, costo: 1000, tipoComision: 'porcentaje', valorComision: 0.25 }
-    };
-    let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
-
-    window.onload = function() {
-        document.getElementById('lblUsuario').innerText = usuario;
-        actualizarSelectProductos();
-        actualizarTabla();
+    let reg = {
+        fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        timestamp: Date.now(),
+        usr: usuario,
+        uni: document.getElementById('vUni').value,
+        vendedor: document.getElementById('vVendedor').value.trim() || 'N/A',
+        prod: p.nombre,
+        cant: cant,
+        total: totalVenta,
+        com: totalComision,
+        cos: totalCosto,
+        gan: gananciaNeta
     };
 
-    function guardarUsuario() {
-        let val = document.getElementById('txtUsuario').value;
-        if(val) {
-            usuario = val;
-            localStorage.setItem('usr', usuario);
-            document.getElementById('lblUsuario').innerText = usuario;
-        }
-    }
-
-    function actualizarSelectProductos() {
-        let sel = document.getElementById('vProducto');
-        sel.innerHTML = '';
-        for(let id in productos) {
-            let p = productos[id];
-            sel.innerHTML += `<option value="${id}">${p.nombre} ($${p.precio})</option>`;
-        }
-    }
-
-    function crearProducto() {
-        let nom = document.getElementById('pNombre').value;
-        let pre = parseFloat(document.getElementById('pPrecio').value);
-        let cos = parseFloat(document.getElementById('pCosto').value);
-        let tip = document.getElementById('pTipoComision').value;
-        let val = parseFloat(document.getElementById('pValorComision').value);
-
-        if(!nom || isNaN(pre)) return alert('Llene al menos Nombre y Precio');
-
-        productos['prod_' + Date.now()] = { nombre: nom, precio: pre, costo: cos||0, tipoComision: tip, valorComision: val||0 };
-        localStorage.setItem('prods', JSON.stringify(productos));
-        actualizarSelectProductos();
-        alert('Producto guardado correctamente');
-    }
-
-    function registrarVenta() {
-        let pId = document.getElementById('vProducto').value;
-        let p = productos[pId];
-        let cant = parseInt(document.getElementById('vCantidad').value) || 1;
-        
-        let total = p.precio * cant;
-        let com = p.tipoComision === 'porcentaje' ? (total * p.valorComision) : (p.valorComision * cant);
-        let cos = p.costo * cant;
-        let gan = total - com - cos;
-
-        ventas.unshift({
-            fecha: new Date().toLocaleDateString(),
-            usr: usuario,
-            uni: document.getElementById('vUni').value,
-            vendedor: document.getElementById('vVendedor').value || 'N/A',
-            prod: p.nombre,
-            cant: cant,
-            total: total,
-            com: com,
-            cos: cos,
-            gan: gan
-        });
-
+    if(db) {
+        await db.collection("ventas").add(reg);
+    } else {
+        reg.id = 'local_' + Date.now();
+        ventas.unshift(reg);
         localStorage.setItem('vnts', JSON.stringify(ventas));
         actualizarTabla();
     }
 
-    function actualizarTabla() {
-        let tb = document.getElementById('tbHistorial');
-        tb.innerHTML = '';
-        let totV = 0, totC = 0, totCos = 0, totG = 0;
-
-        ventas.forEach(v => {
-            totV += v.total; totC += v.com; totCos += v.cos; totG += v.gan;
-            tb.innerHTML += `<tr>
-                <td>${v.fecha}</td>
-                <td>${v.usr}</td>
-                <td>${v.uni}</td>
-                <td>${v.vendedor}</td>
-                <td>${v.cant}x ${v.prod}</td>
-                <td>$${v.total}</td>
-                <td>$${v.gan}</td>
-            </tr>`;
-        });
-
-        document.getElementById('mVentas').innerText = '$' + totV;
-        document.getElementById('mComisiones').innerText = '$' + totC;
-        document.getElementById('mCostos').innerText = '$' + totCos;
-        document.getElementById('mGanancia').innerText = '$' + totG;
-    }
-</script>
-</body>
-</html>
+    alert('Venta registrada con éxito');
+}
