@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Ventas Universitarias</title>
+    <title>Control de Ventas Universitarias V4 (Nube)</title>
+    <!-- Firebase SDK Compat para CDN simple sin builds -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        h1 { text-align: center; color: #1a365d; margin-bottom: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        h1 { color: #1a365d; margin: 0; font-size: 20px; }
+        .user-badge { background: #ebf8ff; color: #2b6cb0; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 14px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 15px; }
         .form-group { display: flex; flex-direction: column; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 14px; color: #4a5568; }
         input, select { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 14px; }
-        button { background-color: #2b6cb0; color: white; border: none; padding: 12px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; transition: background 0.2s; }
+        button { background-color: #2b6cb0; color: white; border: none; padding: 10px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; transition: background 0.2s; }
         button:hover { background-color: #2c5282; }
+        .btn-green { background-color: #38a169; }
+        .btn-green:hover { background-color: #2f855a; }
+        .btn-orange { background-color: #dd6b20; }
+        .btn-orange:hover { background-color: #c05621; }
         .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .metric-card { background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-top: 4px solid #2b6cb0; }
         .metric-card h3 { margin: 0; font-size: 14px; color: #718096; }
@@ -28,12 +37,87 @@
         .javeriana { background: #feebc8; color: #744210; }
         .rosario { background: #ebf8ff; color: #2b6cb0; }
         .externado { background: #e6fffa; color: #234e52; }
+        .status-bar { padding: 10px 15px; background: #feebc8; color: #744210; border-radius: 8px; margin-bottom: 15px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .status-connected { background: #c6f6d5; color: #22543d; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🚀 Control de Ventas - Red Universitaria</h1>
+    <div class="header">
+        <h1>🚀 Control de Ventas (Sincronizado Nube ☁️)</h1>
+        <div class="user-badge" id="displayUsuario">👤 Usuario: ...</div>
+    </div>
+
+    <div class="status-bar" id="statusBar">
+        <span id="statusText">⚠️ Conexión en la nube NO configurada (los datos solo se ven en este dispositivo).</span>
+        <button class="btn-orange" onclick="mostrarModalConfig()" style="padding: 5px 10px; font-size: 12px;">⚙️ Conectar Firebase</button>
+    </div>
+
+    <!-- Modal / Formulario Config Firebase -->
+    <div class="card" id="cardFirebase" style="display:none;">
+        <h2>⚙️ Configuración Base de Datos Firebase (Paso Único)</h2>
+        <p style="font-size:13px; color:#666;">Pegue aquí las credenciales de su proyecto gratuito de Firebase (Firestore) para que el celular y el PC compartan datos en tiempo real.</p>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>apiKey</label>
+                <input type="text" id="fbApiKey" placeholder="AIzaSy...">
+            </div>
+            <div class="form-group">
+                <label>authDomain</label>
+                <input type="text" id="fbAuthDomain" placeholder="tu-app.firebaseapp.com">
+            </div>
+            <div class="form-group">
+                <label>projectId</label>
+                <input type="text" id="fbProjectId" placeholder="tu-app-id">
+            </div>
+        </div>
+        <button class="btn-green" onclick="guardarConfigFirebase()">Guardar y Conectar Nube</button>
+        <button onclick="document.getElementById('cardFirebase').style.display='none'" style="background:#a0aec0;">Cancelar</button>
+    </div>
+
+    <!-- Login / Usuario -->
+    <div class="card">
+        <h2>Perfil del Administrador / Usuario</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nombre de Usuario / Administrador</label>
+                <input type="text" id="inputNombreUsuario" placeholder="Ej: Juan Pablo">
+            </div>
+        </div>
+        <button onclick="guardarUsuario()">Guardar / Cambiar Usuario</button>
+    </div>
+
+    <!-- Modulo para Agregar Nuevos Articulos -->
+    <div class="card">
+        <h2>🛠️ Inventario: Agregar Nuevo Artículo o Combo</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Nombre del Producto</label>
+                <input type="text" id="nuevoNombre" placeholder="Ej: Alfajor, Papas...">
+            </div>
+            <div class="form-group">
+                <label>Precio Venta ($ COP)</label>
+                <input type="number" id="nuevoPrecio" placeholder="Ej: 3000">
+            </div>
+            <div class="form-group">
+                <label>Costo Insumo ($ COP)</label>
+                <input type="number" id="nuevoCosto" placeholder="Ej: 1200">
+            </div>
+            <div class="form-group">
+                <label>Tipo Comisión</label>
+                <select id="nuevoTipoComision">
+                    <option value="porcentaje">Porcentaje (25%)</option>
+                    <option value="fijo">Monto Fijo por Unidad</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Valor Comisión (% o $)</label>
+                <input type="number" id="nuevoValorComision" placeholder="Ej: 0.25 para 25% o 300 para $300">
+            </div>
+        </div>
+        <button class="btn-green" onclick="crearNuevoProducto()">+ Crear Producto</button>
+    </div>
 
     <!-- Dashboard -->
     <div class="dashboard">
@@ -42,7 +126,7 @@
             <p id="totalVentas">$0</p>
         </div>
         <div class="metric-card" style="border-color: #dd6b20;">
-            <h3>Comisiones (25%)</h3>
+            <h3>Comisiones Vendedores</h3>
             <p id="totalComisiones">$0</p>
         </div>
         <div class="metric-card" style="border-color: #319795;">
@@ -55,7 +139,7 @@
         </div>
     </div>
 
-    <!-- Formulario de Registro -->
+    <!-- Formulario de Registro de Ventas -->
     <div class="card">
         <h2>Registrar Nueva Venta</h2>
         <div class="form-grid">
@@ -74,11 +158,7 @@
             <div class="form-group">
                 <label>Producto / Opción</label>
                 <select id="producto">
-                    <option value="menta_suelta">Menta Chao Suelta ($2.000)</option>
-                    <option value="cable_suelto">Cable Ácido Suelto ($800)</option>
-                    <option value="combo_3_cables">Combo 3 Cables ($2.000)</option>
-                    <option value="combo_5_cables">Combo 5 Cables ($3.000)</option>
-                    <option value="combo_menta_cables">Combo Menta + 2 Cables ($3.500)</option>
+                    <!-- Se llena dinámicamente -->
                 </select>
             </div>
             <div class="form-group">
@@ -91,16 +171,17 @@
 
     <!-- Tabla de Registros -->
     <div class="card">
-        <h2>Historial de Registro</h2>
+        <h2>Historial de Registro (Sincronizado)</h2>
         <table>
             <thead>
                 <tr>
                     <th>Fecha</th>
+                    <th>Registrado Por</th>
                     <th>Universidad</th>
                     <th>Vendedor</th>
                     <th>Producto</th>
                     <th>Venta Total</th>
-                    <th>Comisión (25%)</th>
+                    <th>Comisión</th>
                     <th>Costo Insumo</th>
                     <th>Ganancia Neta</th>
                 </tr>
@@ -113,18 +194,144 @@
 </div>
 
 <script>
-    // Datos de productos y costos reales
-    const productosInfo = {
-        'menta_suelta': { nombre: 'Menta Chao Suelta', precio: 2000, costo: 843 },
-        'cable_suelto': { nombre: 'Cable Ácido Suelto', precio: 800, costo: 283 },
-        'combo_3_cables': { nombre: 'Combo 3 Cables', precio: 2000, costo: 850 },
-        'combo_5_cables': { nombre: 'Combo 5 Cables', precio: 3000, costo: 1417 },
-        'combo_menta_cables': { nombre: 'Combo Menta + 2 Cables', precio: 3500, costo: 1409 }
+    let db = null;
+    let usuarioActual = localStorage.getItem('usuarioApp') || 'Admin';
+
+    let productosInfo = JSON.parse(localStorage.getItem('productosApp')) || {
+        'menta_suelta': { nombre: 'Menta Chao Suelta', precio: 2000, costo: 843, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'cable_suelto': { nombre: 'Cable Ácido Suelto', precio: 800, costo: 283, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'combo_3_cables': { nombre: 'Combo 3 Cables', precio: 2000, costo: 850, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'combo_5_cables': { nombre: 'Combo 5 Cables', precio: 3000, costo: 1417, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'combo_menta_cables': { nombre: 'Combo Menta + 2 Cables', precio: 3500, costo: 1409, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'vape_estandar': { nombre: 'Vape Estándar', precio: 35000, costo: 15000, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'vape_premium': { nombre: 'Vape Premium', precio: 45000, costo: 20000, tipoComision: 'porcentaje', valorComision: 0.25 },
+        'huevos_cocidos': { nombre: 'Huevo Cocido', precio: 1200, costo: 500, tipoComision: 'fijo', valorComision: 300 }
     };
 
-    let historial = [];
+    let historial = JSON.parse(localStorage.getItem('historialVentasApp')) || [];
 
-    function agregarVenta() {
+    window.onload = function() {
+        document.getElementById('inputNombreUsuario').value = usuarioActual;
+        document.getElementById('displayUsuario').innerText = '👤 Usuario: ' + usuarioActual;
+        renderizarSelectProductos();
+
+        const fbConfig = JSON.parse(localStorage.getItem('fbConfigApp'));
+        if (fbConfig) {
+            inicializarFirebase(fbConfig);
+        } else {
+            actualizarInterfaz();
+        }
+    };
+
+    function mostrarModalConfig() {
+        document.getElementById('cardFirebase').style.display = 'block';
+    }
+
+    function guardarConfigFirebase() {
+        const apiKey = document.getElementById('fbApiKey').value.trim();
+        const authDomain = document.getElementById('fbAuthDomain').value.trim();
+        const projectId = document.getElementById('fbProjectId').value.trim();
+
+        if(!apiKey || !projectId) {
+            alert('Por favor llene al menos apiKey y projectId.');
+            return;
+        }
+
+        const config = { apiKey, authDomain, projectId };
+        localStorage.setItem('fbConfigApp', JSON.stringify(config));
+        document.getElementById('cardFirebase').style.display = 'none';
+        inicializarFirebase(config);
+    }
+
+    function inicializarFirebase(config) {
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(config);
+            }
+            db = firebase.firestore();
+            
+            document.getElementById('statusBar').className = 'status-bar status-connected';
+            document.getElementById('statusText').innerText = '✅ Conectado a la Nube (Sincronización en tiempo real activa entre Celular y PC).';
+
+            db.collection("ventas").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                historial = [];
+                snapshot.forEach((doc) => {
+                    historial.push(doc.data());
+                });
+                localStorage.setItem('historialVentasApp', JSON.stringify(historial));
+                actualizarInterfaz();
+            });
+
+            db.collection("productos").onSnapshot((snapshot) => {
+                if(!snapshot.empty) {
+                    snapshot.forEach((doc) => {
+                        productosInfo[doc.id] = doc.data();
+                    });
+                    localStorage.setItem('productosApp', JSON.stringify(productosInfo));
+                    renderizarSelectProductos();
+                }
+            });
+
+        } catch(e) {
+            console.error(e);
+            alert('Error al conectar con Firebase. Verifique sus credenciales.');
+        }
+    }
+
+    function guardarUsuario() {
+        const nom = document.getElementById('inputNombreUsuario').value.trim();
+        if(nom) {
+            usuarioActual = nom;
+            localStorage.setItem('usuarioApp', usuarioActual);
+            document.getElementById('displayUsuario').innerText = '👤 Usuario: ' + usuarioActual;
+            alert('¡Usuario guardado!');
+        }
+    }
+
+    function renderizarSelectProductos() {
+        const select = document.getElementById('producto');
+        select.innerHTML = '';
+        for (let key in productosInfo) {
+            let p = productosInfo[key];
+            let option = document.createElement('option');
+            option.value = key;
+            option.innerText = `${p.nombre} ($${p.precio.toLocaleString('es-CO')})`;
+            select.appendChild(option);
+        }
+    }
+
+    async function crearNuevoProducto() {
+        const nombre = document.getElementById('nuevoNombre').value.trim();
+        const precio = parseFloat(document.getElementById('nuevoPrecio').value);
+        const costo = parseFloat(document.getElementById('nuevoCosto').value);
+        const tipoComision = document.getElementById('nuevoTipoComision').value;
+        const valorComision = parseFloat(document.getElementById('nuevoValorComision').value);
+
+        if (!nombre || isNaN(precio) || isNaN(costo) || isNaN(valorComision)) {
+            alert('Por favor complete todos los campos del nuevo producto.');
+            return;
+        }
+
+        const key = 'prod_' + Date.now();
+        const nuevoProd = { nombre, precio, costo, tipoComision, valorComision };
+
+        productosInfo[key] = nuevoProd;
+        localStorage.setItem('productosApp', JSON.stringify(productosInfo));
+        renderizarSelectProductos();
+
+        if (db) {
+            await db.collection("productos").doc(key).set(nuevoProd);
+        }
+
+        document.getElementById('nuevoNombre').value = '';
+        document.getElementById('nuevoPrecio').value = '';
+        document.getElementById('nuevoCosto').value = '';
+        document.getElementById('nuevoValorComision').value = '';
+
+        alert(`¡Producto "${nombre}" creado!`);
+    }
+
+    async function agregarVenta() {
         const uni = document.getElementById('universidad').value;
         const vendedor = document.getElementById('vendedor').value || 'General';
         const prodKey = document.getElementById('producto').value;
@@ -132,12 +339,15 @@
 
         const prod = productosInfo[prodKey];
         const ventaTotal = prod.precio * cant;
-        const comision = ventaTotal * 0.25;
+        
+        let comision = (prod.tipoComision === 'porcentaje') ? (ventaTotal * prod.valorComision) : (prod.valorComision * cant);
         const costoInsumo = prod.costo * cant;
         const gananciaNeta = ventaTotal - comision - costoInsumo;
 
         const registro = {
             fecha: new Date().toLocaleDateString('es-CO'),
+            timestamp: Date.now(),
+            usuario: usuarioActual,
             uni,
             vendedor,
             producto: prod.nombre,
@@ -148,8 +358,13 @@
             gananciaNeta
         };
 
-        historial.unshift(registro);
-        actualizarInterfaz();
+        if (db) {
+            await db.collection("ventas").add(registro);
+        } else {
+            historial.unshift(registro);
+            localStorage.setItem('historialVentasApp', JSON.stringify(historial));
+            actualizarInterfaz();
+        }
     }
 
     function actualizarInterfaz() {
@@ -168,6 +383,7 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${item.fecha}</td>
+                <td><b>${item.usuario || 'Admin'}</b></td>
                 <td><span class="badge ${badgeClass}">${item.uni}</span></td>
                 <td>${item.vendedor}</td>
                 <td>${item.cant}x ${item.producto}</td>
