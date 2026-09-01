@@ -3,11 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Registro de Ventas</title>
+  <title>Sistema de Control de Ventas y Productos</title>
+  
+  <!-- Carga de SDK de Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
   <style>
     :root {
       --primary-color: #007bff;
       --success-color: #28a745;
+      --danger-color: #dc3545;
       --bg-color: #f4f6f8;
       --card-bg: #ffffff;
       --text-color: #333333;
@@ -18,22 +24,48 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      max-width: 800px;
-      margin: 30px auto;
-      padding: 20px;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 15px;
+    }
+
+    /* Pestañas de navegación */
+    .nav-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: #e0e0e0;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #555;
+    }
+
+    .tab-btn.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
     }
 
     .card {
       background: var(--card-bg);
-      padding: 25px;
+      padding: 20px;
       border-radius: 8px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      margin-bottom: 25px;
-    }
-
-    h2, h3 {
-      margin-top: 0;
-      color: #1a1a1a;
+      margin-bottom: 20px;
     }
 
     .form-grid {
@@ -43,9 +75,7 @@
     }
 
     @media (max-width: 600px) {
-      .form-grid {
-        grid-template-columns: 1fr;
-      }
+      .form-grid { grid-template-columns: 1fr; }
     }
 
     .form-group {
@@ -54,211 +84,312 @@
       margin-bottom: 10px;
     }
 
-    .form-group.full-width {
-      grid-column: 1 / -1;
-    }
+    .form-group.full-width { grid-column: 1 / -1; }
 
     label {
       font-weight: 600;
       margin-bottom: 5px;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
     }
 
     select, input {
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 5px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    select:focus, input:focus {
-      border-color: var(--primary-color);
+      font-size: 0.95rem;
     }
 
     button {
-      background-color: var(--success-color);
-      color: white;
-      font-size: 1rem;
-      font-weight: bold;
-      padding: 12px;
+      padding: 10px 15px;
       border: none;
       border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
-      transition: background-color 0.2s;
-      margin-top: 10px;
     }
 
-    button:hover {
-      background-color: #218838;
-    }
-
-    .table-container {
-      overflow-x: auto;
-      background: var(--card-bg);
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    }
+    .btn-submit { background-color: var(--success-color); color: white; width: 100%; margin-top: 10px; }
+    .btn-danger { background-color: var(--danger-color); color: white; padding: 5px 10px; font-size: 0.8rem; }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      text-align: left;
+      margin-top: 10px;
     }
 
     th, td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e9ecef;
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
       font-size: 0.9rem;
     }
 
-    th {
-      background-color: var(--primary-color);
-      color: white;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      letter-spacing: 0.5px;
-    }
-
-    tr:hover {
-      background-color: #f8f9fa;
-    }
-
-    .badge-ganancia {
-      color: var(--success-color);
-      font-weight: bold;
-    }
+    th { background-color: #f1f1f1; }
+    .text-success { color: var(--success-color); font-weight: bold; }
   </style>
 </head>
 <body>
 
-  <!-- FORMULARIO DE REGISTRO DE VENTA -->
-  <div class="card">
-    <h2>Registrar Nueva Venta</h2>
-    
-    <div class="form-grid">
-      <div class="form-group full-width">
-        <label for="vProducto">Producto / Combo</label>
-        <select id="vProducto">
-          <option value="">-- Seleccionar Producto --</option>
-          <option value="cable_individual">Cable (Unidad) - $800</option>
-          <option value="menta_individual">Menta (Unidad) - $2.000</option>
-          <option value="combo_1">Combo 1 (1 Cable + 1 Menta) - $2.500</option>
-          <option value="combo_2">Combo 2 (2 Cables + 1 Menta) - $3.000</option>
-          <option value="combo_3">Combo 3 (2 Cables + 2 Mentas) - $4.500</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="vCantidad">Cantidad</label>
-        <input type="number" id="vCantidad" value="1" min="1">
-      </div>
-
-      <div class="form-group">
-        <label for="vUni">Unidad / Sede</label>
-        <input type="text" id="vUni" placeholder="Ej: Local Central">
-      </div>
-
-      <div class="form-group full-width">
-        <label for="vVendedor">Vendedor</label>
-        <input type="text" id="vVendedor" placeholder="Nombre del vendedor">
-      </div>
+  <!-- SELECCIÓN DE USUARIO GLOBAL -->
+  <div class="card" style="padding: 12px 20px;">
+    <div class="form-group" style="margin: 0; flex-direction: row; align-items: center; gap: 15px;">
+      <label for="vUsuario" style="margin: 0; white-space: nowrap;">Usuario / Cajero Actual:</label>
+      <input type="text" id="vUsuario" value="Operador 1" placeholder="Nombre de usuario" style="flex: 1;">
     </div>
-
-    <button type="button" onclick="registrarVenta()">Registrar Venta</button>
   </div>
 
-  <!-- TABLA DE HISTORIAL DE VENTAS -->
-  <div class="card">
-    <h3>Historial de Ventas</h3>
-    <div class="table-container">
+  <!-- NAVEGACIÓN ENTRE SECCIONES -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="cambiarPestana('ventas')">Registrar Ventas</button>
+    <button class="tab-btn" onclick="cambiarPestana('productos')">Gestionar Productos</button>
+  </div>
+
+  <!-- PESTAÑA 1: REGISTRO DE VENTAS -->
+  <div id="tab-ventas" class="tab-content active">
+    <div class="card">
+      <h3>Registrar Nueva Venta</h3>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="vProducto">Producto o Combo</label>
+          <select id="vProducto" onchange="actualizarPrecioUnidad()"></select>
+        </div>
+
+        <div class="form-group">
+          <label for="vCantidad">Cantidad</label>
+          <input type="number" id="vCantidad" value="1" min="1">
+        </div>
+
+        <div class="form-group">
+          <label for="vUni">Sede / Ubicación</label>
+          <input type="text" id="vUni" placeholder="Ej: Local Principal">
+        </div>
+
+        <div class="form-group full-width">
+          <label for="vVendedor">Vendedor Encargado</label>
+          <input type="text" id="vVendedor" placeholder="Nombre del vendedor">
+        </div>
+      </div>
+      <button class="btn-submit" onclick="registrarVenta()">Guardar Venta</button>
+    </div>
+
+    <div class="card">
+      <h3>Historial de Ventas</h3>
       <table>
         <thead>
           <tr>
             <th>Fecha</th>
             <th>Producto</th>
             <th>Cant</th>
-            <th>Vendedor</th>
+            <th>Usuario</th>
             <th>Total</th>
             <th>Ganancia</th>
           </tr>
         </thead>
-        <tbody id="tablaVentas">
-          <!-- Filas dinámicas creadas por JS -->
-        </tbody>
+        <tbody id="tablaVentas"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PESTAÑA 2: GESTIÓN DE PRODUCTOS -->
+  <div id="tab-productos" class="tab-content">
+    <div class="card">
+      <h3>Agregar Nuevo Producto / Combo</h3>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="pNombre">Nombre del Producto / Combo</label>
+          <input type="text" id="pNombre" placeholder="Ej: Combo 4 Especial">
+        </div>
+
+        <div class="form-group">
+          <label for="pPrecio">Precio de Venta ($)</label>
+          <input type="number" id="pPrecio" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label for="pCosto">Costo de Insumo ($)</label>
+          <input type="number" id="pCosto" placeholder="0">
+        </div>
+
+        <div class="form-group">
+          <label for="pTipoComision">Tipo de Comisión</label>
+          <select id="pTipoComision">
+            <option value="fijo">Monto Fijo ($)</option>
+            <option value="porcentaje">Porcentaje (%)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="pValorComision">Valor de Comisión</label>
+          <input type="number" id="pValorComision" placeholder="Ej: 200 o 10%">
+        </div>
+      </div>
+      <button class="btn-submit" style="background-color: var(--primary-color);" onclick="guardarProducto()">Agregar Producto</button>
+    </div>
+
+    <div class="card">
+      <h3>Catálogo Actual</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Costo</th>
+            <th>Comisión</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProductos"></tbody>
       </table>
     </div>
   </div>
 
   <script>
-    // Configuración inicial de variables globales
-    let usuario = "Usuario_Sistema"; // Se puede sustituir por la sesión activa
-    let db = null; // Si usas Firebase SDK, asigna aquí: firebase.firestore()
-    let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
-
-    // Catálogo con la parametrización exacta acordada
-    const productos = {
-      'cable_individual': { 
-        nombre: 'Cable (Unidad)', 
-        precio: 800, 
-        costo: 300, 
-        valorComision: 100, 
-        tipoComision: 'fijo' 
-      },
-      'menta_individual': { 
-        nombre: 'Menta (Unidad)', 
-        precio: 2000, 
-        costo: 800, 
-        valorComision: 200, 
-        tipoComision: 'fijo' 
-      },
-      'combo_1': { 
-        nombre: 'Combo 1 (1 Cable + 1 Menta)', 
-        precio: 2500, 
-        costo: 1100, 
-        valorComision: 250, 
-        tipoComision: 'fijo' 
-      },
-      'combo_2': { 
-        nombre: 'Combo 2 (2 Cables + 1 Menta)', 
-        precio: 3000, 
-        costo: 1400, 
-        valorComision: 300, 
-        tipoComision: 'fijo' 
-      },
-      'combo_3': { 
-        nombre: 'Combo 3 (2 Cables + 2 Mentas)', 
-        precio: 4500, 
-        costo: 2200, 
-        valorComision: 450, 
-        tipoComision: 'fijo' 
-      }
+    // =========================================================================
+    // 1. CONFIGURACIÓN DE BASE DE DATOS (FIREBASE FIRESTORE)
+    // =========================================================================
+    // Sustituye con las credenciales de tu proyecto de Firebase Console:
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_PROYECTO.firebaseapp.com",
+      projectId: "TU_PROYECTO_ID",
+      storageBucket: "TU_PROYECTO.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
     };
 
-    // Renderizar la tabla de historial al cargar el DOM
-    document.addEventListener("DOMContentLoaded", actualizarTabla);
+    let db = null;
+    
+    // Inicializar Firebase si las llaves han sido configuradas
+    if (firebaseConfig.apiKey !== "TU_API_KEY") {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+    }
 
-    // Lógica principal de procesamiento
+    // Almacenamiento Local (Fallback cuando no hay conexión a Firebase)
+    let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
+      'cable_individual': { nombre: 'Cable (Unidad)', precio: 800, costo: 300, valorComision: 100, tipoComision: 'fijo' },
+      'menta_individual': { nombre: 'Menta (Unidad)', precio: 2000, costo: 800, valorComision: 200, tipoComision: 'fijo' },
+      'combo_1': { nombre: 'Combo 1 (1 Cable + 1 Menta)', precio: 2500, costo: 1100, valorComision: 250, tipoComision: 'fijo' },
+      'combo_2': { nombre: 'Combo 2 (2 Cables + 1 Menta)', precio: 3000, costo: 1400, valorComision: 300, tipoComision: 'fijo' },
+      'combo_3': { nombre: 'Combo 3 (2 Cables + 2 Mentas)', precio: 4500, costo: 2200, valorComision: 450, tipoComision: 'fijo' }
+    };
+
+    let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
+
+    // =========================================================================
+    // 2. INICIALIZACIÓN
+    // =========================================================================
+    document.addEventListener("DOMContentLoaded", () => {
+      renderizarProductos();
+      renderizarVentas();
+    });
+
+    function cambiarPestana(pestana) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+      if (pestana === 'ventas') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-ventas').classList.add('active');
+      } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-productos').classList.add('active');
+      }
+    }
+
+    // =========================================================================
+    // 3. GESTIÓN DE PRODUCTOS (AGREGAR Y ELIMINAR)
+    // =========================================================================
+    function guardarProducto() {
+      const nombre = document.getElementById('pNombre').value.trim();
+      const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
+      const costo = parseFloat(document.getElementById('pCosto').value) || 0;
+      const tipoComision = document.getElementById('pTipoComision').value;
+      const valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
+
+      if (!nombre || precio <= 0) {
+        alert('Ingresa un nombre y un precio válidos para el producto.');
+        return;
+      }
+
+      const id = 'prod_' + Date.now();
+      productos[id] = { nombre, precio, costo, valorComision, tipoComision };
+
+      guardarEstadoProductos();
+      limpiarFormProducto();
+      renderizarProductos();
+      alert('Producto guardado correctamente');
+    }
+
+    function eliminarProducto(id) {
+      if (confirm(`¿Estás seguro de eliminar "${productos[id].nombre}"?`)) {
+        delete productos[id];
+        guardarEstadoProductos();
+        renderizarProductos();
+      }
+    }
+
+    function guardarEstadoProductos() {
+      localStorage.setItem('cat_prods', JSON.stringify(productos));
+    }
+
+    function renderizarProductos() {
+      const selectProducto = document.getElementById('vProducto');
+      const tbody = document.getElementById('tablaProductos');
+
+      selectProducto.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
+      tbody.innerHTML = '';
+
+      Object.keys(productos).forEach(id => {
+        const p = productos[id];
+
+        // Opción en el select de ventas
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${p.nombre} - $${p.precio.toLocaleString()}`;
+        selectProducto.appendChild(opt);
+
+        // Fila en la tabla de productos
+        const tr = document.createElement('tr');
+        const comText = p.tipoComision === 'porcentaje' ? `${p.valorComision}%` : `$${p.valorComision}`;
+        tr.innerHTML = `
+          <td><strong>${p.nombre}</strong></td>
+          <td>$${p.precio.toLocaleString()}</td>
+          <td>$${p.costo.toLocaleString()}</td>
+          <td>${comText}</td>
+          <td><button class="btn-danger" onclick="eliminarProducto('${id}')">Eliminar</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function limpiarFormProducto() {
+      document.getElementById('pNombre').value = '';
+      document.getElementById('pPrecio').value = '';
+      document.getElementById('pCosto').value = '';
+      document.getElementById('pValorComision').value = '';
+    }
+
+    // =========================================================================
+    // 4. REGISTRO Y CÁLCULO DE VENTAS
+    // =========================================================================
     async function registrarVenta() {
       const pId = document.getElementById('vProducto').value;
       const p = productos[pId];
 
       if (!p) {
-        alert('Por favor, selecciona un producto o combo válido.');
+        alert('Selecciona un producto válido.');
         return;
       }
 
+      const usuarioActivo = document.getElementById('vUsuario').value.trim() || 'Anónimo';
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
       const uni = document.getElementById('vUni').value.trim() || 'General';
       const vendedor = document.getElementById('vVendedor').value.trim() || 'N/A';
 
-      // Conversiones numéricas explícitas
       const precioVenta = Number(p.precio) || 0;
       const costoInsumo = Number(p.costo) || 0;
       const valComision = Number(p.valorComision) || 0;
 
-      // Totales
       const totalVenta = precioVenta * cant;
       const totalCosto = costoInsumo * cant;
       let totalComision = 0;
@@ -272,17 +403,10 @@
 
       const gananciaNeta = totalVenta - totalCosto - totalComision;
 
-      // Estructura del registro
       const reg = {
-        fecha: new Date().toLocaleString([], { 
-          year: 'numeric', 
-          month: '2-digit', 
-          day: '2-digit', 
-          hour: '2-digit', 
-          minute: '2-digit' 
-        }),
+        fecha: new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
         timestamp: Date.now(),
-        usr: typeof usuario !== 'undefined' ? usuario : 'Anonimo',
+        usr: usuarioActivo,
         uni: uni,
         vendedor: vendedor,
         prod: p.nombre,
@@ -294,32 +418,31 @@
       };
 
       try {
-        if (typeof db !== 'undefined' && db) {
-          // Guardar asíncronamente en Firestore si la conexión existe
+        if (db) {
+          // Guardar directo en la nube con Firestore
           await db.collection("ventas").add(reg);
         } else {
-          // Guardar de forma local en el navegador (fallback)
+          // Guardar en almacenamiento local
           reg.id = 'local_' + Date.now();
           ventas.unshift(reg);
           localStorage.setItem('vnts', JSON.stringify(ventas));
-          actualizarTabla();
+          renderizarVentas();
         }
 
-        alert(`Venta registrada con éxito:\n${cant}x ${p.nombre}\nTotal: $${totalVenta.toLocaleString()}`);
-        limpiarFormulario();
+        alert(`Venta registrada:\n${cant}x ${p.nombre}\nRegistrado por: ${usuarioActivo}`);
+        document.getElementById('vCantidad').value = '1';
       } catch (error) {
-        console.error('Error al registrar la venta:', error);
-        alert('Ocurrió un error al intentar guardar la venta.');
+        console.error('Error al guardar la venta:', error);
+        alert('Ocurrió un error al procesar el registro.');
       }
     }
 
-    // Renderizado dinámico de la tabla
-    function actualizarTabla() {
+    function renderizarVentas() {
       const tbody = document.getElementById('tablaVentas');
       tbody.innerHTML = '';
 
       if (ventas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888;">No hay ventas registradas aún</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#888;">No hay ventas registradas</td></tr>`;
         return;
       }
 
@@ -329,20 +452,12 @@
           <td>${v.fecha}</td>
           <td><strong>${v.prod}</strong></td>
           <td>${v.cant}</td>
-          <td>${v.vendedor}</td>
+          <td>${v.usr}</td>
           <td>$${v.total.toLocaleString()}</td>
-          <td class="badge-ganancia">$${v.gan.toLocaleString()}</td>
+          <td class="text-success">$${v.gan.toLocaleString()}</td>
         `;
         tbody.appendChild(tr);
       });
-    }
-
-    // Limpieza de campos tras registro exitoso
-    function limpiarFormulario() {
-      document.getElementById('vProducto').value = '';
-      document.getElementById('vCantidad').value = '1';
-      document.getElementById('vUni').value = '';
-      document.getElementById('vVendedor').value = '';
     }
   </script>
 </body>
