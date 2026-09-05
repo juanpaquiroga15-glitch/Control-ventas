@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Control de Ventas y Productos</title>
+  <title>Sistema de Control de Ventas e Inventario - Kosmik</title>
   
-  <!-- Carga de SDK de Firebase -->
+  <!-- SDK de Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -31,7 +31,25 @@
       padding: 15px;
     }
 
-    /* Panel Superior de Totales Destacado */
+    /* Banner de Alerta Stock Bajo */
+    .alert-banner {
+      background-color: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+      border-left: 6px solid var(--danger-color);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .alert-banner h4 {
+      margin: 0 0 5px 0;
+      color: #721c24;
+      font-size: 1rem;
+    }
+
+    /* Panel Superior de Métricas */
     .metrics-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -65,7 +83,7 @@
       color: #111;
     }
 
-    /* Pestañas de navegación */
+    /* Pestañas */
     .nav-tabs {
       display: flex;
       gap: 10px;
@@ -163,11 +181,32 @@
     th { background-color: #f1f1f1; }
     .text-success { color: var(--success-color); font-weight: bold; }
     .text-warning { color: #d39e00; font-weight: bold; }
+    
+    /* Badges para el Stock */
+    .stock-badge {
+      background: #c6f6d5;
+      color: #22543d;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.85rem;
+    }
+    .stock-low { 
+      background: #fed7d7; 
+      color: #9b2c2c; 
+      animation: pulse 1.5s infinite; 
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- USUARIO Y CAJERO ACTIVO -->
+  <!-- USUARIO ACTIVO -->
   <div class="card" style="padding: 12px 20px;">
     <div class="form-group" style="margin: 0; flex-direction: row; align-items: center; gap: 15px;">
       <label for="vUsuario" style="margin: 0; white-space: nowrap;">Usuario / Cajero Actual:</label>
@@ -175,7 +214,13 @@
     </div>
   </div>
 
-  <!-- PANEL DE TOTALES Y MÉTRICAS FINANCIERAS -->
+  <!-- BANNER DE ALERTA DE STOCK BAJO -->
+  <div id="bannerAlerta" class="alert-banner">
+    <h4>⚠️ ¡Atención! Productos con Stock Bajo (≤ 5 unidades):</h4>
+    <div id="listaAlertaStock"></div>
+  </div>
+
+  <!-- PANEL DE TOTALES Y MÉTRICAS -->
   <div class="metrics-grid">
     <div class="metric-card">
       <div class="metric-title">Ventas Totales</div>
@@ -195,13 +240,13 @@
     </div>
   </div>
 
-  <!-- SECCIONES / PESTAÑAS -->
+  <!-- PESTAÑAS -->
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="cambiarPestana('ventas')">Registrar Ventas</button>
-    <button class="tab-btn" onclick="cambiarPestana('productos')">Gestionar Productos</button>
+    <button class="tab-btn" onclick="cambiarPestana('productos')">Gestionar Inventario</button>
   </div>
 
-  <!-- PESTAÑA 1: REGISTRO DE VENTAS -->
+  <!-- PESTAÑA 1: VENTAS -->
   <div id="tab-ventas" class="tab-content active">
     <div class="card">
       <h3>Registrar Nueva Venta</h3>
@@ -212,13 +257,13 @@
         </div>
 
         <div class="form-group">
-          <label for="vCantidad">Cantidad</label>
+          <label for="vCantidad">Cantidad a Vender</label>
           <input type="number" id="vCantidad" value="1" min="1">
         </div>
 
         <div class="form-group">
           <label for="vUni">Sede / Ubicación</label>
-          <input type="text" id="vUni" placeholder="Ej: Local Principal">
+          <input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario">
         </div>
 
         <div class="form-group full-width">
@@ -252,14 +297,19 @@
     </div>
   </div>
 
-  <!-- PESTAÑA 2: GESTIÓN DE PRODUCTOS -->
+  <!-- PESTAÑA 2: INVENTARIO -->
   <div id="tab-productos" class="tab-content">
     <div class="card">
-      <h3>Agregar Nuevo Producto / Combo</h3>
+      <h3>Agregar / Actualizar Inventario</h3>
       <div class="form-grid">
         <div class="form-group full-width">
           <label for="pNombre">Nombre del Producto / Combo</label>
-          <input type="text" id="pNombre" placeholder="Ej: Combo 4 Especial">
+          <input type="text" id="pNombre" placeholder="Ej: Cables / Mentas / Combo 1">
+        </div>
+
+        <div class="form-group">
+          <label for="pStock">Stock Disponible (Unidades)</label>
+          <input type="number" id="pStock" placeholder="Ej: 50" min="0">
         </div>
 
         <div class="form-group">
@@ -285,15 +335,16 @@
           <input type="number" id="pValorComision" placeholder="Ej: 200 o 10%">
         </div>
       </div>
-      <button class="btn-submit" style="background-color: var(--primary-color);" onclick="guardarProducto()">Agregar Producto</button>
+      <button class="btn-submit" style="background-color: var(--primary-color);" onclick="guardarProducto()">Guardar en Inventario</button>
     </div>
 
     <div class="card">
-      <h3>Catálogo Actual</h3>
+      <h3>Inventario Actual</h3>
       <table>
         <thead>
           <tr>
             <th>Nombre</th>
+            <th>Stock Disponible</th>
             <th>Precio</th>
             <th>Costo</th>
             <th>Comisión</th>
@@ -306,7 +357,7 @@
   </div>
 
   <script>
-    // Configuración Firebase (Opcional)
+    // Configuración Firebase (Opcional - Reemplazar con tus credenciales si usas Firestore)
     const firebaseConfig = {
       apiKey: "TU_API_KEY",
       authDomain: "TU_PROYECTO.firebaseapp.com",
@@ -322,12 +373,13 @@
       db = firebase.firestore();
     }
 
+    // Catálogo con precios acordados y stock asignado
     let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
-      'cable_individual': { nombre: 'Cable (Unidad)', precio: 800, costo: 300, valorComision: 100, tipoComision: 'fijo' },
-      'menta_individual': { nombre: 'Menta (Unidad)', precio: 2000, costo: 800, valorComision: 200, tipoComision: 'fijo' },
-      'combo_1': { nombre: 'Combo 1 (1 Cable + 1 Menta)', precio: 2500, costo: 1100, valorComision: 250, tipoComision: 'fijo' },
-      'combo_2': { nombre: 'Combo 2 (2 Cables + 1 Menta)', precio: 3000, costo: 1400, valorComision: 300, tipoComision: 'fijo' },
-      'combo_3': { nombre: 'Combo 3 (2 Cables + 2 Mentas)', precio: 4500, costo: 2200, valorComision: 450, tipoComision: 'fijo' }
+      'cable_individual': { nombre: 'Cable (Unidad)', stock: 3, precio: 800, costo: 300, valorComision: 100, tipoComision: 'fijo' },
+      'menta_individual': { nombre: 'Menta (Unidad)', stock: 50, precio: 2000, costo: 800, valorComision: 200, tipoComision: 'fijo' },
+      'combo_1': { nombre: 'Combo 1 (1 Cable + 1 Menta)', stock: 4, precio: 2500, costo: 1100, valorComision: 250, tipoComision: 'fijo' },
+      'combo_2': { nombre: 'Combo 2 (2 Cables + 1 Menta)', stock: 15, precio: 3000, costo: 1400, valorComision: 300, tipoComision: 'fijo' },
+      'combo_3': { nombre: 'Combo 3 (2 Cables + 2 Mentas)', stock: 10, precio: 4500, costo: 2200, valorComision: 450, tipoComision: 'fijo' }
     };
 
     let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
@@ -352,27 +404,28 @@
 
     function guardarProducto() {
       const nombre = document.getElementById('pNombre').value.trim();
+      const stock = parseInt(document.getElementById('pStock').value, 10) || 0;
       const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
       const costo = parseFloat(document.getElementById('pCosto').value) || 0;
       const tipoComision = document.getElementById('pTipoComision').value;
       const valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
 
       if (!nombre || precio <= 0) {
-        alert('Ingresa un nombre y un precio válidos.');
+        alert('Ingresa un nombre y precio válidos.');
         return;
       }
 
       const id = 'prod_' + Date.now();
-      productos[id] = { nombre, precio, costo, valorComision, tipoComision };
+      productos[id] = { nombre, stock, precio, costo, valorComision, tipoComision };
 
       localStorage.setItem('cat_prods', JSON.stringify(productos));
       limpiarFormProducto();
       renderizarProductos();
-      alert('Producto agregado al catálogo.');
+      alert('Producto guardado en inventario.');
     }
 
     function eliminarProducto(id) {
-      if (confirm(`¿Eliminar "${productos[id].nombre}"?`)) {
+      if (confirm(`¿Eliminar "${productos[id].nombre}" del inventario?`)) {
         delete productos[id];
         localStorage.setItem('cat_prods', JSON.stringify(productos));
         renderizarProductos();
@@ -382,21 +435,35 @@
     function renderizarProductos() {
       const selectProducto = document.getElementById('vProducto');
       const tbody = document.getElementById('tablaProductos');
+      const bannerAlerta = document.getElementById('bannerAlerta');
+      const listaAlertaStock = document.getElementById('listaAlertaStock');
 
       selectProducto.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
       tbody.innerHTML = '';
+      
+      let productosAlertados = [];
 
       Object.keys(productos).forEach(id => {
         const p = productos[id];
+        const stockActual = p.stock !== undefined ? p.stock : 0;
+
+        // Comprobar si el stock es bajo (<= 5)
+        if (stockActual <= 5) {
+          productosAlertados.push(`• <strong>${p.nombre}</strong> (Quedan: ${stockActual} unid.)`);
+        }
+
         const opt = document.createElement('option');
         opt.value = id;
-        opt.textContent = `${p.nombre} - $${p.precio.toLocaleString()}`;
+        opt.textContent = `${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${stockActual}]`;
         selectProducto.appendChild(opt);
 
         const tr = document.createElement('tr');
         const comText = p.tipoComision === 'porcentaje' ? `${p.valorComision}%` : `$${p.valorComision}`;
+        const badgeClass = stockActual <= 5 ? 'stock-badge stock-low' : 'stock-badge';
+
         tr.innerHTML = `
           <td><strong>${p.nombre}</strong></td>
+          <td><span class="${badgeClass}">${stockActual} unid.</span></td>
           <td>$${p.precio.toLocaleString()}</td>
           <td>$${p.costo.toLocaleString()}</td>
           <td>${comText}</td>
@@ -404,10 +471,19 @@
         `;
         tbody.appendChild(tr);
       });
+
+      // Banner de alerta superior
+      if (productosAlertados.length > 0) {
+        bannerAlerta.style.display = 'block';
+        listaAlertaStock.innerHTML = productosAlertados.join('<br>');
+      } else {
+        bannerAlerta.style.display = 'none';
+      }
     }
 
     function limpiarFormProducto() {
       document.getElementById('pNombre').value = '';
+      document.getElementById('pStock').value = '';
       document.getElementById('pPrecio').value = '';
       document.getElementById('pCosto').value = '';
       document.getElementById('pValorComision').value = '';
@@ -422,8 +498,15 @@
         return;
       }
 
-      const usuarioActivo = document.getElementById('vUsuario').value.trim() || 'Anónimo';
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
+      const stockActual = p.stock !== undefined ? p.stock : 0;
+
+      if (stockActual < cant) {
+        alert(`Stock insuficiente. Solo quedan ${stockActual} unidades disponibles de "${p.nombre}".`);
+        return;
+      }
+
+      const usuarioActivo = document.getElementById('vUsuario').value.trim() || 'Anónimo';
       const uni = document.getElementById('vUni').value.trim() || 'General';
       const vendedor = document.getElementById('vVendedor').value.trim() || 'N/A';
 
@@ -444,6 +527,10 @@
 
       const gananciaNeta = totalVenta - totalCosto - totalComision;
 
+      // Descontar del inventario
+      p.stock = stockActual - cant;
+      localStorage.setItem('cat_prods', JSON.stringify(productos));
+
       const reg = {
         fecha: new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
         timestamp: Date.now(),
@@ -461,17 +548,20 @@
       try {
         if (db) {
           await db.collection("ventas").add(reg);
+          await db.collection("productos").doc(pId).update({ stock: p.stock });
         } else {
           reg.id = 'local_' + Date.now();
           ventas.unshift(reg);
           localStorage.setItem('vnts', JSON.stringify(ventas));
-          renderizarVentas();
         }
 
-        alert(`Venta registrada exitosamente.`);
+        renderizarProductos();
+        renderizarVentas();
+
+        alert(`Venta registrada. Quedan ${p.stock} unidades de ${p.nombre}.`);
         document.getElementById('vCantidad').value = '1';
       } catch (error) {
-        console.error('Error:', error);
+        console.error('Error al registrar venta:', error);
       }
     }
 
@@ -508,7 +598,7 @@
         });
       }
 
-      // Actualizar los 4 contadores superiores
+      // Actualizar contadores del panel superior
       document.getElementById('totalVentas').textContent = `$${sumVentas.toLocaleString()}`;
       document.getElementById('totalGanancias').textContent = `$${sumGanancias.toLocaleString()}`;
       document.getElementById('totalComisiones').textContent = `$${sumComisiones.toLocaleString()}`;
