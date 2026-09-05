@@ -16,6 +16,7 @@
       --warning-color: #ffc107;
       --info-color: #17a2b8;
       --danger-color: #dc3545;
+      --whatsapp-color: #25D366;
       --bg-color: #f4f6f8;
       --card-bg: #ffffff;
       --text-color: #333333;
@@ -163,7 +164,9 @@
 
     .btn-submit { background-color: var(--success-color); color: white; width: 100%; margin-top: 10px; }
     .btn-danger { background-color: var(--danger-color); color: white; padding: 5px 10px; font-size: 0.8rem; }
-    .btn-clear { background-color: #6c757d; color: white; margin-top: 10px; font-size: 0.85rem; }
+    .btn-clear { background-color: #6c757d; color: white; font-size: 0.85rem; }
+    .btn-excel { background-color: #107c41; color: white; font-size: 0.85rem; }
+    .btn-wapp { background-color: var(--whatsapp-color); color: white; font-size: 0.85rem; width: 100%; margin-top: 15px; }
 
     table {
       width: 100%;
@@ -182,7 +185,6 @@
     .text-success { color: var(--success-color); font-weight: bold; }
     .text-warning { color: #d39e00; font-weight: bold; }
     
-    /* Badges para el Stock */
     .stock-badge {
       background: #c6f6d5;
       color: #22543d;
@@ -262,23 +264,53 @@
         </div>
 
         <div class="form-group">
-          <label for="vUni">Sede / Ubicación</label>
+          <label for="vUni">Sede / Universidad</label>
           <input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario">
         </div>
 
         <div class="form-group full-width">
           <label for="vVendedor">Vendedor Encargado</label>
-          <input type="text" id="vVendedor" placeholder="Nombre del vendedor">
+          <select id="vVendedor">
+            <option value="Bettina">Bettina</option>
+            <option value="Juan Jose">Juan Jose</option>
+            <option value="Vale">Vale</option>
+            <option value="Alejo">Alejo</option>
+            <option value="Otro">Otro / Directo</option>
+          </select>
         </div>
       </div>
       <button class="btn-submit" onclick="registrarVenta()">Guardar Venta</button>
     </div>
 
+    <!-- SECCIÓN DE HISTORIAL Y FILTROS -->
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Historial de Ventas</h3>
-        <button class="btn-clear" onclick="limpiarHistorial()">Borrar Historial</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Historial de Ventas</h3>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-excel" onclick="exportarExcel()">📊 Exportar Excel</button>
+          <button class="btn-clear" onclick="limpiarHistorial()">Borrar Historial</button>
+        </div>
       </div>
+
+      <!-- FILTROS DE BÚSQUEDA -->
+      <div class="form-grid" style="background: #f8f9fa; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+        <div class="form-group">
+          <label for="fVendedor">Filtrar por Vendedor:</label>
+          <select id="fVendedor" onchange="renderizarVentas()">
+            <option value="todos">-- Todos los vendedores --</option>
+            <option value="Bettina">Bettina</option>
+            <option value="Juan Jose">Juan Jose</option>
+            <option value="Vale">Vale</option>
+            <option value="Alejo">Alejo</option>
+            <option value="Otro">Otro / Directo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fSede">Filtrar por Universidad / Sede:</label>
+          <input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()">
+        </div>
+      </div>
+
       <table>
         <thead>
           <tr>
@@ -294,6 +326,9 @@
         </thead>
         <tbody id="tablaVentas"></tbody>
       </table>
+
+      <!-- BOTÓN DE CUADRE WHATSAPP -->
+      <button class="btn-wapp" onclick="enviarCuadreWhatsApp()">📲 Enviar Cuadre por WhatsApp</button>
     </div>
   </div>
 
@@ -357,7 +392,7 @@
   </div>
 
   <script>
-    // Configuración Firebase (Opcional - Reemplazar con tus credenciales si usas Firestore)
+    // Configuración Firebase (Opcional)
     const firebaseConfig = {
       apiKey: "TU_API_KEY",
       authDomain: "TU_PROYECTO.firebaseapp.com",
@@ -373,7 +408,6 @@
       db = firebase.firestore();
     }
 
-    // Catálogo con precios acordados y stock asignado
     let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
       'cable_individual': { nombre: 'Cable (Unidad)', stock: 3, precio: 800, costo: 300, valorComision: 100, tipoComision: 'fijo' },
       'menta_individual': { nombre: 'Menta (Unidad)', stock: 50, precio: 2000, costo: 800, valorComision: 200, tipoComision: 'fijo' },
@@ -447,7 +481,6 @@
         const p = productos[id];
         const stockActual = p.stock !== undefined ? p.stock : 0;
 
-        // Comprobar si el stock es bajo (<= 5)
         if (stockActual <= 5) {
           productosAlertados.push(`• <strong>${p.nombre}</strong> (Quedan: ${stockActual} unid.)`);
         }
@@ -472,7 +505,6 @@
         tbody.appendChild(tr);
       });
 
-      // Banner de alerta superior
       if (productosAlertados.length > 0) {
         bannerAlerta.style.display = 'block';
         listaAlertaStock.innerHTML = productosAlertados.join('<br>');
@@ -502,13 +534,13 @@
       const stockActual = p.stock !== undefined ? p.stock : 0;
 
       if (stockActual < cant) {
-        alert(`Stock insuficiente. Solo quedan ${stockActual} unidades disponibles de "${p.nombre}".`);
+        alert(`Stock insuficiente. Solo quedan ${stockActual} unidades disponibles.`);
         return;
       }
 
       const usuarioActivo = document.getElementById('vUsuario').value.trim() || 'Anónimo';
       const uni = document.getElementById('vUni').value.trim() || 'General';
-      const vendedor = document.getElementById('vVendedor').value.trim() || 'N/A';
+      const vendedor = document.getElementById('vVendedor').value;
 
       const precioVenta = Number(p.precio) || 0;
       const costoInsumo = Number(p.costo) || 0;
@@ -527,7 +559,6 @@
 
       const gananciaNeta = totalVenta - totalCosto - totalComision;
 
-      // Descontar del inventario
       p.stock = stockActual - cant;
       localStorage.setItem('cat_prods', JSON.stringify(productos));
 
@@ -558,15 +589,18 @@
         renderizarProductos();
         renderizarVentas();
 
-        alert(`Venta registrada. Quedan ${p.stock} unidades de ${p.nombre}.`);
+        alert(`Venta de ${vendedor} registrada. Quedan ${p.stock} unidades de ${p.nombre}.`);
         document.getElementById('vCantidad').value = '1';
       } catch (error) {
-        console.error('Error al registrar venta:', error);
+        console.error('Error:', error);
       }
     }
 
     function renderizarVentas() {
       const tbody = document.getElementById('tablaVentas');
+      const filtroVendedor = document.getElementById('fVendedor').value;
+      const filtroSede = document.getElementById('fSede').value.toLowerCase().trim();
+
       tbody.innerHTML = '';
 
       let sumVentas = 0;
@@ -574,10 +608,17 @@
       let sumComisiones = 0;
       let sumUnidades = 0;
 
-      if (ventas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#888;">No hay ventas registradas</td></tr>`;
+      // Filtrar array de ventas
+      const ventasFiltradas = ventas.filter(v => {
+        const coincideVendedor = (filtroVendedor === 'todos') || (v.vendedor === filtroVendedor);
+        const coincideSede = !filtroSede || (v.uni && v.uni.toLowerCase().includes(filtroSede));
+        return coincideVendedor && coincideSede;
+      });
+
+      if (ventasFiltradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#888;">No hay ventas que coincidan con los filtros</td></tr>`;
       } else {
-        ventas.forEach(v => {
+        ventasFiltradas.forEach(v => {
           sumVentas += v.total || 0;
           sumGanancias += v.gan || 0;
           sumComisiones += v.com || 0;
@@ -598,7 +639,7 @@
         });
       }
 
-      // Actualizar contadores del panel superior
+      // Actualizar tarjetas de métricas con el acumulado filtrado
       document.getElementById('totalVentas').textContent = `$${sumVentas.toLocaleString()}`;
       document.getElementById('totalGanancias').textContent = `$${sumGanancias.toLocaleString()}`;
       document.getElementById('totalComisiones').textContent = `$${sumComisiones.toLocaleString()}`;
@@ -611,6 +652,50 @@
         localStorage.removeItem('vnts');
         renderizarVentas();
       }
+    }
+
+    // EXPORTAR REPORTE A EXCEL (CSV)
+    function exportarExcel() {
+      if (ventas.length === 0) {
+        alert('No hay ventas grabadas para exportar.');
+        return;
+      }
+
+      let csv = 'Fecha,Producto,Cantidad,Usuario,Vendedor,Universidad,Total,Comision,Costo,GananciaNeta\n';
+      ventas.forEach(v => {
+        csv += `"${v.fecha}","${v.prod}",${v.cant},"${v.usr}","${v.vendedor}","${v.uni}",${v.total},${v.com},${v.cos},${v.gan}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Reporte_Ventas_Kosmik_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`;
+      a.click();
+    }
+
+    // GENERAR Y ENVIAR RESUMEN A WHATSAPP
+    function enviarCuadreWhatsApp() {
+      const vtot = document.getElementById('totalVentas').textContent;
+      const gan = document.getElementById('totalGanancias').textContent;
+      const com = document.getElementById('totalComisiones').textContent;
+      const und = document.getElementById('totalUnidades').textContent;
+      const filtroV = document.getElementById('fVendedor').value;
+
+      let titulo = filtroV !== 'todos' ? `CUADRE DE VENDEDOR: ${filtroV.toUpperCase()}` : `CUADRE GENERAL DE VENTAS`;
+
+      let mensaje = `🚀 *${titulo} - KOSMIK*\n`;
+      mensaje += `📅 *Fecha:* ${new Date().toLocaleDateString()}\n`;
+      mensaje += `------------------------------------\n`;
+      mensaje += `💵 *Ventas Totales:* ${vtot}\n`;
+      mensaje += `📈 *Ganancia Neta:* ${gan}\n`;
+      mensaje += `🤝 *Comisiones Total:* ${com}\n`;
+      mensaje += `📦 *Unidades Vendidas:* ${und}\n`;
+      mensaje += `------------------------------------\n`;
+      mensaje += `_Reporte generado desde el Sistema Kosmik_`;
+
+      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
     }
   </script>
 </body>
