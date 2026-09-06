@@ -264,6 +264,7 @@
     .btn-success { background: var(--success); color: white; }
     .btn-ai { background: var(--ai-color); color: white; }
     .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: #0f172a; }
     .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 15px; }
 
     /* TABLAS */
@@ -532,7 +533,7 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="vendNombre">Nombre del Vendedor</label>
-          <input type="text" id="vendNombre" placeholder="Ej: Juan José">
+          <input type="text" id="vendNombre" placeholder="Ej: Juanjo">
         </div>
         <div class="form-group">
           <label for="vendSede">Sede Habitual</label>
@@ -684,7 +685,7 @@
 
     let vendedores = JSON.parse(localStorage.getItem('cat_vends')) || {
       'Bettina': { sede: 'Javeriana', meta: 50000, comisionDefecto: 200, acumuladoComisiones: 0 },
-      'Juan Jose': { sede: 'Rosario', meta: 45000, comisionDefecto: 200, acumuladoComisiones: 0 },
+      'Juanjo': { sede: 'Rosario', meta: 45000, comisionDefecto: 200, acumuladoComisiones: 0 },
       'Vale': { sede: 'Andes', meta: 40000, comisionDefecto: 200, acumuladoComisiones: 0 },
       'Alejo': { sede: 'Sabana', meta: 40000, comisionDefecto: 200, acumuladoComisiones: 0 }
     };
@@ -748,6 +749,58 @@
       alert('Vendedor guardado exitosamente.');
     }
 
+    function editarVendedor(nombreActual) {
+      const info = vendedores[nombreActual];
+      if (!info) return;
+
+      const nuevoNombre = prompt("Editar nombre del vendedor:", nombreActual);
+      if (!nuevoNombre || !nuevoNombre.trim()) return;
+      const nombreLimpio = nuevoNombre.trim();
+
+      if (nombreLimpio !== nombreActual && vendedores[nombreLimpio]) {
+        return alert("Ya existe un vendedor con ese nombre.");
+      }
+
+      const nuevaSede = prompt("Editar sede habitual:", info.sede);
+      const nuevaMeta = prompt("Editar meta semanal ($):", info.meta);
+
+      if (nombreLimpio !== nombreActual) {
+        vendedores[nombreLimpio] = {
+          sede: nuevaSede !== null ? nuevaSede.trim() : info.sede,
+          meta: nuevaMeta !== null ? (parseFloat(nuevaMeta) || info.meta) : info.meta,
+          comisionDefecto: info.comisionDefecto,
+          acumuladoComisiones: info.acumuladoComisiones
+        };
+        delete vendedores[nombreActual];
+
+        // Actualizar el historial de ventas para que no se pierdan los registros del vendedor renombrado
+        ventas.forEach(v => {
+          if (v.vendedor === nombreActual) v.vendedor = nombreLimpio;
+        });
+        localStorage.setItem('vnts', JSON.stringify(ventas));
+      } else {
+        info.sede = nuevaSede !== null ? nuevaSede.trim() : info.sede;
+        info.meta = nuevaMeta !== null ? (parseFloat(nuevaMeta) || info.meta) : info.meta;
+      }
+
+      localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+      renderizarVendedoresSelect();
+      renderizarVendedoresLista();
+      renderizarVentas();
+      alert("Vendedor actualizado correctamente.");
+    }
+
+    function eliminarVendedor(vendedor) {
+      if (confirm(`¿Estás seguro de eliminar al vendedor "${vendedor}"? Sus ventas pasadas en el historial se mantendrán.`)) {
+        delete vendedores[vendedor];
+        localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+        renderizarVendedoresSelect();
+        renderizarVendedoresLista();
+        renderizarVentas();
+        alert("Vendedor eliminado.");
+      }
+    }
+
     function liquidarComisiones(vendedor) {
       if (confirm(`¿Marcar como PAGADAS las comisiones acumuladas de ${vendedor}?`)) {
         if (vendedores[vendedor]) {
@@ -788,11 +841,19 @@
 
         cont.innerHTML += `
           <div class="seller-card">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <strong>${v} <span style="font-weight:normal; color:var(--text-muted);">(${info.sede})</span></strong>
-              <button class="btn btn-primary" style="padding:4px 10px; font-size:0.8rem;" onclick="liquidarComisiones('${v}')">
-                Liquidar Comisiones
-              </button>
+              <div style="display:flex; gap:6px;">
+                <button class="btn btn-warning" style="padding:4px 10px; font-size:0.8rem;" onclick="editarVendedor('${v}')">
+                  <i class="fa-solid fa-pen"></i> Editar
+                </button>
+                <button class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;" onclick="eliminarVendedor('${v}')">
+                  <i class="fa-solid fa-trash"></i> Eliminar
+                </button>
+                <button class="btn btn-primary" style="padding:4px 10px; font-size:0.8rem;" onclick="liquidarComisiones('${v}')">
+                  Liquidar
+                </button>
+              </div>
             </div>
             <div style="margin-top:8px; font-size:0.85rem; color:var(--text-muted);">
               Vendido: <strong>$${vendido.toLocaleString()}</strong> / Meta: $${info.meta.toLocaleString()} (${pct}%)
@@ -876,6 +937,8 @@
       if (p.stock < cant) return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades.`);
 
       const vendedor = document.getElementById('vVendedor').value;
+      if (!vendedor) return alert('Selecciona un vendedor.');
+
       const sede = document.getElementById('vUni').value.trim() || vendedores[vendedor]?.sede || 'General';
 
       const total = p.precio * cant;
