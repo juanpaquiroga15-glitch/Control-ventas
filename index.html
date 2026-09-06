@@ -632,8 +632,11 @@
         </button>
       </div>
 
-      <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Comercial & Sede</div>
+      <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Comercial & Comisiones</div>
       <div class="quick-ai-grid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('auditoria_comisiones')">
+          <i class="fa-solid fa-hand-holding-dollar"></i> Auditoría de Comisiones
+        </button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')">
           <i class="fa-solid fa-trophy"></i> Ranking de Vendedores
         </button>
@@ -663,7 +666,7 @@
     <div class="card">
       <h3><i class="fa-solid fa-message"></i> Consulta Personalizada</h3>
       <div class="form-group">
-        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cuál es el producto con mejor margen o qué vendedor necesita más impulso?"></textarea>
+        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cuánto se le debe en comisiones a cada vendedor o qué producto genera más ganancias?"></textarea>
       </div>
       <button class="btn btn-ai" style="width: 100%; margin-top: 10px;" onclick="consultarIALocal()">
         <i class="fa-solid fa-microchip"></i> Generar Diagnóstico
@@ -773,7 +776,6 @@
         };
         delete vendedores[nombreActual];
 
-        // Actualizar el historial de ventas para que no se pierdan los registros del vendedor renombrado
         ventas.forEach(v => {
           if (v.vendedor === nombreActual) v.vendedor = nombreLimpio;
         });
@@ -1088,7 +1090,28 @@
       setTimeout(() => {
         let res = "";
 
-        if (tipoFijo === 'diagnostico_financiero' || prompt.includes('financiero')) {
+        if (tipoFijo === 'auditoria_comisiones' || prompt.includes('comision') || prompt.includes('comisiones')) {
+          let comStats = {};
+          let totalComs = 0;
+          ventas.forEach(v => {
+            comStats[v.vendedor] = (comStats[v.vendedor] || 0) + v.com;
+            totalComs += v.com;
+          });
+
+          res = `🤝 **AUDITORÍA Y CÁLCULO DE COMISIONES**\n\n`;
+          res += `• Comisiones Totales Acumuladas: **$${totalComs.toLocaleString()}**\n\n`;
+          
+          if (Object.keys(comStats).length === 0) {
+            res += `⚠️ Aún no hay ventas registradas para calcular comisiones.`;
+          } else {
+            res += `**Desglose por Vendedor:**\n`;
+            Object.keys(comStats).forEach(v => {
+              res += `• **${v}**: $${comStats[v].toLocaleString()}\n`;
+            });
+            res += `\n💡 **Recomendación:** Ve a la pestaña *Vendedores & Metas* para ejecutar el botón de *Liquidar* cuando realices los pagos.`;
+          }
+
+        } else if (tipoFijo === 'diagnostico_financiero' || prompt.includes('financiero')) {
           let totV = 0, totG = 0, totC = 0;
           ventas.forEach(v => { totV += v.total; totG += v.gan; totC += v.com; });
           let margen = totV > 0 ? ((totG / totV) * 100).toFixed(1) : 0;
@@ -1097,7 +1120,7 @@
           res += `• Ingresos Brutos: **$${totV.toLocaleString()}**\n`;
           res += `• Ganancia Neta Real: **$${totG.toLocaleString()}** (${margen}% margen)\n`;
           res += `• Comisiones Repartidas: **$${totC.toLocaleString()}**\n\n`;
-          res += `💡 **Diagnóstico:** El margen neta es saludable. Se sugiere impulsar la venta de combos donde la comisión fija representa un menor % relativo del margen.`;
+          res += `💡 **Diagnóstico:** El margen neta es saludable. Se sugiere impulsar la venta de combos.`;
 
         } else if (tipoFijo === 'proyecciones_metas' || prompt.includes('ritmo') || prompt.includes('proyeccion')) {
           let totMeta = 0;
@@ -1108,12 +1131,12 @@
           res = `🎯 **RITMO DE VENTAS Y PROYECCIÓN**\n\n`;
           res += `• Meta Global Acumulada: **$${totMeta.toLocaleString()}**\n`;
           res += `• Avance Actual: **$${totVenta.toLocaleString()}** (${pct}% completado)\n\n`;
-          res += `🚀 **Estrategia recomendada:** Manten el foco en la sede con menor avance para cerrar la brecha antes del fin de semana.`;
+          res += `🚀 **Estrategia recomendada:** Mantén el foco en la sede con menor avance.`;
 
         } else if (tipoFijo === 'calculadora_descuentos' || prompt.includes('descuento') || prompt.includes('promo')) {
           res = `💸 **EVALUADOR DE DESCUENTOS Y MARGEN**\n\n`;
-          res += `• Aplicar **10% de descuento** en combos reduce el margen en promedio solo un **3.5%**, pero incrementa el volumen de rotación en un estimado del **25%**.\n`;
-          res += `💡 **Regla:** Nunca reduzcas el monto fijo de comisión del vendedor al ofrecer un descuento promocional.`;
+          res += `• Aplicar **10% de descuento** en combos reduce el margen en promedio solo un **3.5%**, pero incrementa la rotación.\n`;
+          res += `💡 **Regla:** Nunca reduzcas el monto fijo de comisión del vendedor al ofrecer un descuento.`;
 
         } else if (tipoFijo === 'ranking_vendedores' || prompt.includes('vendedor')) {
           let vStats = {};
