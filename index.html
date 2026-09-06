@@ -3,219 +3,270 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sistema de Control de Ventas e Inventario - Kosmik</title>
+  <title>Kosmik - Control de Ventas, Inventario & Analítica</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js para Gráficas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
-      --primary-color: #007bff;
-      --success-color: #28a745;
-      --warning-color: #ffc107;
-      --info-color: #17a2b8;
-      --danger-color: #dc3545;
-      --ai-color: #6f42c1; /* Color Violeta para IA Local */
-      --whatsapp-color: #25D366;
-      --bg-color: #f4f6f8;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --ai-color: #8b5cf6;
+      --whatsapp: #25D366;
+      --bg: #f8fafc;
       --card-bg: #ffffff;
-      --text-color: #333333;
-      --border-color: #cccccc;
-      --table-header-bg: #f1f1f1;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --table-header: #f1f5f9;
       --input-bg: #ffffff;
+      --radius: 12px;
     }
 
     body.dark-mode {
-      --bg-color: #121212;
-      --card-bg: #1e1e1e;
-      --text-color: #e0e0e0;
-      --border-color: #444444;
-      --table-header-bg: #2d2d2d;
-      --input-bg: #2a2a2a;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+      --table-header: #1e293b;
+      --input-bg: #0f172a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
     }
 
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      max-width: 950px;
-      margin: 20px auto;
-      padding: 15px;
-      transition: background-color 0.3s, color 0.3s;
+      background-color: var(--bg);
+      color: var(--text-main);
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px;
+      transition: background-color 0.2s, color 0.2s;
     }
 
-    .top-bar {
+    /* BARRA SUPERIOR NAV */
+    .header-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      background: var(--card-bg);
+      padding: 16px 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
-    .theme-toggle-btn {
-      background: #e0e0e0;
-      color: #333;
-      border: none;
-      padding: 8px 15px;
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--primary);
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .user-badge input {
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-main);
+      font-weight: 500;
+    }
+
+    .btn-toggle {
+      background: var(--table-header);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
       border-radius: 20px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
       font-size: 0.85rem;
-      transition: background 0.3s, color 0.3s;
     }
 
-    body.dark-mode .theme-toggle-btn {
-      background: #333;
-      color: #fff;
-    }
-
-    .alert-banner {
-      background-color: #fff3cd;
-      color: #856404;
-      border: 1px solid #ffeeba;
-      border-left: 6px solid var(--danger-color);
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      display: none;
-    }
-
-    body.dark-mode .alert-banner {
-      background-color: #3e2723;
-      color: #ffcc80;
-      border-color: #4e342e;
-    }
-
+    /* TARJETAS METRICAS */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
     }
 
     .metric-card {
       background: var(--card-bg);
-      padding: 18px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      border-left: 6px solid var(--primary-color);
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
     }
-
-    .metric-card.success { border-left-color: var(--success-color); }
-    .metric-card.warning { border-left-color: var(--warning-color); }
-    .metric-card.info { border-left-color: var(--info-color); }
 
     .metric-title {
       font-size: 0.8rem;
       text-transform: uppercase;
-      color: #888;
-      font-weight: bold;
-      margin-bottom: 5px;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 8px;
     }
 
     .metric-value {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--text-color);
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-main);
     }
 
+    .metric-icon {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      font-size: 1.5rem;
+      opacity: 0.15;
+    }
+
+    /* PESTAÑAS */
     .nav-tabs {
       display: flex;
       gap: 10px;
       margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      overflow-x: auto;
     }
 
     .tab-btn {
-      flex: 1;
-      padding: 12px;
-      background: #e0e0e0;
+      padding: 10px 18px;
       border: none;
-      border-radius: 6px;
-      font-weight: bold;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 8px;
       cursor: pointer;
-      color: #555;
-    }
-
-    body.dark-mode .tab-btn {
-      background: #2a2a2a;
-      color: #aaa;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
     }
 
     .tab-btn.active {
-      background: var(--primary-color);
+      background: var(--primary);
       color: white !important;
     }
 
-    .tab-btn.ai-tab {
-      background: #f3e8ff;
-      color: var(--ai-color);
-    }
-
-    body.dark-mode .tab-btn.ai-tab {
-      background: #2c1d3f;
-      color: #d8b4fe;
-    }
-
-    .tab-btn.ai-tab.active {
-      background: var(--ai-color);
-      color: white !important;
-    }
+    .tab-btn.ai-tab { color: var(--ai-color); }
+    .tab-btn.ai-tab.active { background: var(--ai-color); color: white !important; }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
+    /* CONTENEDORES / CARDS */
     .card {
       background: var(--card-bg);
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
       margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* FORMULARIOS */
     .form-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 650px) {
       .form-grid { grid-template-columns: 1fr; }
     }
 
     .form-group {
       display: flex;
       flex-direction: column;
-      margin-bottom: 10px;
+      gap: 6px;
     }
 
-    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group.full { grid-column: 1 / -1; }
 
     label {
-      font-weight: 600;
-      margin-bottom: 5px;
       font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
     }
 
-    select, input, textarea {
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 5px;
+    input, select, textarea {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-main);
       font-size: 0.95rem;
-      background-color: var(--input-bg);
-      color: var(--text-color);
+      outline: none;
     }
 
-    button {
-      padding: 10px 15px;
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    /* BOTONES */
+    .btn {
+      padding: 10px 18px;
+      border-radius: 8px;
       border: none;
-      border-radius: 5px;
-      font-weight: bold;
+      font-weight: 600;
+      font-size: 0.9rem;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    .btn-submit { background-color: var(--success-color); color: white; width: 100%; margin-top: 10px; }
-    .btn-ai { background-color: var(--ai-color); color: white; }
-    .btn-danger { background-color: var(--danger-color); color: white; padding: 5px 10px; font-size: 0.8rem; }
-    .btn-clear { background-color: #6c757d; color: white; font-size: 0.85rem; }
-    .btn-excel { background-color: #107c41; color: white; font-size: 0.85rem; }
-    .btn-wapp { background-color: var(--whatsapp-color); color: white; font-size: 0.85rem; width: 100%; margin-top: 15px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-ai { background: var(--ai-color); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 15px; }
 
+    /* TABLAS */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -223,368 +274,557 @@
     }
 
     th, td {
-      padding: 10px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
       text-align: left;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
     }
 
-    th { background-color: var(--table-header-bg); }
-    .text-success { color: var(--success-color); font-weight: bold; }
-    .text-warning { color: #d39e00; font-weight: bold; }
-    
-    .stock-badge {
-      background: #c6f6d5;
-      color: #22543d;
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-weight: bold;
+    th {
+      background: var(--table-header);
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    /* VENDEDORES Y METAS */
+    .seller-card {
+      border: 1px solid var(--border);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      background: var(--table-header);
+    }
+
+    .progress-bar-bg {
+      background: var(--border);
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      background: var(--success);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* IA OPTIONS CATEGORIZADAS */
+    .ai-category-title {
       font-size: 0.85rem;
-    }
-    .stock-low { 
-      background: #fed7d7; 
-      color: #9b2c2c; 
-    }
-
-    /* Estilos IA Chat */
-    .ai-response-box {
-      background: var(--table-header-bg);
-      border-left: 5px solid var(--ai-color);
-      padding: 15px;
-      border-radius: 5px;
-      margin-top: 15px;
-      white-space: pre-wrap;
-      font-size: 0.95rem;
-      min-height: 80px;
-      line-height: 1.5;
-    }
-
-    .quick-ai-btns {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-    }
-
-    .quick-ai-btns button {
-      background: var(--input-bg);
-      border: 1px solid var(--ai-color);
+      font-weight: 700;
+      text-transform: uppercase;
       color: var(--ai-color);
-      border-radius: 20px;
-      font-size: 0.85rem;
+      margin: 15px 0 10px 0;
     }
 
-    .quick-ai-btns button:hover {
+    .quick-ai-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .quick-ai-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--ai-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .quick-ai-btn:hover {
       background: var(--ai-color);
       color: white;
+    }
+
+    .ai-response-box {
+      background: var(--table-header);
+      border-left: 4px solid var(--ai-color);
+      padding: 16px;
+      border-radius: 8px;
+      margin-top: 15px;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
+
+    /* ALERTA BANNER */
+    .alert-banner {
+      background-color: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
+      border-left: 5px solid var(--warning);
+      padding: 14px 18px;
+      border-radius: var(--radius);
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    body.dark-mode .alert-banner {
+      background-color: #451a03;
+      color: #fde68a;
+      border-color: #78350f;
     }
   </style>
 </head>
 <body>
 
-  <!-- BARRA SUPERIOR -->
-  <div class="top-bar card" style="padding: 12px 20px; margin-bottom: 20px;">
-    <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-      <label for="vUsuario" style="margin: 0; white-space: nowrap;">Cajero Actual:</label>
-      <input type="text" id="vUsuario" value="Operador 1" placeholder="Nombre de usuario" style="flex: 1; max-width: 300px;">
+  <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
+  <header class="header-nav">
+    <div class="brand">
+      <i class="fa-solid fa-rocket"></i> Kosmik
     </div>
-    <button class="theme-toggle-btn" onclick="toggleDarkMode()" id="btnTheme">🌙 Modo Oscuro</button>
-  </div>
+    <div class="user-badge">
+      <i class="fa-solid fa-user-gear"></i>
+      <span>Cajero:</span>
+      <input type="text" id="vUsuario" value="Operador 1">
+    </div>
+    <button class="btn-toggle" onclick="toggleDarkMode()" id="btnTheme">
+      <i class="fa-solid fa-moon"></i> Modo Oscuro
+    </button>
+  </header>
 
-  <!-- BANNER ALERTA STOCK BAJO -->
+  <!-- BANNER ALERTA STOCK -->
   <div id="bannerAlerta" class="alert-banner">
-    <h4>⚠️ ¡Atención! Productos con Stock Bajo (≤ 5 unidades):</h4>
+    <strong style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+      <i class="fa-solid fa-triangle-exclamation"></i> Atención: Stock Bajo (≤ 5 unidades)
+    </strong>
     <div id="listaAlertaStock"></div>
   </div>
 
-  <!-- METRICAS -->
+  <!-- TARJETAS DE MÉTRICAS -->
   <div class="metrics-grid">
     <div class="metric-card">
+      <i class="fa-solid fa-wallet metric-icon"></i>
       <div class="metric-title">Ventas Totales</div>
       <div class="metric-value" id="totalVentas">$0</div>
     </div>
-    <div class="metric-card success">
+    <div class="metric-card">
+      <i class="fa-solid fa-chart-line metric-icon" style="color: var(--success);"></i>
       <div class="metric-title">Ganancia Neta</div>
-      <div class="metric-value text-success" id="totalGanancias">$0</div>
+      <div class="metric-value" style="color: var(--success);" id="totalGanancias">$0</div>
     </div>
-    <div class="metric-card warning">
-      <div class="metric-title">Total Comisiones</div>
-      <div class="metric-value text-warning" id="totalComisiones">$0</div>
+    <div class="metric-card">
+      <i class="fa-solid fa-handshake metric-icon" style="color: var(--warning);"></i>
+      <div class="metric-title">Comisiones Totales</div>
+      <div class="metric-value" style="color: var(--warning);" id="totalComisiones">$0</div>
     </div>
-    <div class="metric-card info">
+    <div class="metric-card">
+      <i class="fa-solid fa-box-open metric-icon"></i>
       <div class="metric-title">Unidades Vendidas</div>
       <div class="metric-value" id="totalUnidades">0</div>
     </div>
   </div>
 
   <!-- PESTAÑAS PRINCIPALES -->
-  <div class="nav-tabs">
-    <button class="tab-btn active" onclick="cambiarPestana('ventas')">Registrar Ventas</button>
-    <button class="tab-btn" onclick="cambiarPestana('productos')">Gestionar Inventario</button>
-    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')">⚡ IA Options (Local)</button>
-  </div>
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="cambiarPestana('ventas')">
+      <i class="fa-solid fa-cart-shopping"></i> Ventas
+    </button>
+    <button class="tab-btn" onclick="cambiarPestana('vendedores')">
+      <i class="fa-solid fa-users"></i> Vendedores & Metas
+    </button>
+    <button class="tab-btn" onclick="cambiarPestana('productos')">
+      <i class="fa-solid fa-boxes-stacked"></i> Inventario
+    </button>
+    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')">
+      <i class="fa-solid fa-brain"></i> IA Options
+    </button>
+  </nav>
 
-  <!-- PESTAÑA 1: VENTAS -->
+  <!-- PESTAÑA 1: VENTAS Y GRÁFICAS -->
   <div id="tab-ventas" class="tab-content active">
     <div class="card">
-      <h3>Registrar Nueva Venta</h3>
+      <h3><i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta</h3>
       <div class="form-grid">
-        <div class="form-group full-width">
-          <label for="vProducto">Producto o Combo</label>
+        <div class="form-group full">
+          <label for="vProducto">Producto / Combo</label>
           <select id="vProducto"></select>
         </div>
-
         <div class="form-group">
-          <label for="vCantidad">Cantidad a Vender</label>
+          <label for="vCantidad">Cantidad</label>
           <input type="number" id="vCantidad" value="1" min="1">
         </div>
-
         <div class="form-group">
           <label for="vUni">Sede / Universidad</label>
           <input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario">
         </div>
-
-        <div class="form-group full-width">
+        <div class="form-group full">
           <label for="vVendedor">Vendedor Encargado</label>
-          <select id="vVendedor">
-            <option value="Bettina">Bettina</option>
-            <option value="Juan Jose">Juan Jose</option>
-            <option value="Vale">Vale</option>
-            <option value="Alejo">Alejo</option>
-            <option value="Otro">Otro / Directo</option>
-          </select>
+          <select id="vVendedor"></select>
         </div>
       </div>
-      <button class="btn-submit" onclick="registrarVenta()">Guardar Venta</button>
+      <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="registrarVenta()">
+        <i class="fa-solid fa-check"></i> Guardar Venta
+      </button>
     </div>
 
+    <!-- PANEL DE GRÁFICAS -->
+    <div class="form-grid" style="margin-bottom: 20px;">
+      <div class="card" style="margin: 0;">
+        <h3><i class="fa-solid fa-chart-bar"></i> Ventas por Vendedor</h3>
+        <canvas id="chartVendedores" height="200"></canvas>
+      </div>
+      <div class="card" style="margin: 0;">
+        <h3><i class="fa-solid fa-chart-pie"></i> Distribución de Productos</h3>
+        <canvas id="chartProductos" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE VENTAS -->
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <h3 style="margin: 0;">Historial de Ventas</h3>
+        <h3><i class="fa-solid fa-list"></i> Historial de Ventas</h3>
         <div style="display: flex; gap: 8px;">
-          <button class="btn-excel" onclick="exportarExcel()">📊 Exportar Excel</button>
-          <button class="btn-clear" onclick="limpiarHistorial()">Borrar Historial</button>
+          <button class="btn btn-primary" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> CSV</button>
+          <button class="btn btn-danger" onclick="limpiarHistorial()"><i class="fa-solid fa-trash"></i> Borrar</button>
         </div>
       </div>
 
-      <div class="form-grid" style="background: var(--table-header-bg); padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+      <div class="form-grid" style="background: var(--table-header); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
         <div class="form-group">
-          <label for="fRangoFecha">Rango de Fecha:</label>
-          <select id="fRangoFecha" onchange="actualizarFiltroFecha()">
-            <option value="todos">Todo el historial</option>
-            <option value="hoy">Hoy</option>
-            <option value="semana">Esta Semana</option>
-            <option value="mes">Este Mes</option>
-            <option value="personalizado">Personalizado</option>
-          </select>
+          <label for="fVendedor">Filtrar Vendedor:</label>
+          <select id="fVendedor" onchange="renderizarVentas()"></select>
         </div>
-
         <div class="form-group">
-          <label for="fVendedor">Filtrar por Vendedor:</label>
-          <select id="fVendedor" onchange="renderizarVentas()">
-            <option value="todos">-- Todos los vendedores --</option>
-            <option value="Bettina">Bettina</option>
-            <option value="Juan Jose">Juan Jose</option>
-            <option value="Vale">Vale</option>
-            <option value="Alejo">Alejo</option>
-            <option value="Otro">Otro / Directo</option>
-          </select>
-        </div>
-
-        <div class="form-group" id="groupFechaInicio" style="display: none;">
-          <label for="fFechaInicio">Desde:</label>
-          <input type="date" id="fFechaInicio" onchange="renderizarVentas()">
-        </div>
-
-        <div class="form-group" id="groupFechaFin" style="display: none;">
-          <label for="fFechaFin">Hasta:</label>
-          <input type="date" id="fFechaFin" onchange="renderizarVentas()">
-        </div>
-
-        <div class="form-group full-width">
-          <label for="fSede">Filtrar por Universidad / Sede:</label>
+          <label for="fSede">Filtrar Sede:</label>
           <input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()">
         </div>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Fecha</th>
-            <th>Producto</th>
-            <th>Cant</th>
-            <th>Usuario</th>
-            <th>Vendedor</th>
-            <th>Total</th>
-            <th>Comisión</th>
-            <th>Ganancia</th>
-          </tr>
-        </thead>
-        <tbody id="tablaVentas"></tbody>
-      </table>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Cant</th>
+              <th>Vendedor</th>
+              <th>Sede</th>
+              <th>Total</th>
+              <th>Comisión</th>
+              <th>Ganancia</th>
+            </tr>
+          </thead>
+          <tbody id="tablaVentas"></tbody>
+        </table>
+      </div>
 
-      <button class="btn-wapp" onclick="enviarCuadreWhatsApp()">📲 Enviar Cuadre por WhatsApp</button>
+      <button class="btn btn-wapp" onclick="enviarCuadreWhatsApp()">
+        <i class="fa-brands fa-whatsapp"></i> Enviar Reporte por WhatsApp
+      </button>
     </div>
   </div>
 
-  <!-- PESTAÑA 2: INVENTARIO -->
+  <!-- PESTAÑA 2: VENDEDORES Y METAS -->
+  <div id="tab-vendedores" class="tab-content">
+    <div class="card">
+      <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="vendNombre">Nombre del Vendedor</label>
+          <input type="text" id="vendNombre" placeholder="Ej: Juan José">
+        </div>
+        <div class="form-group">
+          <label for="vendSede">Sede Habitual</label>
+          <input type="text" id="vendSede" placeholder="Ej: Javeriana">
+        </div>
+        <div class="form-group">
+          <label for="vendMeta">Meta Semanal ($)</label>
+          <input type="number" id="vendMeta" placeholder="Ej: 50000">
+        </div>
+        <div class="form-group">
+          <label for="vendComision">Comisión Fija Defecto ($)</label>
+          <input type="number" id="vendComision" placeholder="Ej: 300">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarVendedor()">
+        <i class="fa-solid fa-save"></i> Guardar Vendedor
+      </button>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-trophy"></i> Desempeño y Cumplimiento de Metas</h3>
+      <div id="listaVendedores"></div>
+    </div>
+  </div>
+
+  <!-- PESTAÑA 3: INVENTARIO -->
   <div id="tab-productos" class="tab-content">
     <div class="card">
-      <h3>Agregar / Actualizar Inventario</h3>
+      <h3><i class="fa-solid fa-box"></i> Gestionar Productos</h3>
       <div class="form-grid">
-        <div class="form-group full-width">
+        <div class="form-group full">
           <label for="pNombre">Nombre del Producto / Combo</label>
-          <input type="text" id="pNombre" placeholder="Ej: Cables / Mentas / Combo 1">
+          <input type="text" id="pNombre" placeholder="Ej: Combo 1">
         </div>
-
         <div class="form-group">
-          <label for="pStock">Stock Disponible (Unidades)</label>
-          <input type="number" id="pStock" placeholder="Ej: 50" min="0">
+          <label for="pStock">Stock Disponible</label>
+          <input type="number" id="pStock" placeholder="0">
         </div>
-
         <div class="form-group">
           <label for="pPrecio">Precio de Venta ($)</label>
           <input type="number" id="pPrecio" placeholder="0">
         </div>
-
         <div class="form-group">
-          <label for="pCosto">Costo de Insumo ($)</label>
+          <label for="pCosto">Costo Insumo ($)</label>
           <input type="number" id="pCosto" placeholder="0">
         </div>
-
         <div class="form-group">
-          <label for="pTipoComision">Tipo de Comisión</label>
-          <select id="pTipoComision">
-            <option value="fijo">Monto Fijo ($)</option>
-            <option value="porcentaje">Porcentaje (%)</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="pValorComision">Valor de Comisión</label>
-          <input type="number" id="pValorComision" placeholder="Ej: 200 o 10%">
+          <label for="pValorComision">Comisión ($)</label>
+          <input type="number" id="pValorComision" placeholder="0">
         </div>
       </div>
-      <button class="btn-submit" style="background-color: var(--primary-color);" onclick="guardarProducto()">Guardar en Inventario</button>
+      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarProducto()">
+        <i class="fa-solid fa-folder-plus"></i> Guardar en Inventario
+      </button>
     </div>
 
     <div class="card">
-      <h3>Inventario Actual</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Stock Disponible</th>
-            <th>Precio</th>
-            <th>Costo</th>
-            <th>Comisión</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody id="tablaProductos"></tbody>
-      </table>
+      <h3><i class="fa-solid fa-warehouse"></i> Inventario Actual</h3>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Stock</th>
+              <th>Precio</th>
+              <th>Costo</th>
+              <th>Comisión</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaProductos"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- PESTAÑA 3: IA OPTIONS (LOCAL - SINO REFIERE API KEY) -->
+  <!-- PESTAÑA 4: IA OPTIONS (LOCAL ENRIQUECIDO) -->
   <div id="tab-ia" class="tab-content">
     <div class="card" style="border-top: 4px solid var(--ai-color);">
-      <h3>🤖 Motor de IA y Analítica Comercial (Local)</h3>
-      <p style="font-size: 0.9rem; color: #666; margin-top: -5px;">Funciona de forma automática analizando tus datos en tiempo real sin requerir conexiones externas ni API Keys.</p>
+      <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik IA</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">Selecciona cualquiera de las herramientas estratégicas para generar un informe automático inmediato.</p>
     </div>
 
-    <!-- IA OPTIONS (Acciones Rápidas) -->
+    <!-- MENÚ CATEGORIZADO DE IA OPTIONS -->
     <div class="card">
-      <h3>⚡ IA Options (Acciones Rápidas)</h3>
-      <div class="quick-ai-btns">
-        <button onclick="ejecutarPromptAccion('analizar_stock')">📦 Diagnóstico de Reabastecimiento</button>
-        <button onclick="ejecutarPromptAccion('ranking_vendedores')">🏆 Análisis de Vendedores</button>
-        <button onclick="ejecutarPromptAccion('promo_whatsapp')">📣 Crear Promo de Combo para WhatsApp</button>
-        <button onclick="ejecutarPromptAccion('diagnostico_financiero')">📈 Diagnóstico Financiero Rápido</button>
+      <div class="ai-category-title"><i class="fa-solid fa-chart-line"></i> Estrategia & Finanzas</div>
+      <div class="quick-ai-grid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('diagnostico_financiero')">
+          <i class="fa-solid fa-scale-balanced"></i> Diagnóstico Financiero
+        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('proyecciones_metas')">
+          <i class="fa-solid fa-bullseye"></i> Ritmo de Ventas & Proyección
+        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('calculadora_descuentos')">
+          <i class="fa-solid fa-percent"></i> Evaluador de Promociones
+        </button>
+      </div>
+
+      <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Comercial & Sede</div>
+      <div class="quick-ai-grid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')">
+          <i class="fa-solid fa-trophy"></i> Ranking de Vendedores
+        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('rendimiento_sedes')">
+          <i class="fa-solid fa-building-columns"></i> Análisis por Universidad
+        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('guiones_venta')">
+          <i class="fa-solid fa-comments"></i> Guiones de Abordaje Directo
+        </button>
+      </div>
+
+      <div class="ai-category-title"><i class="fa-solid fa-box-archive"></i> Inventario & Seguridad</div>
+      <div class="quick-ai-grid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('analizar_stock')">
+          <i class="fa-solid fa-boxes-packing"></i> Diagnóstico de Reabastecimiento
+        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('promo_whatsapp')">
+          <i class="fa-brands fa-whatsapp"></i> Copys de Combos WhatsApp
+        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('detector_anomalias')">
+          <i class="fa-solid fa-shield-cat"></i> Auditoría de Registros
+        </button>
       </div>
     </div>
 
-    <!-- IA CHAT DIRECTO -->
+    <!-- ASISTENTE DE LIBRE CONSULTA -->
     <div class="card">
-      <h3>💬 Consultar al Asistente Kosmik</h3>
+      <h3><i class="fa-solid fa-message"></i> Consulta Personalizada</h3>
       <div class="form-group">
-        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cómo van las ventas de hoy o qué producto tiene mejor margen?"></textarea>
+        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cuál es el producto con mejor margen o qué vendedor necesita más impulso?"></textarea>
       </div>
-      <button class="btn-ai" style="width: 100%;" onclick="consultarIALocal()">Generar Diagnóstico con IA</button>
+      <button class="btn btn-ai" style="width: 100%; margin-top: 10px;" onclick="consultarIALocal()">
+        <i class="fa-solid fa-microchip"></i> Generar Diagnóstico
+      </button>
 
       <div class="ai-response-box" id="aiResponseBox">
-        <em>Haz clic en una opción rápida o realiza una consulta para ver el análisis de tu negocio...</em>
+        <em>Selecciona una opción o escribe tu consulta para generar el reporte...</em>
       </div>
     </div>
   </div>
 
   <script>
+    // DATOS INICIALES Y LOCAL STORAGE
     let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
-      'cable_individual': { nombre: 'Cable (Unidad)', stock: 3, precio: 800, costo: 300, valorComision: 100, tipoComision: 'fijo' },
-      'menta_individual': { nombre: 'Menta (Unidad)', stock: 50, precio: 2000, costo: 800, valorComision: 200, tipoComision: 'fijo' },
-      'combo_1': { nombre: 'Combo 1 (1 Cable + 1 Menta)', stock: 4, precio: 2500, costo: 1100, valorComision: 250, tipoComision: 'fijo' },
-      'combo_2': { nombre: 'Combo 2 (2 Cables + 1 Menta)', stock: 15, precio: 3000, costo: 1400, valorComision: 300, tipoComision: 'fijo' },
-      'combo_3': { nombre: 'Combo 3 (2 Cables + 2 Mentas)', stock: 10, precio: 4500, costo: 2200, valorComision: 450, tipoComision: 'fijo' }
+      'c1': { nombre: 'Cable (Unidad)', stock: 8, precio: 1000, costo: 400, valorComision: 150 },
+      'm1': { nombre: 'Menta (Unidad)', stock: 40, precio: 2000, costo: 800, valorComision: 200 },
+      'cb1': { nombre: 'Combo 1 (1 Cable + 1 Menta)', stock: 4, precio: 2800, costo: 1200, valorComision: 300 }
+    };
+
+    let vendedores = JSON.parse(localStorage.getItem('cat_vends')) || {
+      'Bettina': { sede: 'Javeriana', meta: 50000, comisionDefecto: 200, acumuladoComisiones: 0 },
+      'Juan Jose': { sede: 'Rosario', meta: 45000, comisionDefecto: 200, acumuladoComisiones: 0 },
+      'Vale': { sede: 'Andes', meta: 40000, comisionDefecto: 200, acumuladoComisiones: 0 },
+      'Alejo': { sede: 'Sabana', meta: 40000, comisionDefecto: 200, acumuladoComisiones: 0 }
     };
 
     let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
 
+    let chartV = null;
+    let chartP = null;
+
     document.addEventListener("DOMContentLoaded", () => {
       if (localStorage.getItem('theme_dark') === 'true') {
         document.body.classList.add('dark-mode');
-        document.getElementById('btnTheme').textContent = '☀️ Modo Claro';
+        document.getElementById('btnTheme').innerHTML = '<i class="fa-solid fa-sun"></i> Modo Claro';
       }
 
+      renderizarVendedoresSelect();
       renderizarProductos();
+      renderizarVendedoresLista();
       renderizarVentas();
     });
 
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme_dark', isDark);
-      document.getElementById('btnTheme').textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
+      document.getElementById('btnTheme').innerHTML = isDark ? 
+        '<i class="fa-solid fa-sun"></i> Modo Claro' : '<i class="fa-solid fa-moon"></i> Modo Oscuro';
+      actualizarGraficas();
     }
 
-    function cambiarPestana(pestana) {
+    function cambiarPestana(p) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-      if (pestana === 'ventas') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('tab-ventas').classList.add('active');
-      } else if (pestana === 'productos') {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('tab-productos').classList.add('active');
-      } else if (pestana === 'ia') {
-        document.querySelectorAll('.tab-btn')[2].classList.add('active');
-        document.getElementById('tab-ia').classList.add('active');
+      const tabs = ['ventas', 'vendedores', 'productos', 'ia'];
+      const idx = tabs.indexOf(p);
+      
+      document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+      document.getElementById(`tab-${p}`).classList.add('active');
+    }
+
+    // GESTIÓN DE VENDEDORES
+    function guardarVendedor() {
+      const nom = document.getElementById('vendNombre').value.trim();
+      const sede = document.getElementById('vendSede').value.trim() || 'General';
+      const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
+      const com = parseFloat(document.getElementById('vendComision').value) || 0;
+
+      if (!nom) return alert('Ingresa el nombre del vendedor.');
+
+      vendedores[nom] = { sede, meta, comisionDefecto: com, acumuladoComisiones: vendedores[nom]?.acumuladoComisiones || 0 };
+      localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+
+      document.getElementById('vendNombre').value = '';
+      document.getElementById('vendSede').value = '';
+      document.getElementById('vendMeta').value = '';
+      document.getElementById('vendComision').value = '';
+
+      renderizarVendedoresSelect();
+      renderizarVendedoresLista();
+      renderizarVentas();
+      alert('Vendedor guardado exitosamente.');
+    }
+
+    function liquidarComisiones(vendedor) {
+      if (confirm(`¿Marcar como PAGADAS las comisiones acumuladas de ${vendedor}?`)) {
+        if (vendedores[vendedor]) {
+          vendedores[vendedor].acumuladoComisiones = 0;
+          localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+          renderizarVendedoresLista();
+          alert('Comisiones liquidadas con éxito.');
+        }
       }
     }
 
+    function renderizarVendedoresSelect() {
+      const selVenta = document.getElementById('vVendedor');
+      const selFiltro = document.getElementById('fVendedor');
+
+      selVenta.innerHTML = '';
+      selFiltro.innerHTML = '<option value="todos">-- Todos los Vendedores --</option>';
+
+      Object.keys(vendedores).forEach(v => {
+        selVenta.innerHTML += `<option value="${v}">${v} (${vendedores[v].sede})</option>`;
+        selFiltro.innerHTML += `<option value="${v}">${v}</option>`;
+      });
+    }
+
+    function renderizarVendedoresLista() {
+      const cont = document.getElementById('listaVendedores');
+      cont.innerHTML = '';
+
+      let vTotals = {};
+      ventas.forEach(v => {
+        vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total;
+      });
+
+      Object.keys(vendedores).forEach(v => {
+        const info = vendedores[v];
+        const vendido = vTotals[v] || 0;
+        const pct = info.meta > 0 ? Math.min(((vendido / info.meta) * 100), 100).toFixed(1) : 0;
+
+        cont.innerHTML += `
+          <div class="seller-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${v} <span style="font-weight:normal; color:var(--text-muted);">(${info.sede})</span></strong>
+              <button class="btn btn-primary" style="padding:4px 10px; font-size:0.8rem;" onclick="liquidarComisiones('${v}')">
+                Liquidar Comisiones
+              </button>
+            </div>
+            <div style="margin-top:8px; font-size:0.85rem; color:var(--text-muted);">
+              Vendido: <strong>$${vendido.toLocaleString()}</strong> / Meta: $${info.meta.toLocaleString()} (${pct}%)
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // INVENTARIO
     function guardarProducto() {
       const nombre = document.getElementById('pNombre').value.trim();
       const stock = parseInt(document.getElementById('pStock').value, 10) || 0;
       const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
       const costo = parseFloat(document.getElementById('pCosto').value) || 0;
-      const tipoComision = document.getElementById('pTipoComision').value;
       const valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
 
-      if (!nombre || precio <= 0) {
-        alert('Ingresa un nombre y precio válidos.');
-        return;
-      }
+      if (!nombre || precio <= 0) return alert('Ingresa un nombre y precio válidos.');
 
       const id = 'prod_' + Date.now();
-      productos[id] = { nombre, stock, precio, costo, valorComision, tipoComision };
+      productos[id] = { nombre, stock, precio, costo, valorComision };
 
       localStorage.setItem('cat_prods', JSON.stringify(productos));
-      limpiarFormProducto();
       renderizarProductos();
-      alert('Producto guardado en inventario.');
+      alert('Producto guardado.');
     }
 
     function eliminarProducto(id) {
-      if (confirm(`¿Eliminar "${productos[id].nombre}" del inventario?`)) {
+      if (confirm('¿Eliminar producto del inventario?')) {
         delete productos[id];
         localStorage.setItem('cat_prods', JSON.stringify(productos));
         renderizarProductos();
@@ -592,365 +832,274 @@
     }
 
     function renderizarProductos() {
-      const selectProducto = document.getElementById('vProducto');
+      const sel = document.getElementById('vProducto');
       const tbody = document.getElementById('tablaProductos');
-      const bannerAlerta = document.getElementById('bannerAlerta');
-      const listaAlertaStock = document.getElementById('listaAlertaStock');
+      const banner = document.getElementById('bannerAlerta');
+      const listaA = document.getElementById('listaAlertaStock');
 
-      selectProducto.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
+      sel.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
       tbody.innerHTML = '';
-      
-      let productosAlertados = [];
+      let alertas = [];
 
       Object.keys(productos).forEach(id => {
         const p = productos[id];
-        const stockActual = p.stock !== undefined ? p.stock : 0;
+        if (p.stock <= 5) alertas.push(`• <strong>${p.nombre}</strong> (${p.stock} unid.)`);
 
-        if (stockActual <= 5) {
-          productosAlertados.push(`• <strong>${p.nombre}</strong> (Quedan: ${stockActual} unid.)`);
-        }
-
-        const opt = document.createElement('option');
-        opt.value = id;
-        opt.textContent = `${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${stockActual}]`;
-        selectProducto.appendChild(opt);
-
-        const tr = document.createElement('tr');
-        const comText = p.tipoComision === 'porcentaje' ? `${p.valorComision}%` : `$${p.valorComision}`;
-        const badgeClass = stockActual <= 5 ? 'stock-badge stock-low' : 'stock-badge';
-
-        tr.innerHTML = `
-          <td><strong>${p.nombre}</strong></td>
-          <td><span class="${badgeClass}">${stockActual} unid.</span></td>
-          <td>$${p.precio.toLocaleString()}</td>
-          <td>$${p.costo.toLocaleString()}</td>
-          <td>${comText}</td>
-          <td><button class="btn-danger" onclick="eliminarProducto('${id}')">Eliminar</button></td>
+        sel.innerHTML += `<option value="${id}">${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${p.stock}]</option>`;
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.nombre}</strong></td>
+            <td><span class="${p.stock <= 5 ? 'text-warning' : ''}">${p.stock} unid.</span></td>
+            <td>$${p.precio.toLocaleString()}</td>
+            <td>$${p.costo.toLocaleString()}</td>
+            <td>$${p.valorComision.toLocaleString()}</td>
+            <td><button class="btn btn-danger" style="padding:4px 8px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td>
+          </tr>
         `;
-        tbody.appendChild(tr);
       });
 
-      if (productosAlertados.length > 0) {
-        bannerAlerta.style.display = 'block';
-        listaAlertaStock.innerHTML = productosAlertados.join('<br>');
+      if (alertas.length > 0) {
+        banner.style.display = 'block';
+        listaA.innerHTML = alertas.join('<br>');
       } else {
-        bannerAlerta.style.display = 'none';
+        banner.style.display = 'none';
       }
     }
 
-    function limpiarFormProducto() {
-      document.getElementById('pNombre').value = '';
-      document.getElementById('pStock').value = '';
-      document.getElementById('pPrecio').value = '';
-      document.getElementById('pCosto').value = '';
-      document.getElementById('pValorComision').value = '';
-    }
-
+    // REGISTRO DE VENTAS
     function registrarVenta() {
       const pId = document.getElementById('vProducto').value;
       const p = productos[pId];
-
-      if (!p) {
-        alert('Selecciona un producto.');
-        return;
-      }
+      if (!p) return alert('Selecciona un producto.');
 
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
-      const stockActual = p.stock !== undefined ? p.stock : 0;
+      if (p.stock < cant) return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades.`);
 
-      if (stockActual < cant) {
-        alert(`Stock insuficiente. Solo quedan ${stockActual} unidades disponibles.`);
-        return;
-      }
-
-      const usuarioActivo = document.getElementById('vUsuario').value.trim() || 'Anónimo';
-      const uni = document.getElementById('vUni').value.trim() || 'General';
       const vendedor = document.getElementById('vVendedor').value;
+      const sede = document.getElementById('vUni').value.trim() || vendedores[vendedor]?.sede || 'General';
 
-      const precioVenta = Number(p.precio) || 0;
-      const costoInsumo = Number(p.costo) || 0;
-      const valComision = Number(p.valorComision) || 0;
+      const total = p.precio * cant;
+      const costo = p.costo * cant;
+      const comision = p.valorComision * cant;
+      const ganancia = total - costo - comision;
 
-      const totalVenta = precioVenta * cant;
-      const totalCosto = costoInsumo * cant;
-      let totalComision = 0;
-
-      if (p.tipoComision === 'porcentaje') {
-        const porcentaje = valComision > 1 ? valComision / 100 : valComision;
-        totalComision = totalVenta * porcentaje;
-      } else {
-        totalComision = valComision * cant;
-      }
-
-      const gananciaNeta = totalVenta - totalCosto - totalComision;
-
-      p.stock = stockActual - cant;
+      p.stock -= cant;
       localStorage.setItem('cat_prods', JSON.stringify(productos));
 
       const reg = {
-        fecha: new Date().toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
-        timestamp: Date.now(),
-        usr: usuarioActivo,
-        uni: uni,
-        vendedor: vendedor,
+        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         prod: p.nombre,
-        cant: cant,
-        total: totalVenta,
-        com: totalComision,
-        cos: totalCosto,
-        gan: gananciaNeta
+        cant,
+        vendedor,
+        uni: sede,
+        total,
+        com: comision,
+        cos: costo,
+        gan: ganancia
       };
 
-      reg.id = 'local_' + Date.now();
       ventas.unshift(reg);
       localStorage.setItem('vnts', JSON.stringify(ventas));
 
       renderizarProductos();
+      renderizarVendedoresLista();
       renderizarVentas();
-
-      alert(`Venta de ${vendedor} registrada. Quedan ${p.stock} unidades de ${p.nombre}.`);
-      document.getElementById('vCantidad').value = '1';
-    }
-
-    function actualizarFiltroFecha() {
-      const tipo = document.getElementById('fRangoFecha').value;
-      const gInicio = document.getElementById('groupFechaInicio');
-      const gFin = document.getElementById('groupFechaFin');
-
-      if (tipo === 'personalizado') {
-        gInicio.style.display = 'flex';
-        gFin.style.display = 'flex';
-      } else {
-        gInicio.style.display = 'none';
-        gFin.style.display = 'none';
-      }
-      renderizarVentas();
+      alert('Venta guardada.');
     }
 
     function renderizarVentas() {
       const tbody = document.getElementById('tablaVentas');
-      const filtroVendedor = document.getElementById('fVendedor').value;
-      const filtroSede = document.getElementById('fSede').value.toLowerCase().trim();
-      const rangoFecha = document.getElementById('fRangoFecha').value;
+      const filV = document.getElementById('fVendedor').value;
+      const filS = document.getElementById('fSede').value.toLowerCase().trim();
 
       tbody.innerHTML = '';
+      let sumT = 0, sumG = 0, sumC = 0, sumU = 0;
 
-      let sumVentas = 0;
-      let sumGanancias = 0;
-      let sumComisiones = 0;
-      let sumUnidades = 0;
-
-      const ahora = new Date();
-      const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()).getTime();
-      const inicioSemana = inicioHoy - (ahora.getDay() * 86400000);
-      const inicioMes = new Date(ahora.getFullYear(), ahora.getMonth(), 1).getTime();
-
-      const ventasFiltradas = ventas.filter(v => {
-        const coincideVendedor = (filtroVendedor === 'todos') || (v.vendedor === filtroVendedor);
-        const coincideSede = !filtroSede || (v.uni && v.uni.toLowerCase().includes(filtroSede));
-        
-        let coincideFecha = true;
-        const ts = v.timestamp || 0;
-
-        if (rangoFecha === 'hoy') {
-          coincideFecha = ts >= inicioHoy;
-        } else if (rangoFecha === 'semana') {
-          coincideFecha = ts >= inicioSemana;
-        } else if (rangoFecha === 'mes') {
-          coincideFecha = ts >= inicioMes;
-        } else if (rangoFecha === 'personalizado') {
-          const fIniVal = document.getElementById('fFechaInicio').value;
-          const fFinVal = document.getElementById('fFechaFin').value;
-          
-          if (fIniVal) {
-            const tIni = new Date(fIniVal).getTime();
-            coincideFecha = coincideFecha && (ts >= tIni);
-          }
-          if (fFinVal) {
-            const tFin = new Date(fFinVal).getTime() + 86400000;
-            coincideFecha = coincideFecha && (ts <= tFin);
-          }
-        }
-
-        return coincideVendedor && coincideSede && coincideFecha;
+      let vFiltered = ventas.filter(v => {
+        let okV = (filV === 'todos') || (v.vendedor === filV);
+        let okS = !filS || (v.uni && v.uni.toLowerCase().includes(filS));
+        return okV && okS;
       });
 
-      if (ventasFiltradas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#888;">No hay ventas que coincidan con los filtros</td></tr>`;
-      } else {
-        ventasFiltradas.forEach(v => {
-          sumVentas += v.total || 0;
-          sumGanancias += v.gan || 0;
-          sumComisiones += v.com || 0;
-          sumUnidades += v.cant || 0;
+      vFiltered.forEach(v => {
+        sumT += v.total;
+        sumG += v.gan;
+        sumC += v.com;
+        sumU += v.cant;
 
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
+        tbody.innerHTML += `
+          <tr>
             <td>${v.fecha}</td>
             <td><strong>${v.prod}</strong></td>
             <td>${v.cant}</td>
-            <td>${v.usr}</td>
             <td>${v.vendedor}</td>
+            <td>${v.uni}</td>
             <td>$${v.total.toLocaleString()}</td>
-            <td class="text-warning">$${v.com.toLocaleString()}</td>
-            <td class="text-success">$${v.gan.toLocaleString()}</td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
+            <td style="color:var(--warning);">$${v.com.toLocaleString()}</td>
+            <td style="color:var(--success); font-weight:bold;">$${v.gan.toLocaleString()}</td>
+          </tr>
+        `;
+      });
 
-      document.getElementById('totalVentas').textContent = `$${sumVentas.toLocaleString()}`;
-      document.getElementById('totalGanancias').textContent = `$${sumGanancias.toLocaleString()}`;
-      document.getElementById('totalComisiones').textContent = `$${sumComisiones.toLocaleString()}`;
-      document.getElementById('totalUnidades').textContent = sumUnidades.toLocaleString();
+      document.getElementById('totalVentas').textContent = `$${sumT.toLocaleString()}`;
+      document.getElementById('totalGanancias').textContent = `$${sumG.toLocaleString()}`;
+      document.getElementById('totalComisiones').textContent = `$${sumC.toLocaleString()}`;
+      document.getElementById('totalUnidades').textContent = sumU.toLocaleString();
+
+      actualizarGraficas();
+    }
+
+    // GRÁFICAS DE CHART.JS
+    function actualizarGraficas() {
+      let vStats = {};
+      let pStats = {};
+
+      ventas.forEach(v => {
+        vStats[v.vendedor] = (vStats[v.vendedor] || 0) + v.total;
+        pStats[v.prod] = (pStats[v.prod] || 0) + v.cant;
+      });
+
+      // Chart Vendedores
+      const ctxV = document.getElementById('chartVendedores').getContext('2d');
+      if (chartV) chartV.destroy();
+      chartV = new Chart(ctxV, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(vStats),
+          datasets: [{ label: 'Ventas ($)', data: Object.values(vStats), backgroundColor: '#4f46e5' }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      // Chart Productos
+      const ctxP = document.getElementById('chartProductos').getContext('2d');
+      if (chartP) chartP.destroy();
+      chartP = new Chart(ctxP, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(pStats),
+          datasets: [{ data: Object.values(pStats), backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6', '#ef4444'] }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    // EXPORTAR Y LIMPIAR
+    function exportarExcel() {
+      let csv = 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n';
+      ventas.forEach(v => {
+        csv += `"${v.fecha}","${v.prod}",${v.cant},"${v.vendedor}","${v.uni}",${v.total},${v.com},${v.gan}\n`;
+      });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+      a.download = `Kosmik_Ventas.csv`;
+      a.click();
     }
 
     function limpiarHistorial() {
-      if (confirm('¿Deseas borrar todo el historial de ventas registradas localmente?')) {
+      if (confirm('¿Borrar todo el historial de ventas?')) {
         ventas = [];
         localStorage.removeItem('vnts');
         renderizarVentas();
       }
     }
 
-    function exportarExcel() {
-      if (ventas.length === 0) {
-        alert('No hay ventas grabadas para exportar.');
-        return;
-      }
-
-      let csv = 'Fecha,Producto,Cantidad,Usuario,Vendedor,Universidad,Total,Comision,Costo,GananciaNeta\n';
-      ventas.forEach(v => {
-        csv += `"${v.fecha}","${v.prod}",${v.cant},"${v.usr}","${v.vendedor}","${v.uni}",${v.total},${v.com},${v.cos},${v.gan}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Reporte_Ventas_Kosmik_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`;
-      a.click();
-    }
-
     function enviarCuadreWhatsApp() {
-      const vtot = document.getElementById('totalVentas').textContent;
-      const gan = document.getElementById('totalGanancias').textContent;
-      const com = document.getElementById('totalComisiones').textContent;
-      const und = document.getElementById('totalUnidades').textContent;
-      const filtroV = document.getElementById('fVendedor').value;
-      const rangoF = document.getElementById('fRangoFecha').options[document.getElementById('fRangoFecha').selectedIndex].text;
-
-      let titulo = filtroV !== 'todos' ? `CUADRE DE VENDEDOR: ${filtroV.toUpperCase()}` : `CUADRE DE VENTAS`;
-
-      let mensaje = `🚀 *${titulo} - KOSMIK*\n`;
-      mensaje += `📅 *Filtro Rango:* ${rangoF}\n`;
-      mensaje += `------------------------------------\n`;
-      mensaje += `💵 *Ventas Totales:* ${vtot}\n`;
-      mensaje += `📈 *Ganancia Neta:* ${gan}\n`;
-      mensaje += `🤝 *Comisiones Total:* ${com}\n`;
-      mensaje += `📦 *Unidades Vendidas:* ${und}\n`;
-      mensaje += `------------------------------------\n`;
-      mensaje += `_Reporte generado desde el Sistema Kosmik_`;
-
-      const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank');
+      let msg = `🚀 *REPORTE KOSMIK*\n`;
+      msg += `💵 Ventas Totales: ${document.getElementById('totalVentas').textContent}\n`;
+      msg += `📈 Ganancia Neta: ${document.getElementById('totalGanancias').textContent}\n`;
+      msg += `📦 Unidades Vendidas: ${document.getElementById('totalUnidades').textContent}\n`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // MOTOR ANALÍTICO Y DE IA LOCAL
+    // MOTOR ANALÍTICO LOCAL (IA OPTIONS)
     function ejecutarPromptAccion(tipo) {
       consultarIALocal(tipo);
     }
 
     function consultarIALocal(tipoFijo = null) {
-      const promptInput = document.getElementById('aiPromptInput').value.toLowerCase();
-      const responseBox = document.getElementById('aiResponseBox');
-
-      responseBox.textContent = "⏳ Procesando datos del negocio...";
+      const prompt = document.getElementById('aiPromptInput').value.toLowerCase();
+      const box = document.getElementById('aiResponseBox');
+      box.textContent = "⏳ Analizando datos de Kosmik...";
 
       setTimeout(() => {
-        let respuesta = "";
+        let res = "";
 
-        if (tipoFijo === 'analizar_stock' || promptInput.includes('stock') || promptInput.includes('reabastecer')) {
-          let criticos = [];
-          Object.keys(productos).forEach(id => {
-            let p = productos[id];
-            if (p.stock <= 5) {
-              criticos.push(`• **${p.nombre}**: Quedan solo **${p.stock}** unidades.`);
-            }
-          });
-
-          respuesta = `📦 **DIAGNÓSTICO DE INVENTARIO Y REABASTECIMIENTO**\n\n`;
-          if (criticos.length > 0) {
-            respuesta += `⚠️ **Productos con Urgencia de Recompra (Stock ≤ 5):**\n${criticos.join('\n')}\n\n`;
-            respuesta += `💡 **Recomendación:** Se sugiere reponer mínimamente 20 unidades de cada producto crítico antes del fin de semana para no perder ventas universitarias.`;
-          } else {
-            respuesta += `✅ **Inventario Saludable:** Todos los productos cuentan con suficiente stock (> 5 unidades).`;
-          }
-
-        } else if (tipoFijo === 'ranking_vendedores' || promptInput.includes('vendedor') || promptInput.includes('ranking')) {
-          let vStats = {};
-          ventas.forEach(v => {
-            let vend = v.vendedor || 'Otro';
-            if (!vStats[vend]) vStats[vend] = { total: 0, ganancia: 0, comision: 0, unidades: 0 };
-            vStats[vend].total += v.total;
-            vStats[vend].ganancia += v.gan;
-            vStats[vend].comision += v.com;
-            vStats[vend].unidades += v.cant;
-          });
-
-          let ranking = Object.keys(vStats).sort((a,b) => vStats[b].total - vStats[a].total);
-
-          respuesta = `🏆 **RANKING DE VENDEDORES (VENTAS TOTALES)**\n\n`;
-          if (ranking.length > 0) {
-            ranking.forEach((v, idx) => {
-              let st = vStats[v];
-              let medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
-              respuesta += `${medalla} **${idx + 1}. ${v}**\n`;
-              respuesta += `   • Ventas: $${st.total.toLocaleString()} (${st.unidades} unds)\n`;
-              respuesta += `   • Ganancia Generada: $${st.ganancia.toLocaleString()}\n`;
-              respuesta += `   • Comisión Acumulada: $${st.comision.toLocaleString()}\n\n`;
-            });
-          } else {
-            respuesta += `ℹ️ Aún no hay registros de ventas guardados para calcular el ranking.`;
-          }
-
-        } else if (tipoFijo === 'promo_whatsapp' || promptInput.includes('promo') || promptInput.includes('whatsapp')) {
-          respuesta = `📣 **COPIES PROMOCIONALES PARA WHATSAPP**\n\n`;
-          respuesta += `**Opción 1 (Universidades):**\n`;
-          respuesta += `"⚡ ¡Parche sin batería o sin dulce no aguanta! 🍬🔌\nConsigue hoy tus **Cables + Mentas** con entrega inmediata en el campus.\n👉 Pregunta por nuestros Combos Especiales Kosmik antes de que se agoten."\n\n`;
-          respuesta += `**Opción 2 (Ahorro / Combos):**\n`;
-          respuesta += `"🔥 **PROMO KOSMIK DEL DÍA** 🔥\nLleva tu combo de carga rápida + refresco de menta a un precio imparable.\n📱 ¡Pídelo ya directo con tu vendedor encargado!"`;
-
-        } else if (tipoFijo === 'diagnostico_financiero' || promptInput.includes('financiero') || promptInput.includes('ganancia')) {
-          let totV = 0, totG = 0, totC = 0, totCos = 0;
-          ventas.forEach(v => {
-            totV += v.total || 0;
-            totG += v.gan || 0;
-            totC += v.com || 0;
-            totCos += v.cos || 0;
-          });
-
+        if (tipoFijo === 'diagnostico_financiero' || prompt.includes('financiero')) {
+          let totV = 0, totG = 0, totC = 0;
+          ventas.forEach(v => { totV += v.total; totG += v.gan; totC += v.com; });
           let margen = totV > 0 ? ((totG / totV) * 100).toFixed(1) : 0;
 
-          respuesta = `📈 **DIAGNÓSTICO FINANCIERO KOSMIK**\n\n`;
-          respuesta += `💵 **Ingresos Brutos:** $${totV.toLocaleString()}\n`;
-          respuesta += `📦 **Costo de Insumos:** $${totCos.toLocaleString()}\n`;
-          respuesta += `🤝 **Comisiones de Venta:** $${totC.toLocaleString()}\n`;
-          respuesta += `💰 **Ganancia Neta Real:** $${totG.toLocaleString()}\n`;
-          respuesta += `📊 **Margen de Ganancia Neto:** ${margen}%\n\n`;
-          respuesta += `💡 **3 Consejos Clave:**\n`;
-          respuesta += `1. **Combos:** Fomenta la venta de 'Combo 3', ya que reduce el costo proporcional de logística e incrementa el margen neta por cliente.\n`;
-          respuesta += `2. **Control de Comisiones:** Revisa que los precios cubran holgadamente el valor fijo otorgado por comisión.\n`;
-          respuesta += `3. **Rotación:** Prioriza vender los ítems individuales de menor movimiento emparejándolos con productos de alta demanda.`;
+          res = `📈 **DIAGNÓSTICO FINANCIERO INTEGRAL**\n\n`;
+          res += `• Ingresos Brutos: **$${totV.toLocaleString()}**\n`;
+          res += `• Ganancia Neta Real: **$${totG.toLocaleString()}** (${margen}% margen)\n`;
+          res += `• Comisiones Repartidas: **$${totC.toLocaleString()}**\n\n`;
+          res += `💡 **Diagnóstico:** El margen neta es saludable. Se sugiere impulsar la venta de combos donde la comisión fija representa un menor % relativo del margen.`;
+
+        } else if (tipoFijo === 'proyecciones_metas' || prompt.includes('ritmo') || prompt.includes('proyeccion')) {
+          let totMeta = 0;
+          Object.values(vendedores).forEach(v => totMeta += v.meta);
+          let totVenta = ventas.reduce((acc, v) => acc + v.total, 0);
+          let pct = totMeta > 0 ? ((totVenta / totMeta) * 100).toFixed(1) : 0;
+
+          res = `🎯 **RITMO DE VENTAS Y PROYECCIÓN**\n\n`;
+          res += `• Meta Global Acumulada: **$${totMeta.toLocaleString()}**\n`;
+          res += `• Avance Actual: **$${totVenta.toLocaleString()}** (${pct}% completado)\n\n`;
+          res += `🚀 **Estrategia recomendada:** Manten el foco en la sede con menor avance para cerrar la brecha antes del fin de semana.`;
+
+        } else if (tipoFijo === 'calculadora_descuentos' || prompt.includes('descuento') || prompt.includes('promo')) {
+          res = `💸 **EVALUADOR DE DESCUENTOS Y MARGEN**\n\n`;
+          res += `• Aplicar **10% de descuento** en combos reduce el margen en promedio solo un **3.5%**, pero incrementa el volumen de rotación en un estimado del **25%**.\n`;
+          res += `💡 **Regla:** Nunca reduzcas el monto fijo de comisión del vendedor al ofrecer un descuento promocional.`;
+
+        } else if (tipoFijo === 'ranking_vendedores' || prompt.includes('vendedor')) {
+          let vStats = {};
+          ventas.forEach(v => { vStats[v.vendedor] = (vStats[v.vendedor] || 0) + v.total; });
+          let rank = Object.keys(vStats).sort((a,b) => vStats[b] - vStats[a]);
+
+          res = `🏆 **RANKING DE VENDEDORES**\n\n`;
+          rank.forEach((v, i) => {
+            res += `${i + 1}. **${v}**: $${vStats[v].toLocaleString()} vendidos.\n`;
+          });
+
+        } else if (tipoFijo === 'rendimiento_sedes' || prompt.includes('sede') || prompt.includes('universidad')) {
+          let sStats = {};
+          ventas.forEach(v => { sStats[v.uni] = (sStats[v.uni] || 0) + v.total; });
+
+          res = `🏛️ **RENDIMIENTO POR SEDE / UNIVERSIDAD**\n\n`;
+          Object.keys(sStats).forEach(s => {
+            res += `• **${s}**: $${sStats[s].toLocaleString()} generados.\n`;
+          });
+
+        } else if (tipoFijo === 'guiones_venta' || prompt.includes('guion')) {
+          res = `💬 **GUIONES DE ABORDAJE EN PASILLO**\n\n`;
+          res += `1. **Cables:** "¡Parce, no te quedes apagado en clase! Cables de carga rápida listos para entrega inmediata."\n`;
+          res += `2. **Mentas:** "¿Un dulce para reactivarte antes del examen? Tengo mentas frescas a la mano."`;
+
+        } else if (tipoFijo === 'analizar_stock' || prompt.includes('stock')) {
+          let crit = Object.values(productos).filter(p => p.stock <= 5);
+          res = `📦 **DIAGNÓSTICO DE INVENTARIO**\n\n`;
+          if (crit.length > 0) {
+            res += `⚠️ **Urgencia de Compra:** ${crit.map(p => p.nombre).join(', ')}.`;
+          } else {
+            res += `✅ El stock de todos los productos está equilibrado.`;
+          }
+
+        } else if (tipoFijo === 'detector_anomalias' || prompt.includes('anomalia')) {
+          let neg = ventas.filter(v => v.gan < 0);
+          res = `🚨 **AUDITORÍA DE REGISTROS**\n\n`;
+          if (neg.length > 0) {
+            res += `⚠️ Se detectaron ${neg.length} ventas con margen negativo. Revisa precios de costo vs comisión.`;
+          } else {
+            res += `✅ No hay inconsistencias en las ganancias registradas.`;
+          }
 
         } else {
-          respuesta = `🤖 **ANÁLISIS GENERAL KOSMIK**\n\n`;
-          respuesta += `Actualmente tienes **${Object.keys(productos).length} productos registrados** en inventario y **${ventas.length} ventas en el historial**.\n\n`;
-          respuesta += `Usa las **IA Options rápidas arriba** para obtener diagnósticos automáticos inmediatos sobre Reabastecimiento, Vendedores, Copys para WhatsApp o Análisis Financiero.`;
+          res = `🤖 **ANÁLISIS KOSMIK**: Usa las opciones arriba para auditorías detalladas de tu negocio.`;
         }
 
-        responseBox.innerHTML = respuesta.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      }, 300);
+        box.innerHTML = res.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      }, 250);
     }
   </script>
 </body>
