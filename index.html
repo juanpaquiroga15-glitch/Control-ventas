@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sistema de Control de Ventas e Inventario - Kosmik</title>
-  
-  <!-- SDK de Firebase (Opcional) -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
@@ -16,7 +12,7 @@
       --warning-color: #ffc107;
       --info-color: #17a2b8;
       --danger-color: #dc3545;
-      --ai-color: #f55036;
+      --ai-color: #6f42c1; /* Color Violeta para IA Local */
       --whatsapp-color: #25D366;
       --bg-color: #f4f6f8;
       --card-bg: #ffffff;
@@ -147,13 +143,13 @@
     }
 
     .tab-btn.ai-tab {
-      background: #fde8e5;
+      background: #f3e8ff;
       color: var(--ai-color);
     }
 
     body.dark-mode .tab-btn.ai-tab {
-      background: #3a1c18;
-      color: #ff8a75;
+      background: #2c1d3f;
+      color: #d8b4fe;
     }
 
     .tab-btn.ai-tab.active {
@@ -325,7 +321,7 @@
   <div class="nav-tabs">
     <button class="tab-btn active" onclick="cambiarPestana('ventas')">Registrar Ventas</button>
     <button class="tab-btn" onclick="cambiarPestana('productos')">Gestionar Inventario</button>
-    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')">⚡ IA Options (Groq)</button>
+    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')">⚡ IA Options (Local)</button>
   </div>
 
   <!-- PESTAÑA 1: VENTAS -->
@@ -490,19 +486,11 @@
     </div>
   </div>
 
-  <!-- PESTAÑA 3: IA OPTIONS Y IA CHAT (GROQ) -->
+  <!-- PESTAÑA 3: IA OPTIONS (LOCAL - SINO REFIERE API KEY) -->
   <div id="tab-ia" class="tab-content">
-    <!-- Configuración de API Key -->
     <div class="card" style="border-top: 4px solid var(--ai-color);">
-      <h3>🔑 Clave API de Groq</h3>
-      <div class="form-group">
-        <label for="groqApiKey">Tu API Key de Groq (gsk_...):</label>
-        <div style="display: flex; gap: 10px;">
-          <input type="password" id="groqApiKey" placeholder="gsk_..." style="flex: 1;">
-          <button class="btn-ai" onclick="guardarApiKey()">Guardar Clave</button>
-        </div>
-        <small style="color: #777; margin-top: 5px;">Se guarda de manera privada en tu navegador.</small>
-      </div>
+      <h3>🤖 Motor de IA y Analítica Comercial (Local)</h3>
+      <p style="font-size: 0.9rem; color: #666; margin-top: -5px;">Funciona de forma automática analizando tus datos en tiempo real sin requerir conexiones externas ni API Keys.</p>
     </div>
 
     <!-- IA OPTIONS (Acciones Rápidas) -->
@@ -518,37 +506,19 @@
 
     <!-- IA CHAT DIRECTO -->
     <div class="card">
-      <h3>💬 IA Chat Kosmik</h3>
-      <p style="font-size: 0.9rem; color: #666; margin-top: -5px;">Pregunta lo que necesites en lenguaje natural directo sobre tu inventario y ventas.</p>
-      
+      <h3>💬 Consultar al Asistente Kosmik</h3>
       <div class="form-group">
-        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cuánto vendió Bettina hoy y cuál es su comisión acumulada?"></textarea>
+        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cómo van las ventas de hoy o qué producto tiene mejor margen?"></textarea>
       </div>
-      <button class="btn-ai" style="width: 100%;" onclick="consultarIA()">Consultar a Kosmik AI</button>
+      <button class="btn-ai" style="width: 100%;" onclick="consultarIALocal()">Generar Diagnóstico con IA</button>
 
       <div class="ai-response-box" id="aiResponseBox">
-        <em>La respuesta de la IA aparecerá aquí...</em>
+        <em>Haz clic en una opción rápida o realiza una consulta para ver el análisis de tu negocio...</em>
       </div>
     </div>
   </div>
 
   <script>
-    // Configuración Firebase (Opcional)
-    const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_PROYECTO.firebaseapp.com",
-      projectId: "TU_PROYECTO_ID",
-      storageBucket: "TU_PROYECTO.appspot.com",
-      messagingSenderId: "TU_SENDER_ID",
-      appId: "TU_APP_ID"
-    };
-
-    let db = null;
-    if (firebaseConfig.apiKey !== "TU_API_KEY") {
-      firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-    }
-
     let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
       'cable_individual': { nombre: 'Cable (Unidad)', stock: 3, precio: 800, costo: 300, valorComision: 100, tipoComision: 'fijo' },
       'menta_individual': { nombre: 'Menta (Unidad)', stock: 50, precio: 2000, costo: 800, valorComision: 200, tipoComision: 'fijo' },
@@ -563,11 +533,6 @@
       if (localStorage.getItem('theme_dark') === 'true') {
         document.body.classList.add('dark-mode');
         document.getElementById('btnTheme').textContent = '☀️ Modo Claro';
-      }
-
-      const savedKey = localStorage.getItem('groq_api_key');
-      if (savedKey) {
-        document.getElementById('groqApiKey').value = savedKey;
       }
 
       renderizarProductos();
@@ -681,7 +646,7 @@
       document.getElementById('pValorComision').value = '';
     }
 
-    async function registrarVenta() {
+    function registrarVenta() {
       const pId = document.getElementById('vProducto').value;
       const p = productos[pId];
 
@@ -736,24 +701,15 @@
         gan: gananciaNeta
       };
 
-      try {
-        if (db) {
-          await db.collection("ventas").add(reg);
-          await db.collection("productos").doc(pId).update({ stock: p.stock });
-        } else {
-          reg.id = 'local_' + Date.now();
-          ventas.unshift(reg);
-          localStorage.setItem('vnts', JSON.stringify(ventas));
-        }
+      reg.id = 'local_' + Date.now();
+      ventas.unshift(reg);
+      localStorage.setItem('vnts', JSON.stringify(ventas));
 
-        renderizarProductos();
-        renderizarVentas();
+      renderizarProductos();
+      renderizarVentas();
 
-        alert(`Venta de ${vendedor} registrada. Quedan ${p.stock} unidades de ${p.nombre}.`);
-        document.getElementById('vCantidad').value = '1';
-      } catch (error) {
-        console.error('Error:', error);
-      }
+      alert(`Venta de ${vendedor} registrada. Quedan ${p.stock} unidades de ${p.nombre}.`);
+      document.getElementById('vCantidad').value = '1';
     }
 
     function actualizarFiltroFecha() {
@@ -900,108 +856,101 @@
       window.open(url, '_blank');
     }
 
-    // LÓGICA DE IA CON ROBUSTEZ Y MULTI-MODELO (GROQ)
-    function guardarApiKey() {
-      const key = document.getElementById('groqApiKey').value.trim();
-      if (!key) {
-        alert('Por favor ingresa una API Key válida.');
-        return;
-      }
-      localStorage.setItem('groq_api_key', key);
-      alert('API Key de Groq guardada de forma segura.');
-    }
-
+    // MOTOR ANALÍTICO Y DE IA LOCAL
     function ejecutarPromptAccion(tipo) {
-      const prompts = {
-        analizar_stock: "Analiza mi inventario actual y dime exactamente qué productos necesitan reabastecimiento pronto, cuántas unidades quedan y una sugerencia de compra.",
-        ranking_vendedores: "Analiza el historial de ventas y genera un ranking detallado de vendedores (Bettina, Juan José, Vale, Alejo), indicando quién vendió más, quién generó más ganancia y cuánta comisión acumuló cada uno.",
-        promo_whatsapp: "Genera 2 mensajes creativos y atractivos para enviar por WhatsApp a grupos universitarios promocionando nuestros combos de mentas y cables con un tono juvenil y divertido.",
-        diagnostico_financiero: "Haz un diagnóstico financiero rápido del negocio en base a las ventas registradas, costos y comisiones. Dame 3 consejos breves para mejorar el margen de ganancia."
-      };
-
-      document.getElementById('aiPromptInput').value = prompts[tipo];
-      consultarIA();
+      consultarIALocal(tipo);
     }
 
-    async function consultarIA() {
-      const apiKey = (localStorage.getItem('groq_api_key') || document.getElementById('groqApiKey').value).trim();
-      const promptUsuario = document.getElementById('aiPromptInput').value.trim();
+    function consultarIALocal(tipoFijo = null) {
+      const promptInput = document.getElementById('aiPromptInput').value.toLowerCase();
       const responseBox = document.getElementById('aiResponseBox');
 
-      if (!apiKey) {
-        alert('Por favor ingresa tu API Key de Groq (gsk_...) en el apartado superior.');
-        return;
-      }
+      responseBox.textContent = "⏳ Procesando datos del negocio...";
 
-      if (!promptUsuario) {
-        alert('Escribe una consulta o elige una de las IA Options rápidas.');
-        return;
-      }
+      setTimeout(() => {
+        let respuesta = "";
 
-      responseBox.textContent = "⏳ Analizando datos de Kosmik y consultando a Groq...";
-
-      const contextoDatos = {
-        inventario: productos,
-        historialVentas: ventas.slice(0, 50)
-      };
-
-      const promptCompleto = `Eres 'Kosmik AI', el asistente comercial inteligente de un negocio de ventas de cables, mentas y combos.
-A continuación tienes los datos actuales en tiempo real del negocio:
-${JSON.stringify(contextoDatos, null, 2)}
-
-Pregunta/Instrucción del usuario:
-"${promptUsuario}"
-
-Responde con un formato claro, estructurado, profesional y conciso utilizando viñetas y emojis cuando sea pertinente.`;
-
-      // Lista de modelos a intentar en orden de estabilidad
-      const modelosDisponibles = [
-        'llama-3.3-70b-versatile',
-        'llama-3.1-8b-instant',
-        'llama3-70b-8192',
-        'llama3-8b-8192'
-      ];
-
-      let exito = false;
-
-      for (const modelo of modelosDisponibles) {
-        try {
-          const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
-            },
-            body: JSON.stringify({
-              model: modelo,
-              messages: [{ role: 'user', content: promptCompleto }],
-              temperature: 0.7
-            })
+        if (tipoFijo === 'analizar_stock' || promptInput.includes('stock') || promptInput.includes('reabastecer')) {
+          let criticos = [];
+          Object.keys(productos).forEach(id => {
+            let p = productos[id];
+            if (p.stock <= 5) {
+              criticos.push(`• **${p.nombre}**: Quedan solo **${p.stock}** unidades.`);
+            }
           });
 
-          const data = await response.json();
-
-          if (response.ok && data.choices && data.choices[0] && data.choices[0].message) {
-            responseBox.textContent = data.choices[0].message.content;
-            exito = true;
-            break;
-          } else if (data.error) {
-            console.warn(`Error con modelo ${modelo}:`, data.error.message);
-            // Si el error es de clave inválida, detener reintentos
-            if (data.error.code === 'invalid_api_key' || response.status === 401) {
-              responseBox.textContent = `❌ Clave inválida (401): Revisa la API Key ingresada en la consola de Groq.`;
-              exito = true;
-              break;
-            }
+          respuesta = `📦 **DIAGNÓSTICO DE INVENTARIO Y REABASTECIMIENTO**\n\n`;
+          if (criticos.length > 0) {
+            respuesta += `⚠️ **Productos con Urgencia de Recompra (Stock ≤ 5):**\n${criticos.join('\n')}\n\n`;
+            respuesta += `💡 **Recomendación:** Se sugiere reponer mínimamente 20 unidades de cada producto crítico antes del fin de semana para no perder ventas universitarias.`;
+          } else {
+            respuesta += `✅ **Inventario Saludable:** Todos los productos cuentan con suficiente stock (> 5 unidades).`;
           }
-        } catch (err) {
-          console.warn(`Fallo de conexión probando ${modelo}:`, err);
-        }
-      }
 
-      if (!exito) {
-        responseBox.textContent = "⚠️ No se pudo obtener respuesta de la API. Verifica que estés ejecutando la página desde un servidor local o hospedada en internet (GitHub Pages) y que tu API Key esté activa en console.groq.com.";
-      }
+        } else if (tipoFijo === 'ranking_vendedores' || promptInput.includes('vendedor') || promptInput.includes('ranking')) {
+          let vStats = {};
+          ventas.forEach(v => {
+            let vend = v.vendedor || 'Otro';
+            if (!vStats[vend]) vStats[vend] = { total: 0, ganancia: 0, comision: 0, unidades: 0 };
+            vStats[vend].total += v.total;
+            vStats[vend].ganancia += v.gan;
+            vStats[vend].comision += v.com;
+            vStats[vend].unidades += v.cant;
+          });
+
+          let ranking = Object.keys(vStats).sort((a,b) => vStats[b].total - vStats[a].total);
+
+          respuesta = `🏆 **RANKING DE VENDEDORES (VENTAS TOTALES)**\n\n`;
+          if (ranking.length > 0) {
+            ranking.forEach((v, idx) => {
+              let st = vStats[v];
+              let medalla = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '👤';
+              respuesta += `${medalla} **${idx + 1}. ${v}**\n`;
+              respuesta += `   • Ventas: $${st.total.toLocaleString()} (${st.unidades} unds)\n`;
+              respuesta += `   • Ganancia Generada: $${st.ganancia.toLocaleString()}\n`;
+              respuesta += `   • Comisión Acumulada: $${st.comision.toLocaleString()}\n\n`;
+            });
+          } else {
+            respuesta += `ℹ️ Aún no hay registros de ventas guardados para calcular el ranking.`;
+          }
+
+        } else if (tipoFijo === 'promo_whatsapp' || promptInput.includes('promo') || promptInput.includes('whatsapp')) {
+          respuesta = `📣 **COPIES PROMOCIONALES PARA WHATSAPP**\n\n`;
+          respuesta += `**Opción 1 (Universidades):**\n`;
+          respuesta += `"⚡ ¡Parche sin batería o sin dulce no aguanta! 🍬🔌\nConsigue hoy tus **Cables + Mentas** con entrega inmediata en el campus.\n👉 Pregunta por nuestros Combos Especiales Kosmik antes de que se agoten."\n\n`;
+          respuesta += `**Opción 2 (Ahorro / Combos):**\n`;
+          respuesta += `"🔥 **PROMO KOSMIK DEL DÍA** 🔥\nLleva tu combo de carga rápida + refresco de menta a un precio imparable.\n📱 ¡Pídelo ya directo con tu vendedor encargado!"`;
+
+        } else if (tipoFijo === 'diagnostico_financiero' || promptInput.includes('financiero') || promptInput.includes('ganancia')) {
+          let totV = 0, totG = 0, totC = 0, totCos = 0;
+          ventas.forEach(v => {
+            totV += v.total || 0;
+            totG += v.gan || 0;
+            totC += v.com || 0;
+            totCos += v.cos || 0;
+          });
+
+          let margen = totV > 0 ? ((totG / totV) * 100).toFixed(1) : 0;
+
+          respuesta = `📈 **DIAGNÓSTICO FINANCIERO KOSMIK**\n\n`;
+          respuesta += `💵 **Ingresos Brutos:** $${totV.toLocaleString()}\n`;
+          respuesta += `📦 **Costo de Insumos:** $${totCos.toLocaleString()}\n`;
+          respuesta += `🤝 **Comisiones de Venta:** $${totC.toLocaleString()}\n`;
+          respuesta += `💰 **Ganancia Neta Real:** $${totG.toLocaleString()}\n`;
+          respuesta += `📊 **Margen de Ganancia Neto:** ${margen}%\n\n`;
+          respuesta += `💡 **3 Consejos Clave:**\n`;
+          respuesta += `1. **Combos:** Fomenta la venta de 'Combo 3', ya que reduce el costo proporcional de logística e incrementa el margen neta por cliente.\n`;
+          respuesta += `2. **Control de Comisiones:** Revisa que los precios cubran holgadamente el valor fijo otorgado por comisión.\n`;
+          respuesta += `3. **Rotación:** Prioriza vender los ítems individuales de menor movimiento emparejándolos con productos de alta demanda.`;
+
+        } else {
+          respuesta = `🤖 **ANÁLISIS GENERAL KOSMIK**\n\n`;
+          respuesta += `Actualmente tienes **${Object.keys(productos).length} productos registrados** en inventario y **${ventas.length} ventas en el historial**.\n\n`;
+          respuesta += `Usa las **IA Options rápidas arriba** para obtener diagnósticos automáticos inmediatos sobre Reabastecimiento, Vendedores, Copys para WhatsApp o Análisis Financiero.`;
+        }
+
+        responseBox.innerHTML = respuesta.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      }, 300);
     }
   </script>
 </body>
