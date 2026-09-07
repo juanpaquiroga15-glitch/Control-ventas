@@ -62,7 +62,7 @@
     .btn-toggle { background: var(--table-header); color: var(--text-main); border: 1px solid var(--border); padding: 9px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
     .btn-toggle:hover { opacity: 0.85; transform: translateY(-1px); }
 
-    /* SELECTOR MAESTRO DE CATEGORÍAS (DULCES, HUEVOS, VAPES) */
+    /* SELECTOR MAESTRO DE CATEGORÍAS */
     .master-category-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
     .master-cat-btn { background: var(--card-bg); border: 2px solid var(--border); padding: 18px; border-radius: var(--radius); cursor: pointer; font-weight: 700; font-size: 1.15rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow); }
     .master-cat-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
@@ -152,7 +152,7 @@
 </head>
 <body>
 
-  <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
+  <!-- BARRA SUPERIOR NAV -->
   <header class="header-nav">
     <div class="brand">
       <i class="fa-solid fa-rocket"></i> Kosmik Enterprise <span id="cloudStatusBadge" class="badge-status badge-offline" style="margin-left: 10px;">Local</span>
@@ -167,7 +167,7 @@
     </button>
   </header>
 
-  <!-- SELECTOR MAESTRO DE CATEGORÍAS (3 PÁGINAS EN 1) -->
+  <!-- SELECTOR MAESTRO DE CATEGORÍAS -->
   <div class="master-category-bar">
     <button class="master-cat-btn active" id="btnCatDulces" onclick="cambiarCategoriaMaster('dulces')">🍬 Dulces</button>
     <button class="master-cat-btn" id="btnCatHuevos" onclick="cambiarCategoriaMaster('huevos')">🥚 Huevos</button>
@@ -265,7 +265,7 @@
         <div class="form-group"><label for="vendNombre">Nombre del Vendedor</label><input type="text" id="vendNombre" placeholder="Ej: Juanjo"></div>
         <div class="form-group"><label for="vendSede">Sede Habitual</label><input type="text" id="vendSede" placeholder="Ej: Javeriana"></div>
         <div class="form-group"><label for="vendMeta">Meta Semanal ($)</label><input type="number" id="vendMeta" placeholder="Ej: 100000"></div>
-        <div class="form-group"><label for="vendComision">Comisión Fija Defecto ($)</label><input type="number" id="vendComision" placeholder="Ej: 500"></div>
+        <div class="form-group"><label for="vendComision">Comisión Porcentaje Defecto (%)</label><input type="number" id="vendComision" placeholder="Ej: 10" min="0" max="100" step="0.5"></div>
       </div>
       <button class="btn btn-primary" style="margin-top: 18px; width: 100%;" onclick="guardarVendedor()"><i class="fa-solid fa-save"></i> Guardar Vendedor</button>
     </div>
@@ -281,7 +281,7 @@
         <div class="form-group"><label for="pStock">Stock Inicial</label><input type="number" id="pStock" placeholder="0"></div>
         <div class="form-group"><label for="pPrecio">Precio de Venta ($)</label><input type="number" id="pPrecio" placeholder="0"></div>
         <div class="form-group"><label for="pCosto">Costo de Insumo ($)</label><input type="number" id="pCosto" placeholder="0"></div>
-        <div class="form-group" id="grupoComisionInput"><label for="pValorComision">Comisión por Unidad ($)</label><input type="number" id="pValorComision" placeholder="0"></div>
+        <div class="form-group" id="grupoComisionInput" style="display:none;"><label for="pValorComision">Comisión Producto ($)</label><input type="number" id="pValorComision" placeholder="0"></div>
       </div>
       <button class="btn btn-primary" style="margin-top: 18px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-folder-plus"></i> Guardar en Base de Datos</button>
     </div>
@@ -373,7 +373,7 @@
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
     let dbFirebase = null;
 
-    // Bases de datos independientes por categoría con valores robustos iniciales
+    // Bases de datos independientes por categoría
     let BD_PRODUCTOS = JSON.parse(localStorage.getItem('kosmik_bd_prods')) || {
       dulces: {
         'c1': { nombre: 'Cable Ácido (Unidad)', stock: 25, precio: 1000, costo: 400 },
@@ -381,20 +381,20 @@
         'cb1': { nombre: 'Combo Dulce Universitario', stock: 15, precio: 3000, costo: 1200 }
       },
       huevos: {
-        'h1': { nombre: 'Cartón Huevos AA (30 und)', stock: 12, precio: 18000, costo: 13000, valorComision: 1000 },
-        'h2': { nombre: 'Cartón Huevos A (30 und)', stock: 20, precio: 16000, costo: 11500, valorComision: 800 }
+        'h1': { nombre: 'Cartón Huevos AA (30 und)', stock: 12, precio: 18000, costo: 13000 },
+        'h2': { nombre: 'Cartón Huevos A (30 und)', stock: 20, precio: 16000, costo: 11500 }
       },
       vapes: {
-        'v1': { nombre: 'Vape Desechable 5000 Puffs', stock: 10, precio: 35000, costo: 20000, valorComision: 3000 },
-        'v2': { nombre: 'Vape Recargable Pod System', stock: 6, precio: 55000, costo: 35000, valorComision: 5000 }
+        'v1': { nombre: 'Vape Desechable 5000 Puffs', stock: 10, precio: 35000, costo: 20000 },
+        'v2': { nombre: 'Vape Recargable Pod System', stock: 6, precio: 55000, costo: 35000 }
       }
     };
 
     let vendedores = JSON.parse(localStorage.getItem('cat_vends')) || {
-      'Bettina': { sede: 'Javeriana', meta: 100000, comisionDefecto: 500, acumuladoComisiones: 0 },
-      'Juanjo': { sede: 'Rosario', meta: 90000, comisionDefecto: 500, acumuladoComisiones: 0 },
-      'Vale': { sede: 'Andes', meta: 80000, comisionDefecto: 500, acumuladoComisiones: 0 },
-      'Alejo': { sede: 'Sabana', meta: 80000, comisionDefecto: 500, acumuladoComisiones: 0 }
+      'Bettina': { sede: 'Javeriana', meta: 100000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
+      'Juanjo': { sede: 'Rosario', meta: 90000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
+      'Vale': { sede: 'Andes', meta: 80000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
+      'Alejo': { sede: 'Sabana', meta: 80000, comisionPorcentaje: 10, acumuladoComisiones: 0 }
     };
 
     let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
@@ -449,13 +449,6 @@
       const iconos = { dulces: '🍬 Dulces', huevos: '🥚 Huevos', vapes: '💨 Vapes' };
       document.getElementById('tituloRegistroVenta').innerHTML = `<i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta (${iconos[categoriaActual]})`;
       document.getElementById('tituloIAHeader').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise - ${iconos[categoriaActual]}`;
-      
-      const grupoComision = document.getElementById('grupoComisionInput');
-      if (categoriaActual === 'dulces') {
-        grupoComision.style.display = 'none'; // Ocultar input comisión en dulces (se calcula 25% automático obligatorio)
-      } else {
-        grupoComision.style.display = 'flex'; // Mostrar en huevos y vapes
-      }
     }
 
     function toggleDarkMode() {
@@ -549,16 +542,16 @@
     }
 
     /********************************************************************************
-     * GESTIÓN COMERCIAL DE VENDEDORES Y METAS
+     * GESTIÓN COMERCIAL DE VENDEDORES Y METAS (CON PORCENTAJE DE COMISIÓN)
      ********************************************************************************/
     function guardarVendedor() {
       const nom = document.getElementById('vendNombre').value.trim();
       const sede = document.getElementById('vendSede').value.trim() || 'General';
       const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
-      const com = parseFloat(document.getElementById('vendComision').value) || 0;
+      const comPorc = parseFloat(document.getElementById('vendComision').value) || 0;
       if (!nom) return alert('Por favor ingresa el nombre del vendedor.');
 
-      vendedores[nom] = { sede, meta, comisionDefecto: com, acumuladoComisiones: vendedores[nom]?.acumuladoComisiones || 0 };
+      vendedores[nom] = { sede, meta, comisionPorcentaje: comPorc, acumuladoComisiones: vendedores[nom]?.acumuladoComisiones || 0 };
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       sincronizarHaciaCloud();
 
@@ -583,9 +576,15 @@
 
       const nuevaSede = prompt("Editar sede habitual:", info.sede);
       const nuevaMeta = prompt("Editar meta semanal ($):", info.meta);
+      const nuevaComisionPorc = prompt("Editar comisión porcentaje (%):", info.comisionPorcentaje || 0);
 
       if (nombreLimpio !== nombreActual) {
-        vendedores[nombreLimpio] = { sede: nuevaSede || info.sede, meta: parseFloat(nuevaMeta) || info.meta, comisionDefecto: info.comisionDefecto, acumuladoComisiones: info.acumuladoComisiones };
+        vendedores[nombreLimpio] = { 
+          sede: nuevaSede || info.sede, 
+          meta: parseFloat(nuevaMeta) || info.meta, 
+          comisionPorcentaje: parseFloat(nuevaComisionPorc) || info.comisionPorcentaje || 0, 
+          acumuladoComisiones: info.acumuladoComisiones 
+        };
         delete vendedores[nombreActual];
         Object.keys(BD_VENTAS).forEach(cat => {
           BD_VENTAS[cat].forEach(v => { if (v.vendedor === nombreActual) v.vendedor = nombreLimpio; });
@@ -594,6 +593,7 @@
       } else {
         info.sede = nuevaSede || info.sede;
         info.meta = parseFloat(nuevaMeta) || info.meta;
+        info.comisionPorcentaje = parseFloat(nuevaComisionPorc) || info.comisionPorcentaje || 0;
       }
 
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
@@ -635,7 +635,7 @@
       selFiltro.innerHTML = '<option value="todos">-- Todos los Vendedores --</option>';
 
       Object.keys(vendedores).forEach(v => {
-        selVenta.innerHTML += `<option value="${v}">${v} (${vendedores[v].sede})</option>`;
+        selVenta.innerHTML += `<option value="${v}">${v} (${vendedores[v].sede} - ${vendedores[v].comisionPorcentaje || 0}%)</option>`;
         selFiltro.innerHTML += `<option value="${v}">${v}</option>`;
       });
     }
@@ -654,11 +654,12 @@
         const info = vendedores[v];
         const vendido = vTotals[v] || 0;
         const pct = info.meta > 0 ? Math.min(((vendido / info.meta) * 100), 100).toFixed(1) : 0;
+        const comPorcText = info.comisionPorcentaje || 0;
 
         cont.innerHTML += `
           <div class="seller-card">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <strong>${v} (${info.sede})</strong>
+              <strong>${v} (${info.sede}) — <em>Comisión: ${comPorcText}%</em></strong>
               <div style="display:flex; gap:6px;">
                 <button class="btn btn-warning" style="padding:5px 10px; font-size:0.75rem;" onclick="editarVendedor('${v}')">Editar</button>
                 <button class="btn btn-danger" style="padding:5px 10px; font-size:0.75rem;" onclick="eliminarVendedor('${v}')">Eliminar</button>
@@ -672,7 +673,7 @@
       });
     }
 
-    /****************************************************************----------------
+    /************************************************--------------------------------
      * GESTIÓN DE INVENTARIO Y PRODUCTOS
      ********************************************************************************/
     function guardarProducto() {
@@ -680,18 +681,11 @@
       const stock = parseInt(document.getElementById('pStock').value, 10) || 0;
       const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
       const costo = parseFloat(document.getElementById('pCosto').value) || 0;
-      
-      let valorComision = 0;
-      if (categoriaActual !== 'dulces') {
-        valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
-      }
 
       if (!nombre || precio <= 0) return alert('Por favor ingresa un nombre y un precio de venta válido.');
 
       const id = 'prod_' + Date.now();
-      BD_PRODUCTOS[categoriaActual][id] = categoriaActual === 'dulces' 
-        ? { nombre, stock, precio, costo } 
-        : { nombre, stock, precio, costo, valorComision };
+      BD_PRODUCTOS[categoriaActual][id] = { nombre, stock, precio, costo };
 
       localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
       sincronizarHaciaCloud();
@@ -701,7 +695,6 @@
       document.getElementById('pStock').value = '';
       document.getElementById('pPrecio').value = '';
       document.getElementById('pCosto').value = '';
-      if(document.getElementById('pValorComision')) document.getElementById('pValorComision').value = '';
 
       alert('Producto guardado exitosamente en el inventario corporativo.');
     }
@@ -732,7 +725,7 @@
         if (p.stock <= 5) alertas.push(`• <strong>${p.nombre}</strong> (${p.stock} unidades restantes)`);
         sel.innerHTML += `<option value="${id}">${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${p.stock}]</option>`;
         
-        const comText = categoriaActual === 'dulces' ? '25% (Automático)' : `$${(p.valorComision || 0).toLocaleString()}`;
+        const comText = categoriaActual === 'dulces' ? '25% (Automático)' : 'Calculado s/ Vendedor';
         tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.stock} unid.</td><td>$${p.precio.toLocaleString()}</td><td>$${p.costo.toLocaleString()}</td><td>${comText}</td><td><button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
       });
 
@@ -762,19 +755,21 @@
 
       const totalVenta = p.precio * cant;
       
-      // COMISIÓN EXACTA DEL 25% PARA DULCES, PERSONALIZADA PARA HUEVOS Y VAPES
+      // LÓGICA DE COMISIÓN BLINDADA: 25% para Dulces, o el % configurado del vendedor para Huevos/Vapes
       let totalComision = 0;
+      const infoVendedor = vendedores[vendedor];
       if (categoriaActual === 'dulces') {
         totalComision = totalVenta * 0.25; // 25% exacto de la venta
       } else {
-        totalComision = (p.valorComision || 0) * cant;
+        const porc = infoVendedor ? (infoVendedor.comisionPorcentaje || 0) : 0;
+        totalComision = totalVenta * (porc / 100);
       }
 
       const totalCosto = (p.costo || 0) * cant;
       const gananciaNeta = totalVenta - totalCosto - totalComision;
 
-      if (vendedores[vendedor]) {
-        vendedores[vendedor].acumuladoComisiones = (vendedores[vendedor].acumuladoComisiones || 0) + totalComision;
+      if (infoVendedor) {
+        infoVendedor.acumuladoComisiones = (infoVendedor.acumuladoComisiones || 0) + totalComision;
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       }
 
@@ -916,7 +911,7 @@
 
     /************************************************--------------------------------
      * IA COPILOT (MOTOR LOCAL Y GOOGLE GEMINI)
-     ********************************************************************************/
+     ****************************************************************----------------/
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
@@ -935,7 +930,7 @@
         let criticos = Object.values(prodsActuales).filter(p => p.stock <= 5);
         r = criticos.length === 0 ? `📦 Todos los artículos de ${categoriaActual} cuentan con inventario saludable.` : `⚠️ Alerta de Reabastecimiento Crítico:\n` + criticos.map(p => `• ${p.nombre} (${p.stock} unid. restantes)`).join('\n');
       } else if (tipo === 'auditoria_comisiones') {
-        r = `🤝 **Auditoría de Comisiones Acumuladas:**\n` + Object.entries(vendedores).map(([v, info]) => `• ${v}: $${(info.acumuladoComisiones || 0).toLocaleString()}`).join('\n');
+        r = `🤝 **Auditoría de Comisiones Acumuladas:**\n` + Object.entries(vendedores).map(([v, info]) => `• ${v}: $${(info.acumuladoComisiones || 0).toLocaleString()} (Configurado con ${info.comisionPorcentaje || 0}%)`).join('\n');
       } else if (tipo === 'rendimiento_sedes') {
         let sMap = {}; ventasActuales.forEach(v => sMap[v.sede] = (sMap[v.sede] || 0) + v.total);
         r = `🏛️ **Análisis por Sede/Universidad (${categoriaActual.toUpperCase()}):**\n` + (Object.keys(sMap).length ? Object.entries(sMap).map(([s, val]) => `• ${s}: $${val.toLocaleString()}`).join('\n') : 'Sin registros segmentados por sede.');
@@ -944,7 +939,7 @@
       } else if (tipo === 'promo_whatsapp') {
         r = `📱 **Copy Promocional WhatsApp (${categoriaActual.toUpperCase()}):**\n🔥 ¡DISPONIBLE AHORA EN EL CAMPUS! 🔥\nNo te quedes sin tu producto favorito de ${categoriaActual}. Calidad superior y entrega inmediata. ¡Pídelo ya! 🚀`;
       } else if (tipo === 'calculadora_descuentos') {
-        r = `💡 **Evaluador de Promociones:** Asegúrate de que el volumen de venta compense cualquier descuento para proteger el margen neto del 25% en comisiones.`;
+        r = `💡 **Evaluador de Promociones:** Asegúrate de que el volumen de venta compense cualquier descuento para proteger el margen neto.`;
       } else if (tipo === 'proyecciones_metas') {
         r = `🎯 **Proyección de Metas:** Revisa el porcentaje de avance individual en la pestaña de Vendedores para impulsar el cierre de semana.`;
       } else if (tipo === 'detector_anomalias') {
