@@ -49,256 +49,271 @@
       --input-bg: #0f172a;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Inter', sans-serif;
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Inter', sans-serif; 
     }
 
-    body {
-      background-color: var(--bg);
-      color: var(--text-main);
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 20px;
-      transition: background-color 0.2s, color 0.2s;
+    body { 
+      background-color: var(--bg); 
+      color: var(--text-main); 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      padding: 20px; 
+      transition: background-color 0.2s, color 0.2s; 
     }
 
     /* BARRA SUPERIOR NAV */
-    .header-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--card-bg);
-      padding: 16px 24px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    .header-nav { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      background: var(--card-bg); 
+      padding: 16px 24px; 
+      border-radius: var(--radius); 
+      border: 1px solid var(--border); 
+      margin-bottom: 20px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
     }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 700;
-      font-size: 1.25rem;
-      color: var(--primary);
+    .brand { 
+      display: flex; 
+      align-items: center; 
+      gap: 12px; 
+      font-weight: 700; 
+      font-size: 1.25rem; 
+      color: var(--primary); 
     }
 
-    .user-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.9rem;
-      color: var(--text-muted);
+    .user-badge { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      font-size: 0.9rem; 
+      color: var(--text-muted); 
     }
 
-    .user-badge input {
-      padding: 6px 12px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--input-bg);
-      color: var(--text-main);
-      font-weight: 500;
+    .user-badge input { 
+      padding: 6px 12px; 
+      border-radius: 6px; 
+      border: 1px solid var(--border); 
+      background: var(--input-bg); 
+      color: var(--text-main); 
+      font-weight: 500; 
     }
 
-    .btn-toggle {
-      background: var(--table-header);
-      color: var(--text-main);
-      border: 1px solid var(--border);
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
+    .btn-toggle { 
+      background: var(--table-header); 
+      color: var(--text-main); 
+      border: 1px solid var(--border); 
+      padding: 8px 16px; 
+      border-radius: 20px; 
+      cursor: pointer; 
+      font-weight: 600; 
+      font-size: 0.85rem; 
     }
 
     /* TARJETAS METRICAS */
-    .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+    .metrics-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 16px; 
+      margin-bottom: 24px; 
     }
 
-    .metric-card {
-      background: var(--card-bg);
-      padding: 20px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      position: relative;
-      overflow: hidden;
+    .metric-card { 
+      background: var(--card-bg); 
+      padding: 20px; 
+      border-radius: var(--radius); 
+      border: 1px solid var(--border); 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
+      position: relative; 
+      overflow: hidden; 
     }
 
-    .metric-title {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-bottom: 8px;
+    .metric-title { 
+      font-size: 0.8rem; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+      color: var(--text-muted); 
+      font-weight: 600; 
+      margin-bottom: 8px; 
     }
 
-    .metric-value {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: var(--text-main);
+    .metric-value { 
+      font-size: 1.75rem; 
+      font-weight: 700; 
+      color: var(--text-main); 
     }
 
-    .metric-icon {
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      font-size: 1.5rem;
-      opacity: 0.15;
+    .metric-icon { 
+      position: absolute; 
+      right: 20px; 
+      top: 20px; 
+      font-size: 1.5rem; 
+      opacity: 0.15; 
     }
 
     /* PESTAÑAS */
-    .nav-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 10px;
-      overflow-x: auto;
+    .nav-tabs { 
+      display: flex; 
+      gap: 10px; 
+      margin-bottom: 20px; 
+      border-bottom: 1px solid var(--border); 
+      padding-bottom: 10px; 
+      overflow-x: auto; 
     }
 
-    .tab-btn {
-      padding: 10px 18px;
-      border: none;
-      background: transparent;
-      color: var(--text-muted);
-      font-weight: 600;
-      font-size: 0.9rem;
-      border-radius: 8px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      white-space: nowrap;
+    .tab-btn { 
+      padding: 10px 18px; 
+      border: none; 
+      background: transparent; 
+      color: var(--text-muted); 
+      font-weight: 600; 
+      font-size: 0.9rem; 
+      border-radius: 8px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      white-space: nowrap; 
     }
 
-    .tab-btn.active {
-      background: var(--primary);
-      color: white !important;
+    .tab-btn.active { 
+      background: var(--primary); 
+      color: white !important; 
     }
 
-    .tab-btn.ai-tab { color: var(--ai-color); }
-    .tab-btn.ai-tab.active { background: var(--ai-color); color: white !important; }
+    .tab-btn.ai-tab { 
+      color: var(--ai-color); 
+    }
 
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
+    .tab-btn.ai-tab.active { 
+      background: var(--ai-color); 
+      color: white !important; 
+    }
+
+    .tab-content { 
+      display: none; 
+    }
+
+    .tab-content.active { 
+      display: block; 
+    }
 
     /* CONTENEDORES / CARDS */
-    .card {
-      background: var(--card-bg);
-      padding: 24px;
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    .card { 
+      background: var(--card-bg); 
+      padding: 24px; 
+      border-radius: var(--radius); 
+      border: 1px solid var(--border); 
+      margin-bottom: 20px; 
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
     }
 
-    .card h3 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    .card h3 { 
+      font-size: 1.1rem; 
+      font-weight: 700; 
+      margin-bottom: 16px; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
     }
 
     /* FORMULARIOS */
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px;
+    .form-grid { 
+      display: grid; 
+      grid-template-columns: repeat(2, 1fr); 
+      gap: 16px; 
     }
 
-    @media (max-width: 650px) {
-      .form-grid { grid-template-columns: 1fr; }
+    @media (max-width: 650px) { 
+      .form-grid { 
+        grid-template-columns: 1fr; 
+      } 
     }
 
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+    .form-group { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
     }
 
-    .form-group.full { grid-column: 1 / -1; }
-
-    label {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--text-muted);
+    .form-group.full { 
+      grid-column: 1 / -1; 
     }
 
-    input, select, textarea {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--input-bg);
-      color: var(--text-main);
-      font-size: 0.95rem;
-      outline: none;
+    label { 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      color: var(--text-muted); 
     }
 
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--primary);
+    input, select, textarea { 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      border: 1px solid var(--border); 
+      background: var(--input-bg); 
+      color: var(--text-main); 
+      font-size: 0.95rem; 
+      outline: none; 
+    }
+
+    input:focus, select:focus, textarea:focus { 
+      border-color: var(--primary); 
     }
 
     /* CHAT INPUT CONTAINER (ESTILO WHATSAPP) */
-    .chat-input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
+    .chat-input-wrapper { 
+      position: relative; 
+      display: flex; 
+      align-items: center; 
     }
 
-    .chat-input-wrapper textarea {
-      width: 100%;
-      padding-right: 50px;
-      resize: none;
-      height: 60px;
+    .chat-input-wrapper textarea { 
+      width: 100%; 
+      padding-right: 50px; 
+      resize: none; 
+      height: 60px; 
     }
 
-    .btn-send-whatsapp {
-      position: absolute;
-      right: 10px;
-      bottom: 12px;
-      background: var(--ai-color);
-      color: white;
-      border: none;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 1rem;
-      transition: background 0.2s, transform 0.1s;
+    .btn-send-whatsapp { 
+      position: absolute; 
+      right: 10px; 
+      bottom: 12px; 
+      background: var(--ai-color); 
+      color: white; 
+      border: none; 
+      width: 38px; 
+      height: 38px; 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      font-size: 1rem; 
+      transition: background 0.2s, transform 0.1s; 
     }
 
-    .btn-send-whatsapp:hover {
-      background: #7c3aed;
-      transform: scale(1.05);
+    .btn-send-whatsapp:hover { 
+      background: #7c3aed; 
+      transform: scale(1.05); 
     }
 
     /* BOTONES GENERALES */
-    .btn {
-      padding: 10px 18px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
+    .btn { 
+      padding: 10px 18px; 
+      border-radius: 8px; 
+      border: none; 
+      font-weight: 600; 
+      font-size: 0.9rem; 
+      cursor: pointer; 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
     }
 
     .btn-primary { background: var(--primary); color: white; }
@@ -309,121 +324,122 @@
     .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 15px; }
 
     /* TABLAS */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-top: 10px; 
     }
 
-    th, td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-      text-align: left;
-      font-size: 0.88rem;
+    th, td { 
+      padding: 12px 14px; 
+      border-bottom: 1px solid var(--border); 
+      text-align: left; 
+      font-size: 0.88rem; 
     }
 
-    th {
-      background: var(--table-header);
-      color: var(--text-muted);
-      font-weight: 600;
+    th { 
+      background: var(--table-header); 
+      color: var(--text-muted); 
+      font-weight: 600; 
     }
 
     /* VENDEDORES Y METAS */
-    .seller-card {
-      border: 1px solid var(--border);
-      padding: 16px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      background: var(--table-header);
+    .seller-card { 
+      border: 1px solid var(--border); 
+      padding: 16px; 
+      border-radius: 8px; 
+      margin-bottom: 12px; 
+      background: var(--table-header); 
     }
 
-    .progress-bar-bg {
-      background: var(--border);
-      height: 8px;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 8px;
+    .progress-bar-bg { 
+      background: var(--border); 
+      height: 8px; 
+      border-radius: 4px; 
+      overflow: hidden; 
+      margin-top: 8px; 
     }
 
-    .progress-bar-fill {
-      background: var(--success);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease;
+    .progress-bar-fill { 
+      background: var(--success); 
+      height: 100%; 
+      width: 0%; 
+      transition: width 0.3s ease; 
     }
 
     /* IA OPTIONS CATEGORIZADAS */
-    .ai-category-title {
-      font-size: 0.85rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--ai-color);
-      margin: 15px 0 10px 0;
+    .ai-category-title { 
+      font-size: 0.85rem; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      color: var(--ai-color); 
+      margin: 15px 0 10px 0; 
     }
 
-    .quick-ai-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-      margin-bottom: 20px;
+    .quick-ai-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
+      gap: 10px; 
+      margin-bottom: 20px; 
     }
 
-    .quick-ai-btn {
-      background: var(--card-bg);
-      border: 1px solid var(--ai-color);
-      color: var(--text-main);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .quick-ai-btn { 
+      background: var(--card-bg); 
+      border: 1px solid var(--ai-color); 
+      color: var(--text-main); 
+      padding: 10px 14px; 
+      border-radius: 8px; 
+      font-size: 0.85rem; 
+      font-weight: 600; 
+      cursor: pointer; 
+      text-align: left; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
     }
 
-    .quick-ai-btn:hover {
-      background: var(--ai-color);
-      color: white;
+    .quick-ai-btn:hover { 
+      background: var(--ai-color); 
+      color: white; 
     }
 
-    .ai-response-box {
-      background: var(--table-header);
-      border-left: 4px solid var(--ai-color);
-      padding: 16px;
-      border-radius: 8px;
-      margin-top: 15px;
-      line-height: 1.6;
-      font-size: 0.95rem;
-      white-space: pre-wrap;
+    .ai-response-box { 
+      background: var(--table-header); 
+      border-left: 4px solid var(--ai-color); 
+      padding: 16px; 
+      border-radius: 8px; 
+      margin-top: 15px; 
+      line-height: 1.6; 
+      font-size: 0.95rem; 
+      white-space: pre-wrap; 
     }
 
     /* ALERTA BANNER */
-    .alert-banner {
-      background-color: #fef3c7;
-      color: #92400e;
-      border: 1px solid #fde68a;
-      border-left: 5px solid var(--warning);
-      padding: 14px 18px;
-      border-radius: var(--radius);
-      margin-bottom: 20px;
-      display: none;
+    .alert-banner { 
+      background-color: #fef3c7; 
+      color: #92400e; 
+      border: 1px solid #fde68a; 
+      border-left: 5px solid var(--warning); 
+      padding: 14px 18px; 
+      border-radius: var(--radius); 
+      margin-bottom: 20px; 
+      display: none; 
     }
 
-    body.dark-mode .alert-banner {
-      background-color: #451a03;
-      color: #fde68a;
-      border-color: #78350f;
+    body.dark-mode .alert-banner { 
+      background-color: #451a03; 
+      color: #fde68a; 
+      border-color: #78350f; 
     }
 
-    .badge-status {
-      display: inline-block;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 700;
+    .badge-status { 
+      display: inline-block; 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+      font-size: 0.75rem; 
+      font-weight: 700; 
     }
+
     .badge-offline { background: #fee2e2; color: #991b1b; }
     .badge-online { background: #d1fae5; color: #065f46; }
   </style>
@@ -479,60 +495,30 @@
 
   <!-- PESTAÑAS PRINCIPALES -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" onclick="cambiarPestana('ventas')">
-      <i class="fa-solid fa-cart-shopping"></i> Ventas
-    </button>
-    <button class="tab-btn" onclick="cambiarPestana('vendedores')">
-      <i class="fa-solid fa-users"></i> Vendedores & Metas
-    </button>
-    <button class="tab-btn" onclick="cambiarPestana('productos')">
-      <i class="fa-solid fa-boxes-stacked"></i> Inventario
-    </button>
-    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')">
-      <i class="fa-solid fa-brain"></i> IA Copilot
-    </button>
-    <button class="tab-btn" onclick="cambiarPestana('ajustes')">
-      <i class="fa-solid fa-gear"></i> Ajustes (Cloud & IA)
-    </button>
+    <button class="tab-btn active" onclick="cambiarPestana('ventas')"><i class="fa-solid fa-cart-shopping"></i> Ventas</button>
+    <button class="tab-btn" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users"></i> Vendedores & Metas</button>
+    <button class="tab-btn" onclick="cambiarPestana('productos')"><i class="fa-solid fa-boxes-stacked"></i> Inventario</button>
+    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')"><i class="fa-solid fa-brain"></i> IA Copilot</button>
+    <button class="tab-btn" onclick="cambiarPestana('ajustes')"><i class="fa-solid fa-gear"></i> Ajustes (Cloud & IA)</button>
   </nav>
 
-  <!-- PESTAÑA 1: VENTAS Y GRÁFICAS -->
+  <!-- PESTAÑA 1: VENTAS -->
   <div id="tab-ventas" class="tab-content active">
     <div class="card">
       <h3><i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta</h3>
       <div class="form-grid">
-        <div class="form-group full">
-          <label for="vProducto">Producto / Combo</label>
-          <select id="vProducto"></select>
-        </div>
-        <div class="form-group">
-          <label for="vCantidad">Cantidad</label>
-          <input type="number" id="vCantidad" value="1" min="1">
-        </div>
-        <div class="form-group">
-          <label for="vUni">Sede / Universidad</label>
-          <input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario">
-        </div>
-        <div class="form-group full">
-          <label for="vVendedor">Vendedor Encargado</label>
-          <select id="vVendedor"></select>
-        </div>
+        <div class="form-group full"><label for="vProducto">Producto / Combo</label><select id="vProducto"></select></div>
+        <div class="form-group"><label for="vCantidad">Cantidad</label><input type="number" id="vCantidad" value="1" min="1"></div>
+        <div class="form-group"><label for="vUni">Sede / Universidad</label><input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario"></div>
+        <div class="form-group full"><label for="vVendedor">Vendedor Encargado</label><select id="vVendedor"></select></div>
       </div>
-      <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="registrarVenta()">
-        <i class="fa-solid fa-check"></i> Guardar Venta
-      </button>
+      <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> Guardar Venta</button>
     </div>
 
     <!-- PANEL DE GRÁFICAS -->
     <div class="form-grid" style="margin-bottom: 20px;">
-      <div class="card" style="margin: 0;">
-        <h3><i class="fa-solid fa-chart-bar"></i> Ventas por Vendedor</h3>
-        <canvas id="chartVendedores" height="200"></canvas>
-      </div>
-      <div class="card" style="margin: 0;">
-        <h3><i class="fa-solid fa-chart-pie"></i> Distribución de Productos</h3>
-        <canvas id="chartProductos" height="200"></canvas>
-      </div>
+      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-bar"></i> Ventas por Vendedor</h3><canvas id="chartVendedores" height="200"></canvas></div>
+      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-pie"></i> Distribución de Productos</h3><canvas id="chartProductos" height="200"></canvas></div>
     </div>
 
     <!-- HISTORIAL DE VENTAS -->
@@ -544,73 +530,33 @@
           <button class="btn btn-danger" onclick="limpiarHistorial()"><i class="fa-solid fa-trash"></i> Borrar</button>
         </div>
       </div>
-
       <div class="form-grid" style="background: var(--table-header); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-        <div class="form-group">
-          <label for="fVendedor">Filtrar Vendedor:</label>
-          <select id="fVendedor" onchange="renderizarVentas()"></select>
-        </div>
-        <div class="form-group">
-          <label for="fSede">Filtrar Sede:</label>
-          <input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()">
-        </div>
+        <div class="form-group"><label for="fVendedor">Filtrar Vendedor:</label><select id="fVendedor" onchange="renderizarVentas()"></select></div>
+        <div class="form-group"><label for="fSede">Filtrar Sede:</label><input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()"></div>
       </div>
-
       <div style="overflow-x: auto;">
         <table>
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Producto</th>
-              <th>Cant</th>
-              <th>Vendedor</th>
-              <th>Sede</th>
-              <th>Total</th>
-              <th>Comisión</th>
-              <th>Ganancia</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Fecha</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total</th><th>Comisión</th><th>Ganancia</th></tr></thead>
           <tbody id="tablaVentas"></tbody>
         </table>
       </div>
-
-      <button class="btn btn-wapp" onclick="enviarCuadreWhatsApp()">
-        <i class="fa-brands fa-whatsapp"></i> Enviar Reporte por WhatsApp
-      </button>
+      <button class="btn btn-wapp" onclick="enviarCuadreWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Enviar Reporte por WhatsApp</button>
     </div>
   </div>
 
-  <!-- PESTAÑA 2: VENDEDORES Y METAS -->
+  <!-- PESTAÑA 2: VENDEDORES -->
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
       <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor</h3>
       <div class="form-grid">
-        <div class="form-group">
-          <label for="vendNombre">Nombre del Vendedor</label>
-          <input type="text" id="vendNombre" placeholder="Ej: Juanjo">
-        </div>
-        <div class="form-group">
-          <label for="vendSede">Sede Habitual</label>
-          <input type="text" id="vendSede" placeholder="Ej: Javeriana">
-        </div>
-        <div class="form-group">
-          <label for="vendMeta">Meta Semanal ($)</label>
-          <input type="number" id="vendMeta" placeholder="Ej: 50000">
-        </div>
-        <div class="form-group">
-          <label for="vendComision">Comisión Fija Defecto ($)</label>
-          <input type="number" id="vendComision" placeholder="Ej: 300">
-        </div>
+        <div class="form-group"><label for="vendNombre">Nombre del Vendedor</label><input type="text" id="vendNombre" placeholder="Ej: Juanjo"></div>
+        <div class="form-group"><label for="vendSede">Sede Habitual</label><input type="text" id="vendSede" placeholder="Ej: Javeriana"></div>
+        <div class="form-group"><label for="vendMeta">Meta Semanal ($)</label><input type="number" id="vendMeta" placeholder="Ej: 50000"></div>
+        <div class="form-group"><label for="vendComision">Comisión Fija Defecto ($)</label><input type="number" id="vendComision" placeholder="Ej: 300"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarVendedor()">
-        <i class="fa-solid fa-save"></i> Guardar Vendedor
-      </button>
+      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarVendedor()"><i class="fa-solid fa-save"></i> Guardar Vendedor</button>
     </div>
-
-    <div class="card">
-      <h3><i class="fa-solid fa-trophy"></i> Desempeño y Cumplimiento de Metas</h3>
-      <div id="listaVendedores"></div>
-    </div>
+    <div class="card"><h3><i class="fa-solid fa-trophy"></i> Desempeño y Cumplimiento de Metas</h3><div id="listaVendedores"></div></div>
   </div>
 
   <!-- PESTAÑA 3: INVENTARIO -->
@@ -618,46 +564,19 @@
     <div class="card">
       <h3><i class="fa-solid fa-box"></i> Gestionar Productos</h3>
       <div class="form-grid">
-        <div class="form-group full">
-          <label for="pNombre">Nombre del Producto / Combo</label>
-          <input type="text" id="pNombre" placeholder="Ej: Combo 1">
-        </div>
-        <div class="form-group">
-          <label for="pStock">Stock Disponible</label>
-          <input type="number" id="pStock" placeholder="0">
-        </div>
-        <div class="form-group">
-          <label for="pPrecio">Precio de Venta ($)</label>
-          <input type="number" id="pPrecio" placeholder="0">
-        </div>
-        <div class="form-group">
-          <label for="pCosto">Costo Insumo ($)</label>
-          <input type="number" id="pCosto" placeholder="0">
-        </div>
-        <div class="form-group">
-          <label for="pValorComision">Comisión ($)</label>
-          <input type="number" id="pValorComision" placeholder="0">
-        </div>
+        <div class="form-group full"><label for="pNombre">Nombre del Producto / Combo</label><input type="text" id="pNombre" placeholder="Ej: Combo 1"></div>
+        <div class="form-group"><label for="pStock">Stock Disponible</label><input type="number" id="pStock" placeholder="0"></div>
+        <div class="form-group"><label for="pPrecio">Precio de Venta ($)</label><input type="number" id="pPrecio" placeholder="0"></div>
+        <div class="form-group"><label for="pCosto">Costo Insumo ($)</label><input type="number" id="pCosto" placeholder="0"></div>
+        <div class="form-group"><label for="pValorComision">Comisión ($)</label><input type="number" id="pValorComision" placeholder="0"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarProducto()">
-        <i class="fa-solid fa-folder-plus"></i> Guardar en Inventario
-      </button>
+      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-folder-plus"></i> Guardar en Inventario</button>
     </div>
-
     <div class="card">
       <h3><i class="fa-solid fa-warehouse"></i> Inventario Actual</h3>
       <div style="overflow-x: auto;">
         <table>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Stock</th>
-              <th>Precio</th>
-              <th>Costo</th>
-              <th>Comisión</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
+          <thead><tr><th>Nombre</th><th>Stock</th><th>Precio</th><th>Costo</th><th>Comisión</th><th>Acción</th></tr></thead>
           <tbody id="tablaProductos"></tbody>
         </table>
       </div>
@@ -700,71 +619,38 @@
       <div class="form-group">
         <div class="chat-input-wrapper">
           <textarea id="aiPromptInput" placeholder="Escribe tu consulta y presiona Enter..." onkeydown="manejarEnterChat(event)"></textarea>
-          <button class="btn-send-whatsapp" onclick="consultarIA()" title="Enviar consulta">
-            <i class="fa-solid fa-arrow-up"></i>
-          </button>
+          <button class="btn-send-whatsapp" onclick="consultarIA()" title="Enviar consulta"><i class="fa-solid fa-arrow-up"></i></button>
         </div>
       </div>
-
-      <div class="ai-response-box" id="aiResponseBox">
-        <em>Selecciona una opción o escribe tu consulta para generar el reporte...</em>
-      </div>
+      <div class="ai-response-box" id="aiResponseBox"><em>Selecciona una opción o escribe tu consulta para generar el reporte...</em></div>
     </div>
   </div>
 
-  <!-- PESTAÑA 5: AJUSTES (FIREBASE & API KEY IA) -->
+  <!-- PESTAÑA 5: AJUSTES -->
   <div id="tab-ajustes" class="tab-content">
     <div class="card" style="border-top: 4px solid var(--primary);">
       <h3><i class="fa-solid fa-cloud"></i> Configuración de Sincronización en la Nube (Firebase)</h3>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Conecta tus credenciales de Firebase Firestore para respaldar y sincronizar datos en tiempo real entre múltiples dispositivos.</p>
-      
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Conecta tus credenciales de Firebase Firestore para respaldar datos en tiempo real.</p>
       <div class="form-grid">
-        <div class="form-group">
-          <label for="fbApiKey">Firebase API Key</label>
-          <input type="password" id="fbApiKey" placeholder="AIzaSy...">
-        </div>
-        <div class="form-group">
-          <label for="fbAuthDomain">Auth Domain</label>
-          <input type="text" id="fbAuthDomain" placeholder="tu-proyecto.firebaseapp.com">
-        </div>
-        <div class="form-group">
-          <label for="fbProjectId">Project ID</label>
-          <input type="text" id="fbProjectId" placeholder="tu-proyecto-id">
-        </div>
-        <div class="form-group">
-          <label for="fbStorageBucket">Storage Bucket</label>
-          <input type="text" id="fbStorageBucket" placeholder="tu-proyecto.appspot.com">
-        </div>
-        <div class="form-group">
-          <label for="fbMessagingSenderId">Messaging Sender ID</label>
-          <input type="text" id="fbMessagingSenderId" placeholder="123456789">
-        </div>
-        <div class="form-group">
-          <label for="fbAppId">App ID</label>
-          <input type="text" id="fbAppId" placeholder="1:12345:web:abcde">
-        </div>
+        <div class="form-group"><label for="fbApiKey">Firebase API Key</label><input type="password" id="fbApiKey" placeholder="AIzaSy..."></div>
+        <div class="form-group"><label for="fbAuthDomain">Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="tu-proyecto.firebaseapp.com"></div>
+        <div class="form-group"><label for="fbProjectId">Project ID</label><input type="text" id="fbProjectId" placeholder="tu-proyecto-id"></div>
+        <div class="form-group"><label for="fbStorageBucket">Storage Bucket</label><input type="text" id="fbStorageBucket" placeholder="tu-proyecto.appspot.com"></div>
+        <div class="form-group"><label for="fbMessagingSenderId">Messaging Sender ID</label><input type="text" id="fbMessagingSenderId" placeholder="123456789"></div>
+        <div class="form-group"><label for="fbAppId">App ID</label><input type="text" id="fbAppId" placeholder="1:12345:web:abcde"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 15px;" onclick="guardarConexionFirebase()">
-        <i class="fa-solid fa-plug"></i> Guardar y Conectar Firebase
-      </button>
+      <button class="btn btn-primary" style="margin-top: 15px;" onclick="guardarConexionFirebase()"><i class="fa-solid fa-plug"></i> Guardar y Conectar Firebase</button>
     </div>
 
     <div class="card" style="border-top: 4px solid var(--ai-color);">
       <h3><i class="fa-solid fa-key"></i> Configuración de Inteligencia Artificial (Gemini API Key)</h3>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Ingresa tu clave de API de Google Gemini para habilitar consultas en la nube avanzadas con el modelo oficial.</p>
-      
-      <div class="form-group full">
-        <label for="aiApiKey">Google Gemini API Key</label>
-        <input type="password" id="aiApiKey" placeholder="AIzaSy... (Deja en blanco para usar modo analítico local)">
-      </div>
-      <button class="btn btn-ai" style="margin-top: 15px;" onclick="guardarApiKeyIA()">
-        <i class="fa-solid fa-save"></i> Guardar API Key IA
-      </button>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Ingresa tu clave de API de Google Gemini para habilitar el modelo oficial en la nube.</p>
+      <div class="form-group full"><label for="aiApiKey">Google Gemini API Key</label><input type="password" id="aiApiKey" placeholder="AIzaSy..."></div>
+      <button class="btn btn-ai" style="margin-top: 15px;" onclick="guardarApiKeyIA()"><i class="fa-solid fa-save"></i> Guardar API Key IA</button>
     </div>
   </div>
 
   <script>
-    // ESTADO DE CONFIGURACIÓN Y DATOS
     let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
     let dbFirebase = null;
@@ -783,8 +669,7 @@
     };
 
     let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
-    let chartV = null;
-    let chartP = null;
+    let chartV = null, chartP = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       if (localStorage.getItem('theme_dark') === 'true') {
@@ -802,9 +687,7 @@
         inicializarFirebaseCloud(firebaseConfig);
       }
 
-      if (geminiApiKey) {
-        document.getElementById('aiApiKey').value = geminiApiKey;
-      }
+      if (geminiApiKey) document.getElementById('aiApiKey').value = geminiApiKey;
 
       renderizarVendedoresSelect();
       renderizarProductos();
@@ -815,8 +698,7 @@
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme_dark', isDark);
-      document.getElementById('btnTheme').innerHTML = isDark ? 
-        '<i class="fa-solid fa-sun"></i> Modo Claro' : '<i class="fa-solid fa-moon"></i> Modo Oscuro';
+      document.getElementById('btnTheme').innerHTML = isDark ? '<i class="fa-solid fa-sun"></i> Modo Claro' : '<i class="fa-solid fa-moon"></i> Modo Oscuro';
       actualizarGraficas();
     }
 
@@ -832,7 +714,6 @@
       if(p === 'ventas') actualizarGraficas();
     }
 
-    // CONEXIÓN FIREBASE
     function guardarConexionFirebase() {
       const config = {
         apiKey: document.getElementById('fbApiKey').value.trim(),
@@ -843,27 +724,21 @@
         appId: document.getElementById('fbAppId').value.trim()
       };
 
-      if (!config.apiKey || !config.projectId) {
-        return alert('Por favor ingresa al menos la API Key y el Project ID de Firebase.');
-      }
-
+      if (!config.apiKey || !config.projectId) return alert('Ingresa API Key y Project ID.');
       localStorage.setItem('kosmik_fb_config', JSON.stringify(config));
       firebaseConfig = config;
       inicializarFirebaseCloud(config);
-      alert('Configuración de Firebase guardada correctamente.');
+      alert('Configuración de Firebase guardada.');
     }
 
     function inicializarFirebaseCloud(config) {
       try {
-        if (!firebase.apps.length) {
-          firebase.initializeApp(config);
-        }
+        if (!firebase.apps.length) firebase.initializeApp(config);
         dbFirebase = firebase.firestore();
         document.getElementById('cloudStatusBadge').className = 'badge-status badge-online';
         document.getElementById('cloudStatusBadge').innerText = 'Cloud (Firebase)';
         sincronizarDesdeCloud();
       } catch (e) {
-        console.error("Error al inicializar Firebase:", e);
         document.getElementById('cloudStatusBadge').className = 'badge-status badge-offline';
         document.getElementById('cloudStatusBadge').innerText = 'Error Conexión';
       }
@@ -873,17 +748,15 @@
       const key = document.getElementById('aiApiKey').value.trim();
       localStorage.setItem('kosmik_ai_key', key);
       geminiApiKey = key;
-      alert('API Key de Gemini guardada con éxito.');
+      alert('API Key de Gemini guardada.');
     }
 
-    // GESTIÓN DE VENDEDORES
     function guardarVendedor() {
       const nom = document.getElementById('vendNombre').value.trim();
       const sede = document.getElementById('vendSede').value.trim() || 'General';
       const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
       const com = parseFloat(document.getElementById('vendComision').value) || 0;
-
-      if (!nom) return alert('Ingresa el nombre del vendedor.');
+      if (!nom) return alert('Ingresa el nombre.');
 
       vendedores[nom] = { sede, meta, comisionDefecto: com, acumuladoComisiones: vendedores[nom]?.acumuladoComisiones || 0 };
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
@@ -897,40 +770,28 @@
       renderizarVendedoresSelect();
       renderizarVendedoresLista();
       renderizarVentas();
-      alert('Vendedor guardado exitosamente.');
+      alert('Vendedor guardado.');
     }
 
     function editarVendedor(nombreActual) {
       const info = vendedores[nombreActual];
       if (!info) return;
 
-      const nuevoNombre = prompt("Editar nombre del vendedor:", nombreActual);
+      const nuevoNombre = prompt("Editar nombre:", nombreActual);
       if (!nuevoNombre || !nuevoNombre.trim()) return;
       const nombreLimpio = nuevoNombre.trim();
 
-      if (nombreLimpio !== nombreActual && vendedores[nombreLimpio]) {
-        return alert("Ya existe un vendedor con ese nombre.");
-      }
-
-      const nuevaSede = prompt("Editar sede habitual:", info.sede);
-      const nuevaMeta = prompt("Editar meta semanal ($):", info.meta);
+      const nuevaSede = prompt("Editar sede:", info.sede);
+      const nuevaMeta = prompt("Editar meta ($):", info.meta);
 
       if (nombreLimpio !== nombreActual) {
-        vendedores[nombreLimpio] = {
-          sede: nuevaSede !== null ? nuevaSede.trim() : info.sede,
-          meta: nuevaMeta !== null ? (parseFloat(nuevaMeta) || info.meta) : info.meta,
-          comisionDefecto: info.comisionDefecto,
-          acumuladoComisiones: info.acumuladoComisiones
-        };
+        vendedores[nombreLimpio] = { sede: nuevaSede || info.sede, meta: parseFloat(nuevaMeta) || info.meta, comisionDefecto: info.comisionDefecto, acumuladoComisiones: info.acumuladoComisiones };
         delete vendedores[nombreActual];
-
-        ventas.forEach(v => {
-          if (v.vendedor === nombreActual) v.vendedor = nombreLimpio;
-        });
+        ventas.forEach(v => { if (v.vendedor === nombreActual) v.vendedor = nombreLimpio; });
         localStorage.setItem('vnts', JSON.stringify(ventas));
       } else {
-        info.sede = nuevaSede !== null ? nuevaSede.trim() : info.sede;
-        info.meta = nuevaMeta !== null ? (parseFloat(nuevaMeta) || info.meta) : info.meta;
+        info.sede = nuevaSede || info.sede;
+        info.meta = parseFloat(nuevaMeta) || info.meta;
       }
 
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
@@ -938,29 +799,26 @@
       renderizarVendedoresSelect();
       renderizarVendedoresLista();
       renderizarVentas();
-      alert("Vendedor actualizado correctamente.");
     }
 
     function eliminarVendedor(vendedor) {
-      if (confirm(`¿Estás seguro de eliminar al vendedor "${vendedor}"? Sus ventas pasadas se mantendrán.`)) {
+      if (confirm(`¿Eliminar a ${vendedor}?`)) {
         delete vendedores[vendedor];
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
         sincronizarHaciaCloud();
         renderizarVendedoresSelect();
         renderizarVendedoresLista();
         renderizarVentas();
-        alert("Vendedor eliminado.");
       }
     }
 
     function liquidarComisiones(vendedor) {
-      if (confirm(`¿Marcar como PAGADAS las comisiones acumuladas de ${vendedor}?`)) {
+      if (confirm(`¿Liquidar comisiones de ${vendedor}?`)) {
         if (vendedores[vendedor]) {
           vendedores[vendedor].acumuladoComisiones = 0;
           localStorage.setItem('cat_vends', JSON.stringify(vendedores));
           sincronizarHaciaCloud();
           renderizarVendedoresLista();
-          alert('Comisiones liquidadas con éxito.');
         }
       }
     }
@@ -968,7 +826,6 @@
     function renderizarVendedoresSelect() {
       const selVenta = document.getElementById('vVendedor');
       const selFiltro = document.getElementById('fVendedor');
-
       selVenta.innerHTML = '';
       selFiltro.innerHTML = '<option value="todos">-- Todos los Vendedores --</option>';
 
@@ -981,11 +838,8 @@
     function renderizarVendedoresLista() {
       const cont = document.getElementById('listaVendedores');
       cont.innerHTML = '';
-
       let vTotals = {};
-      ventas.forEach(v => {
-        vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total;
-      });
+      ventas.forEach(v => { vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total; });
 
       Object.keys(vendedores).forEach(v => {
         const info = vendedores[v];
@@ -995,43 +849,30 @@
         cont.innerHTML += `
           <div class="seller-card">
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <strong>${v} <span style="font-weight:normal; color:var(--text-muted);">(${info.sede})</span></strong>
+              <strong>${v} (${info.sede})</strong>
               <div style="display:flex; gap:6px;">
-                <button class="btn btn-warning" style="padding:4px 10px; font-size:0.8rem;" onclick="editarVendedor('${v}')">
-                  <i class="fa-solid fa-pen"></i> Editar
-                </button>
-                <button class="btn btn-danger" style="padding:4px 10px; font-size:0.8rem;" onclick="eliminarVendedor('${v}')">
-                  <i class="fa-solid fa-trash"></i> Eliminar
-                </button>
-                <button class="btn btn-primary" style="padding:4px 10px; font-size:0.8rem;" onclick="liquidarComisiones('${v}')">
-                  Liquidar ($${(info.acumuladoComisiones || 0).toLocaleString()})
-                </button>
+                <button class="btn btn-warning" style="padding:4px 8px; font-size:0.75rem;" onclick="editarVendedor('${v}')">Editar</button>
+                <button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="eliminarVendedor('${v}')">Eliminar</button>
+                <button class="btn btn-primary" style="padding:4px 8px; font-size:0.75rem;" onclick="liquidarComisiones('${v}')">Liquidar ($${(info.acumuladoComisiones || 0).toLocaleString()})</button>
               </div>
             </div>
-            <div style="margin-top:8px; font-size:0.85rem; color:var(--text-muted);">
-              Vendido: <strong>$${vendido.toLocaleString()}</strong> / Meta: $${info.meta.toLocaleString()} (${pct}%)
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width: ${pct}%;"></div>
-            </div>
+            <div style="margin-top:6px; font-size:0.85rem; color:var(--text-muted);">Vendido: $${vendido.toLocaleString()} / Meta: $${info.meta.toLocaleString()} (${pct}%)</div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%;"></div></div>
           </div>
         `;
       });
     }
 
-    // INVENTARIO
     function guardarProducto() {
       const nombre = document.getElementById('pNombre').value.trim();
       const stock = parseInt(document.getElementById('pStock').value, 10) || 0;
       const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
       const costo = parseFloat(document.getElementById('pCosto').value) || 0;
       const valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
-
-      if (!nombre || precio <= 0) return alert('Ingresa un nombre y precio válidos.');
+      if (!nombre || precio <= 0) return alert('Datos de producto inválidos.');
 
       const id = 'prod_' + Date.now();
       productos[id] = { nombre, stock, precio, costo, valorComision };
-
       localStorage.setItem('cat_prods', JSON.stringify(productos));
       sincronizarHaciaCloud();
       renderizarProductos();
@@ -1039,7 +880,7 @@
     }
 
     function eliminarProducto(id) {
-      if (confirm('¿Eliminar producto del inventario?')) {
+      if (confirm('¿Eliminar producto?')) {
         delete productos[id];
         localStorage.setItem('cat_prods', JSON.stringify(productos));
         sincronizarHaciaCloud();
@@ -1052,7 +893,6 @@
       const tbody = document.getElementById('tablaProductos');
       const banner = document.getElementById('bannerAlerta');
       const listaA = document.getElementById('listaAlertaStock');
-
       sel.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
       tbody.innerHTML = '';
       let alertas = [];
@@ -1060,44 +900,22 @@
       Object.keys(productos).forEach(id => {
         const p = productos[id];
         if (p.stock <= 5) alertas.push(`• <strong>${p.nombre}</strong> (${p.stock} unid.)`);
-
         sel.innerHTML += `<option value="${id}">${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${p.stock}]</option>`;
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>${p.nombre}</strong></td>
-            <td><span class="${p.stock <= 5 ? 'text-warning' : ''}">${p.stock} unid.</span></td>
-            <td>$${p.precio.toLocaleString()}</td>
-            <td>$${p.costo.toLocaleString()}</td>
-            <td>$${p.valorComision.toLocaleString()}</td>
-            <td><button class="btn btn-danger" style="padding:4px 8px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td>
-          </tr>
-        `;
+        tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.stock} unid.</td><td>$${p.precio.toLocaleString()}</td><td>$${p.costo.toLocaleString()}</td><td>$${p.valorComision.toLocaleString()}</td><td><button class="btn btn-danger" style="padding:4px 8px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
       });
 
-      if (alertas.length > 0) {
-        banner.style.display = 'block';
-        listaA.innerHTML = alertas.join('<br>');
-      } else {
-        banner.style.display = 'none';
-      }
+      banner.style.display = alertas.length > 0 ? 'block' : 'none';
+      listaA.innerHTML = alertas.join('<br>');
     }
 
-    // REGISTRO DE VENTAS
     function registrarVenta() {
       const pId = document.getElementById('vProducto').value;
       const p = productos[pId];
       if (!p) return alert('Selecciona un producto.');
-
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
-      if (cant <= 0) return alert('Cantidad no válida.');
-
-      if (p.stock < cant) {
-        return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades disponibles.`);
-      }
+      if (p.stock < cant) return alert(`Stock insuficiente. Quedan ${p.stock}.`);
 
       const vendedor = document.getElementById('vVendedor').value;
-      if (!vendedor) return alert('Selecciona un vendedor.');
-
       const sede = document.getElementById('vUni').value.trim() || vendedores[vendedor]?.sede || 'General';
       
       p.stock -= cant;
@@ -1113,71 +931,44 @@
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       }
 
-      const nuevaVenta = {
+      ventas.unshift({
         fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        producto: p.nombre,
-        cantidad: cant,
-        vendedor: vendedor,
-        sede: sede,
-        total: totalVenta,
-        comision: totalComision,
-        ganancia: gananciaNeta
-      };
-
-      ventas.unshift(nuevaVenta);
+        producto: p.nombre, cantidad: cant, vendedor, sede, total: totalVenta, comision: totalComision, ganancia: gananciaNeta
+      });
       localStorage.setItem('vnts', JSON.stringify(ventas));
       sincronizarHaciaCloud();
 
       document.getElementById('vCantidad').value = '1';
       document.getElementById('vUni').value = '';
-
       renderizarProductos();
       renderizarVendedoresLista();
       renderizarVentas();
-      alert('¡Venta registrada con éxito!');
+      alert('¡Venta registrada!');
     }
 
     function renderizarVentas() {
       const tbody = document.getElementById('tablaVentas');
       const filtroV = document.getElementById('fVendedor').value;
       const filtroS = document.getElementById('fSede').value.toLowerCase();
-
       tbody.innerHTML = '';
       let tVentas = 0, tGanancias = 0, tComisiones = 0, tUnidades = 0;
 
-      ventas.forEach((v) => {
+      ventas.forEach(v => {
         if (filtroV !== 'todos' && v.vendedor !== filtroV) return;
         if (filtroS && !v.sede.toLowerCase().includes(filtroS)) return;
-
-        tVentas += v.total;
-        tGanancias += v.ganancia;
-        tComisiones += v.comision;
-        tUnidades += v.cantidad;
-
-        tbody.innerHTML += `
-          <tr>
-            <td>${v.fecha}</td>
-            <td>${v.producto}</td>
-            <td>${v.cantidad}</td>
-            <td>${v.vendedor}</td>
-            <td>${v.sede}</td>
-            <td>$${v.total.toLocaleString()}</td>
-            <td>$${v.comision.toLocaleString()}</td>
-            <td style="color:var(--success);">+$${v.ganancia.toLocaleString()}</td>
-          </tr>
-        `;
+        tVentas += v.total; tGanancias += v.ganancia; tComisiones += v.comision; tUnidades += v.cantidad;
+        tbody.innerHTML += `<tr><td>${v.fecha}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>${v.vendedor}</td><td>${v.sede}</td><td>$${v.total.toLocaleString()}</td><td>$${v.comision.toLocaleString()}</td><td style="color:var(--success);">+$${v.ganancia.toLocaleString()}</td></tr>`;
       });
 
       document.getElementById('totalVentas').innerText = '$' + tVentas.toLocaleString();
       document.getElementById('totalGanancias').innerText = '$' + tGanancias.toLocaleString();
       document.getElementById('totalComisiones').innerText = '$' + tComisiones.toLocaleString();
       document.getElementById('totalUnidades').innerText = tUnidades.toLocaleString();
-
       actualizarGraficas();
     }
 
     function limpiarHistorial() {
-      if (confirm('¿Estás seguro de borrar todo el historial de ventas?')) {
+      if (confirm('¿Borrar todo el historial?')) {
         ventas = [];
         localStorage.setItem('vnts', JSON.stringify(ventas));
         sincronizarHaciaCloud();
@@ -1188,43 +979,19 @@
 
     function exportarExcel() {
       let csv = 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n';
-      ventas.forEach(v => {
-        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`;
-      });
+      ventas.forEach(v => { csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`; });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'reporte_ventas_kosmik.csv';
-      a.click();
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'reporte_kosmik.csv'; a.click();
     }
 
     function enviarCuadreWhatsApp() {
-      let totalV = document.getElementById('totalVentas').innerText;
-      let totalG = document.getElementById('totalGanancias').innerText;
-      let totalC = document.getElementById('totalComisiones').innerText;
-      let operador = document.getElementById('vUsuario').value;
-
-      let msg = `🚀 *CUADRE DE CAJA - KOSMIK*%0A`;
-      msg += `👤 Operador: ${operador}%0A`;
-      msg += `💰 Ventas Totales: ${totalV}%0A`;
-      msg += `📈 Ganancia Neta: ${totalG}%0A`;
-      msg += `🤝 Comisiones: ${totalC}%0A`;
-      msg += `📦 Total Operaciones: ${ventas.length}%0A`;
-      msg += `_Generado automáticamente desde Kosmik App_`;
-
+      let msg = `🚀 *CUADRE KOSMIK*%0A💰 Ventas: ${document.getElementById('totalVentas').innerText}%0A📈 Ganancia: ${document.getElementById('totalGanancias').innerText}%0A🤝 Comisiones: ${document.getElementById('totalComisiones').innerText}`;
       window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
     }
 
-    // SINCRONIZACIÓN CLOUD FIRESTORE
     function sincronizarHaciaCloud() {
       if (!dbFirebase) return;
-      dbFirebase.collection("kosmik_data").doc("estado_global").set({
-        productos,
-        vendedores,
-        ventas,
-        actualizado: new Date().toISOString()
-      }).catch(err => console.error("Error sincronizando hacia Firebase:", err));
+      dbFirebase.collection("kosmik_data").doc("estado_global").set({ productos, vendedores, ventas, actualizado: new Date().toISOString() }).catch(err => console.error(err));
     }
 
     function sincronizarDesdeCloud() {
@@ -1235,138 +1002,76 @@
           if (data.productos) productos = data.productos;
           if (data.vendedores) vendedores = data.vendedores;
           if (data.ventas) ventas = data.ventas;
-
           localStorage.setItem('cat_prods', JSON.stringify(productos));
           localStorage.setItem('cat_vends', JSON.stringify(vendedores));
           localStorage.setItem('vnts', JSON.stringify(ventas));
-
           renderizarVendedoresSelect();
           renderizarProductos();
           renderizarVendedoresLista();
           renderizarVentas();
         }
-      }).catch(err => console.error("Error cargando desde Firebase:", err));
+      }).catch(err => console.error(err));
     }
 
-    // GRÁFICAS CHART.JS
     function actualizarGraficas() {
       const isDark = document.body.classList.contains('dark-mode');
       const textColor = isDark ? '#f8fafc' : '#0f172a';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
-
-      let vMap = {};
+      let vMap = {}, pMap = {};
       ventas.forEach(v => {
         vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total;
-      });
-
-      const ctxV = document.getElementById('chartVendedores').getContext('2d');
-      if (chartV) chartV.destroy();
-      chartV = new Chart(ctxV, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(vMap),
-          datasets: [{
-            label: 'Ventas ($)',
-            data: Object.values(vMap),
-            backgroundColor: '#4f46e5',
-            borderRadius: 6
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: textColor }, grid: { color: gridColor } },
-            y: { ticks: { color: textColor }, grid: { color: gridColor } }
-          }
-        }
-      });
-
-      let pMap = {};
-      ventas.forEach(v => {
         pMap[v.producto] = (pMap[v.producto] || 0) + v.cantidad;
       });
 
-      const ctxP = document.getElementById('chartProductos').getContext('2d');
+      if (chartV) chartV.destroy();
+      chartV = new Chart(document.getElementById('chartVendedores').getContext('2d'), {
+        type: 'bar', data: { labels: Object.keys(vMap), datasets: [{ data: Object.values(vMap), backgroundColor: '#4f46e5', borderRadius: 6 }] },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } } }
+      });
+
       if (chartP) chartP.destroy();
-      chartP = new Chart(ctxP, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(pMap),
-          datasets: [{
-            data: Object.values(pMap),
-            backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
-        }
+      chartP = new Chart(document.getElementById('chartProductos').getContext('2d'), {
+        type: 'doughnut', data: { labels: Object.keys(pMap), datasets: [{ data: Object.values(pMap), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }
       });
     }
 
-    // MOTOR INTELIGENTE HÍBRIDO (LOCAL / GEMINI API)
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
-
       if (tipo === 'diagnostico_financiero') {
         let totalV = ventas.reduce((acc, v) => acc + v.total, 0);
         let totalG = ventas.reduce((acc, v) => acc + v.ganancia, 0);
         let margen = totalV > 0 ? ((totalG / totalV) * 100).toFixed(1) : 0;
-        r = `📊 **Diagnóstico Financiero Rápido:**\n- Facturación global registrada: $${totalV.toLocaleString()}\n- Margen de utilidad neto global: ${margen}%\n- **Recomendación:** Mantén tus costos fijos controlados y prioriza la rotación de combos con mayor rentabilidad de insumos.`;
+        r = `📊 **Diagnóstico Financiero Rápido:**\n- Facturación global: $${totalV.toLocaleString()}\n- Margen de utilidad neto: ${margen}%`;
       } else if (tipo === 'ranking_vendedores') {
-        let vMap = {};
-        ventas.forEach(v => { vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total; });
-        let sorted = Object.entries(vMap).sort((a,b) => b[1] - a[1]);
-        r = `🏆 **Ranking Actual de Vendedores:**\n`;
-        if(sorted.length === 0) r += `Aún no hay registros de ventas para clasificar.`;
-        sorted.forEach(([v, val], idx) => {
-          r += `${idx+1}. **${v}**: $${val.toLocaleString()}\n`;
-        });
+        let vMap = {}; ventas.forEach(v => vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total);
+        r = `🏆 **Ranking de Vendedores:**\n` + Object.entries(vMap).map(([v, val]) => `• ${v}: $${val.toLocaleString()}`).join('\n');
       } else if (tipo === 'analizar_stock') {
         let criticos = Object.values(productos).filter(p => p.stock <= 5);
-        r = `📦 **Auditoría de Reabastecimiento:**\n`;
-        if (criticos.length === 0) {
-          r += `¡Excelente! No hay productos con stock crítico en este momento. Todos superan las 5 unidades.`;
-        } else {
-          r += `Se detectaron ${criticos.length} productos en nivel crítico de inventario:\n`;
-          criticos.forEach(p => {
-            r += `• ${p.nombre} (Disponibles: ${p.stock} unid.) - ¡Pedir lote nuevo urgente!\n`;
-          });
-        }
+        r = criticos.length === 0 ? `📦 Todos los productos tienen stock saludable.` : `⚠️ Stock crítico en:\n` + criticos.map(p => `• ${p.nombre} (${p.stock} unid.)`).join('\n');
       } else if (tipo === 'auditoria_comisiones') {
-        r = `🤝 **Estado de Comisiones Pendientes:**\n`;
-        Object.entries(vendedores).forEach(([v, info]) => {
-          r += `• **${v}**: $${(info.acumuladoComisiones || 0).toLocaleString()} acumulados sin liquidar.\n`;
-        });
-        r += `\n*Recuerda utilizar el botón 'Liquidar' en la sección de Vendedores al hacer cortes de caja.*`;
+        r = `🤝 **Comisiones Acumuladas:**\n` + Object.entries(vendedores).map(([v, info]) => `• ${v}: $${(info.acumuladoComisiones || 0).toLocaleString()}`).join('\n');
       } else if (tipo === 'rendimiento_sedes') {
-        let sMap = {};
-        ventas.forEach(v => { sMap[v.sede] = (sMap[v.sede] || 0) + v.total; });
-        r = `🏛️ **Volumen de Ventas por Sede/Universidad:**\n`;
-        if(Object.keys(sMap).length === 0) r += `No hay registros agrupados por sede aún.`;
-        Object.entries(sMap).forEach(([s, val]) => {
-          r += `• **${s}**: $${val.toLocaleString()}\n`;
-        });
+        let sMap = {}; ventas.forEach(v => sMap[v.sede] = (sMap[v.sede] || 0) + v.total);
+        r = `🏛️ **Ventas por Sede:**\n` + Object.entries(sMap).map(([s, val]) => `• ${s}: $${val.toLocaleString()}`).join('\n');
       } else if (tipo === 'guiones_venta') {
-        r = `💬 **Guión Recomendado para Abordaje Estudiantil:**\n"¡Hola! ¿Qué tal? Te cuento que hoy traemos nuestros combos especiales energéticos y de tecnología express ideales para la jornada. ¿Te llevas uno de promoción hoy para recargar pilas?"`;
+        r = `💬 **Guión de Abordaje:**\n"¡Hola! ¿Qué tal? Hoy traemos combos energéticos ideales para la jornada. ¿Te llevas uno?"`;
       } else if (tipo === 'promo_whatsapp') {
-        r = `📱 **Copy Promocional para Estados de WhatsApp:**\n🔥 ¡ATENCIÓN UNIVERSITARIOS! 🔥\nNo dejes que tu día se apague. Acércate con nuestros vendedores y llévate tu combo favorito al mejor precio. ¡Stock limitado, aprovecha ya! 🚀`;
+        r = `📱 **Copy WhatsApp:**\n🔥 ¡ATENCIÓN UNIVERSITARIOS! 🔥\nNo dejes que tu día se apague. Llévate tu combo favorito al mejor precio. ¡Stock limitado! 🚀`;
       } else if (tipo === 'calculadora_descuentos') {
-        r = `💡 **Evaluador de Promociones:**\nSi aplicas un descuento superior al 15%, asegúrate de que el volumen de venta compense la pérdida de margen unitario para proteger tu ganancia neta.`;
+        r = `💡 **Promociones:** Valida que el volumen cubra el descuento para no perder margen.`;
       } else if (tipo === 'proyecciones_metas') {
-        r = `🎯 **Proyección de Metas:**\nRevisa el porcentaje de avance individual en la pestaña 'Vendedores & Metas'. Los perfiles con más del 80% están cerca de cerrar sus objetivos semanales exitosamente.`;
+        r = `🎯 **Metas:** Revisa el porcentaje de avance en la pestaña de Vendedores.`;
       } else if (tipo === 'detector_anomalias') {
-        r = `🛡️ **Auditoría de Integridad:**\nEl sistema opera con normalidad. No se detectan transacciones duplicadas o anomalías en los registros recientes.`;
+        r = `🛡️ **Seguridad:** El sistema opera con normalidad y sin anomalías.`;
       }
-
       box.innerText = r;
     }
 
     function manejarEnterChat(event) {
       if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault(); // Evita el salto de línea
+        event.preventDefault();
         consultarIA();
       }
     }
@@ -1376,8 +1081,7 @@
       const txt = txtInput.value.trim();
       const box = document.getElementById('aiResponseBox');
       if (!txt) return;
-
-      txtInput.value = ''; // Limpia el input de inmediato estilo WhatsApp
+      txtInput.value = '';
 
       if (!geminiApiKey) {
         const queryLower = txt.toLowerCase();
@@ -1388,37 +1092,34 @@
         } else if (queryLower.includes('stock') || queryLower.includes('inventario')) {
           ejecutarPromptAccion('analizar_stock');
         } else {
-          box.innerText = `🤖 **Respuesta Kosmik IA (Modo Local):**\nPara consultas abiertas detalladas con inteligencia artificial generativa, ingresa tu API Key oficial de Google Gemini en la pestaña de Ajustes.`;
+          box.innerText = `🤖 [Modo Local]: Ingresa tu API Key de Gemini en la pestaña Ajustes para consultas abiertas con inteligencia artificial.`;
         }
         return;
       }
 
-      box.innerText = "🤖 Consultando con Google Gemini API...";
-      
+      box.innerText = "🤖 Consultando con Google Gemini...";
       try {
-        // Usando el modelo actualizado gemini-2.0-flash
         const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Actúa como el analista de negocios inteligente para Kosmik (una plataforma de ventas universitarias de snacks y accesorios). 
-                Datos actuales del negocio:
+                text: `Actúa como analista financiero y comercial de Kosmik (sistema de snacks universitarios). 
+                Datos del negocio:
                 - Productos: ${JSON.stringify(productos)}
                 - Vendedores: ${JSON.stringify(vendedores)}
                 - Ventas recientes: ${JSON.stringify(ventas.slice(0, 10))}
                 
-                Pregunta del usuario: ${txt}`
+                Pregunta del operador: ${txt}`
               }]
             }]
           })
         });
 
         const data = await respuesta.json();
-        
         if (data.error) {
-          box.innerText = `❌ Error de Google Gemini: ${data.error.message || 'Verifica tu clave.'}`;
+          box.innerText = `❌ Error de Gemini: ${data.error.message || 'Verifica tu clave.'}`;
           return;
         }
 
@@ -1429,7 +1130,7 @@
         }
       } catch (err) {
         console.error(err);
-        box.innerText = "Error de red al consultar la API de Gemini.";
+        box.innerText = "Error de red al conectar con Google Gemini.";
       }
     }
   </script>
