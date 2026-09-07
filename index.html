@@ -281,7 +281,6 @@
         <div class="form-group"><label for="pStock">Stock Inicial</label><input type="number" id="pStock" placeholder="0"></div>
         <div class="form-group"><label for="pPrecio">Precio de Venta ($)</label><input type="number" id="pPrecio" placeholder="0"></div>
         <div class="form-group"><label for="pCosto">Costo de Insumo ($)</label><input type="number" id="pCosto" placeholder="0"></div>
-        <div class="form-group" id="grupoComisionInput" style="display:none;"><label for="pValorComision">Comisión Producto ($)</label><input type="number" id="pValorComision" placeholder="0"></div>
       </div>
       <button class="btn btn-primary" style="margin-top: 18px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-folder-plus"></i> Guardar en Base de Datos</button>
     </div>
@@ -541,7 +540,7 @@
       }).catch(err => console.error("Error al descargar desde cloud:", err));
     }
 
-    /********************************************************************************
+    /****************************************************************----------------
      * GESTIÓN COMERCIAL DE VENDEDORES Y METAS (CON PORCENTAJE DE COMISIÓN)
      ********************************************************************************/
     function guardarVendedor() {
@@ -673,7 +672,7 @@
       });
     }
 
-    /************************************************--------------------------------
+    /****************************************************************----------------
      * GESTIÓN DE INVENTARIO Y PRODUCTOS
      ********************************************************************************/
     function guardarProducto() {
@@ -755,7 +754,7 @@
 
       const totalVenta = p.precio * cant;
       
-      // LÓGICA DE COMISIÓN BLINDADA: 25% para Dulces, o el % configurado del vendedor para Huevos/Vapes
+      // COMISIÓN EXACTA DEL 25% PARA DULCES, O EL % CONFIGURADO DEL VENDEDOR PARA HUEVOS/VAPES
       let totalComision = 0;
       const infoVendedor = vendedores[vendedor];
       if (categoriaActual === 'dulces') {
@@ -859,7 +858,7 @@
 
     /************************************************--------------------------------
      * GRÁFICAS Y ANALÍTICA VISUAL (CHART.JS)
-     ****************************************************************----------------/
+     ********************************************************************************/
     function actualizarGraficas() {
       const isDark = document.body.classList.contains('dark-mode');
       const textColor = isDark ? '#f8fafc' : '#0f172a';
@@ -911,7 +910,7 @@
 
     /************************************************--------------------------------
      * IA COPILOT (MOTOR LOCAL Y GOOGLE GEMINI)
-     ****************************************************************----------------/
+     ********************************************************************************/
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
