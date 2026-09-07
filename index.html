@@ -194,7 +194,7 @@
       <div class="metric-title">Ganancia Neta</div>
       <div class="metric-value" style="color: var(--success);" id="totalGanancias">$0</div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card" id="cardComisionesContainer">
       <i class="fa-solid fa-handshake metric-icon" style="color: var(--warning);"></i>
       <div class="metric-title">Comisiones Totales</div>
       <div class="metric-value" style="color: var(--warning);" id="totalComisiones">$0</div>
@@ -207,9 +207,9 @@
   </div>
 
   <!-- PESTAÑAS PRINCIPALES -->
-  <nav class="nav-tabs">
+  <nav class="nav-tabs" id="navTabsContainer">
     <button class="tab-btn active" onclick="cambiarPestana('ventas')"><i class="fa-solid fa-cart-shopping"></i> Ventas</button>
-    <button class="tab-btn" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users"></i> Vendedores & Metas</button>
+    <button class="tab-btn" id="tabBtnVendedores" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users"></i> Vendedores & Metas</button>
     <button class="tab-btn" onclick="cambiarPestana('productos')"><i class="fa-solid fa-boxes-stacked"></i> Inventario</button>
     <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')"><i class="fa-solid fa-brain"></i> IA Copilot</button>
     <button class="tab-btn" onclick="cambiarPestana('ajustes')"><i class="fa-solid fa-gear"></i> Ajustes (Cloud & IA)</button>
@@ -223,14 +223,18 @@
         <div class="form-group full"><label for="vProducto">Producto / Combo</label><select id="vProducto"></select></div>
         <div class="form-group"><label for="vCantidad">Cantidad</label><input type="number" id="vCantidad" value="1" min="1"></div>
         <div class="form-group"><label for="vUni">Sede / Universidad</label><input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario"></div>
-        <div class="form-group full"><label for="vVendedor">Vendedor Encargado</label><select id="vVendedor"></select></div>
+        <!-- GRUPO VENDEDOR (SOLO VISIBLE EN DULCES) -->
+        <div class="form-group full" id="grupoVendedorVenta">
+          <label for="vVendedor">Vendedor Encargado (Solo Dulces)</label>
+          <select id="vVendedor"></select>
+        </div>
       </div>
       <button class="btn btn-success" style="width: 100%; margin-top: 18px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> Guardar Venta en Sistema</button>
     </div>
 
     <!-- PANEL DE GRÁFICAS -->
     <div class="form-grid" style="margin-bottom: 24px;">
-      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-bar"></i> Rendimiento por Vendedor</h3><canvas id="chartVendedores" height="210"></canvas></div>
+      <div class="card" id="cardGraficaVendedores" style="margin: 0;"><h3><i class="fa-solid fa-chart-bar"></i> Rendimiento por Vendedor</h3><canvas id="chartVendedores" height="210"></canvas></div>
       <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-pie"></i> Participación de Productos</h3><canvas id="chartProductos" height="210"></canvas></div>
     </div>
 
@@ -243,13 +247,13 @@
           <button class="btn btn-danger" onclick="limpiarHistorial()"><i class="fa-solid fa-trash"></i> Borrar Historial</button>
         </div>
       </div>
-      <div class="form-grid" style="background: var(--table-header); padding: 16px; border-radius: 10px; margin-bottom: 18px;">
+      <div class="form-grid" style="background: var(--table-header); padding: 16px; border-radius: 10px; margin-bottom: 18px;" id="filtroVendedorContainer">
         <div class="form-group"><label for="fVendedor">Filtrar por Vendedor:</label><select id="fVendedor" onchange="renderizarVentas()"></select></div>
         <div class="form-group"><label for="fSede">Filtrar por Sede:</label><input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()"></div>
       </div>
       <div style="overflow-x: auto;">
         <table>
-          <thead><tr><th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total Venta</th><th>Comisión</th><th>Ganancia Neta</th></tr></thead>
+          <thead><tr id="tablaVentasHeaders"><th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total Venta</th><th>Comisión</th><th>Ganancia Neta</th></tr></thead>
           <tbody id="tablaVentas"></tbody>
         </table>
       </div>
@@ -257,10 +261,10 @@
     </div>
   </div>
 
-  <!-- PESTAÑA 2: VENDEDORES -->
+  <!-- PESTAÑA 2: VENDEDORES (SOLO DULCES) -->
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
-      <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor Comercial</h3>
+      <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor Comercial (Exclusivo Dulces)</h3>
       <div class="form-grid">
         <div class="form-group"><label for="vendNombre">Nombre del Vendedor</label><input type="text" id="vendNombre" placeholder="Ej: Juanjo"></div>
         <div class="form-group"><label for="vendSede">Sede Habitual</label><input type="text" id="vendSede" placeholder="Ej: Javeriana"></div>
@@ -310,8 +314,8 @@
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('calculadora_descuentos')"><i class="fa-solid fa-percent"></i> Evaluador de Promociones</button>
       </div>
 
-      <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Humana & Comisiones</div>
-      <div class="quick-ai-grid">
+      <div class="ai-category-title" id="aiCatVendedoresTitle"><i class="fa-solid fa-users"></i> Gestión Humana & Comisiones</div>
+      <div class="quick-ai-grid" id="aiCatVendedoresGrid">
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('auditoria_comisiones')"><i class="fa-solid fa-hand-holding-dollar"></i> Auditoría de Comisiones</button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')"><i class="fa-solid fa-trophy"></i> Ranking de Vendedores</button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('rendimiento_sedes')"><i class="fa-solid fa-building-columns"></i> Análisis por Universidad</button>
@@ -372,7 +376,6 @@
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
     let dbFirebase = null;
 
-    // Bases de datos independientes por categoría
     let BD_PRODUCTOS = JSON.parse(localStorage.getItem('kosmik_bd_prods')) || {
       dulces: {
         'c1': { nombre: 'Cable Ácido (Unidad)', stock: 25, precio: 1000, costo: 400 },
@@ -399,9 +402,6 @@
     let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
     let chartV = null, chartP = null;
 
-    /********************************************************************************
-     * CICLO DE VIDA E INICIALIZACIÓN
-     ********************************************************************************/
     document.addEventListener("DOMContentLoaded", () => {
       console.log("🚀 Kosmik Enterprise Ultimate inicializado correctamente.");
       if (localStorage.getItem('theme_dark') === 'true') {
@@ -428,9 +428,6 @@
       renderizarVentas();
     });
 
-    /********************************************************************************
-     * GESTIÓN DE CATEGORÍAS MAESTRAS Y UI
-     ********************************************************************************/
     function cambiarCategoriaMaster(cat) {
       categoriaActual = cat;
       document.querySelectorAll('.master-cat-btn').forEach(btn => btn.classList.remove('active'));
@@ -448,6 +445,42 @@
       const iconos = { dulces: '🍬 Dulces', huevos: '🥚 Huevos', vapes: '💨 Vapes' };
       document.getElementById('tituloRegistroVenta').innerHTML = `<i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta (${iconos[categoriaActual]})`;
       document.getElementById('tituloIAHeader').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise - ${iconos[categoriaActual]}`;
+
+      const tabVend = document.getElementById('tabBtnVendedores');
+      const grupoVend = document.getElementById('grupoVendedorVenta');
+      const cardComs = document.getElementById('cardComisionesContainer');
+      const cardGrafV = document.getElementById('cardGraficaVendedores');
+      const filtroVContainer = document.getElementById('filtroVendedorContainer');
+      const aiTitleV = document.getElementById('aiCatVendedoresTitle');
+      const aiGridV = document.getElementById('aiCatVendedoresGrid');
+      const thHeaders = document.getElementById('tablaVentasHeaders');
+
+      if (categoriaActual === 'dulces') {
+        if(tabVend) tabVend.style.display = 'flex';
+        if(grupoVend) grupoVend.style.display = 'flex';
+        if(cardComs) cardComs.style.display = 'block';
+        if(cardGrafV) cardGrafV.style.display = 'block';
+        if(filtroVContainer) filtroVContainer.style.display = 'grid';
+        if(aiTitleV) aiTitleV.style.display = 'flex';
+        if(aiGridV) aiGridV.style.display = 'grid';
+        if(thHeaders) thHeaders.innerHTML = '<th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total Venta</th><th>Comisión</th><th>Ganancia Neta</th>';
+      } else {
+        // En Huevos y Vapes se oculta todo lo relacionado a vendedores y comisiones
+        if(tabVend) tabVend.style.display = 'none';
+        if(grupoVend) grupoVend.style.display = 'none';
+        if(cardComs) cardComs.style.display = 'none';
+        if(cardGrafV) cardGrafV.style.display = 'none';
+        if(filtroVContainer) filtroVContainer.style.display = 'none';
+        if(aiTitleV) aiTitleV.style.display = 'none';
+        if(aiGridV) aiGridV.style.display = 'none';
+        if(thHeaders) thHeaders.innerHTML = '<th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Sede</th><th>Total Venta</th><th>Ganancia Neta</th>';
+        
+        // Si estaba en la pestaña de vendedores, lo devolvemos a ventas por seguridad
+        const activeTab = document.querySelector('.tab-content.active');
+        if(activeTab && activeTab.id === 'tab-vendedores') {
+          cambiarPestana('ventas');
+        }
+      }
     }
 
     function toggleDarkMode() {
@@ -458,6 +491,7 @@
     }
 
     function cambiarPestana(p) {
+      if (p === 'vendedores' && categoriaActual !== 'dulces') return;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
@@ -470,9 +504,6 @@
       if(p === 'ventas') actualizarGraficas();
     }
 
-    /********************************************************************************
-     * CONEXIÓN Y SINCRONIZACIÓN FIREBASE CLOUD
-     ********************************************************************************/
     function guardarConexionFirebase() {
       const config = {
         apiKey: document.getElementById('fbApiKey').value.trim(),
@@ -540,9 +571,6 @@
       }).catch(err => console.error("Error al descargar desde cloud:", err));
     }
 
-    /****************************************************************----------------
-     * GESTIÓN COMERCIAL DE VENDEDORES Y METAS (CON PORCENTAJE DE COMISIÓN)
-     ********************************************************************************/
     function guardarVendedor() {
       const nom = document.getElementById('vendNombre').value.trim();
       const sede = document.getElementById('vendSede').value.trim() || 'General';
@@ -645,9 +673,9 @@
       cont.innerHTML = '';
       let vTotals = {};
       
-      Object.keys(BD_VENTAS).forEach(cat => {
-        BD_VENTAS[cat].forEach(v => { vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total; });
-      });
+      if (BD_VENTAS['dulces']) {
+        BD_VENTAS['dulces'].forEach(v => { vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total; });
+      }
 
       Object.keys(vendedores).forEach(v => {
         const info = vendedores[v];
@@ -672,9 +700,6 @@
       });
     }
 
-    /****************************************************************----------------
-     * GESTIÓN DE INVENTARIO Y PRODUCTOS
-     ********************************************************************************/
     function guardarProducto() {
       const nombre = document.getElementById('pNombre').value.trim();
       const stock = parseInt(document.getElementById('pStock').value, 10) || 0;
@@ -724,7 +749,7 @@
         if (p.stock <= 5) alertas.push(`• <strong>${p.nombre}</strong> (${p.stock} unidades restantes)`);
         sel.innerHTML += `<option value="${id}">${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${p.stock}]</option>`;
         
-        const comText = categoriaActual === 'dulces' ? '25% (Automático)' : 'Calculado s/ Vendedor';
+        const comText = categoriaActual === 'dulces' ? '25% (Automático)' : 'N/A (Sin Vendedor)';
         tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.stock} unid.</td><td>$${p.precio.toLocaleString()}</td><td>$${p.costo.toLocaleString()}</td><td>${comText}</td><td><button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
       });
 
@@ -734,9 +759,6 @@
       }
     }
 
-    /************************************************--------------------------------
-     * PUNTO DE VENTA Y REGISTRO DE TRANSACCIONES
-     ********************************************************************************/
     function registrarVenta() {
       const pId = document.getElementById('vProducto').value;
       const prodsActuales = BD_PRODUCTOS[categoriaActual] || {};
@@ -746,42 +768,49 @@
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
       if (p.stock < cant) return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades disponibles.`);
 
-      const vendedor = document.getElementById('vVendedor').value;
-      const sede = document.getElementById('vUni').value.trim() || vendedores[vendedor]?.sede || 'General';
+      let vendedor = 'Directo';
+      let sede = document.getElementById('vUni').value.trim() || 'General';
+      let totalComision = 0;
+      let infoVendedor = null;
+
+      if (categoriaActual === 'dulces') {
+        vendedor = document.getElementById('vVendedor').value;
+        infoVendedor = vendedores[vendedor];
+        sede = sede || infoVendedor?.sede || 'General';
+        const porc = infoVendedor ? (infoVendedor.comisionPorcentaje || 0) : 0;
+        
+        const totalVentaCalc = p.precio * cant;
+        // Si es dulces, comisión 25% automático o porc vendedor según config previa
+        totalComision = totalVentaCalc * (porc > 0 ? porc / 100 : 0.25);
+      }
       
       p.stock -= cant;
       localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
 
       const totalVenta = p.precio * cant;
-      
-      // COMISIÓN EXACTA DEL 25% PARA DULCES, O EL % CONFIGURADO DEL VENDEDOR PARA HUEVOS/VAPES
-      let totalComision = 0;
-      const infoVendedor = vendedores[vendedor];
-      if (categoriaActual === 'dulces') {
-        totalComision = totalVenta * 0.25; // 25% exacto de la venta
-      } else {
-        const porc = infoVendedor ? (infoVendedor.comisionPorcentaje || 0) : 0;
-        totalComision = totalVenta * (porc / 100);
-      }
-
       const totalCosto = (p.costo || 0) * cant;
       const gananciaNeta = totalVenta - totalCosto - totalComision;
 
-      if (infoVendedor) {
+      if (categoriaActual === 'dulces' && infoVendedor) {
         infoVendedor.acumuladoComisiones = (infoVendedor.acumuladoComisiones || 0) + totalComision;
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       }
 
-      BD_VENTAS[categoriaActual].unshift({
+      let ventaObj = {
         fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         producto: p.nombre, 
         cantidad: cant, 
-        vendedor, 
         sede, 
         total: totalVenta, 
-        comision: totalComision, 
         ganancia: gananciaNeta
-      });
+      };
+
+      if (categoriaActual === 'dulces') {
+        ventaObj.vendedor = vendedor;
+        ventaObj.comision = totalComision;
+      }
+
+      BD_VENTAS[categoriaActual].unshift(ventaObj);
       
       localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
       sincronizarHaciaCloud();
@@ -806,15 +835,21 @@
 
       const ventasActuales = BD_VENTAS[categoriaActual] || [];
       ventasActuales.forEach(v => {
-        if (filtroV !== 'todos' && v.vendedor !== filtroV) return;
+        if (categoriaActual === 'dulces') {
+          if (filtroV !== 'todos' && v.vendedor !== filtroV) return;
+        }
         if (filtroS && !v.sede.toLowerCase().includes(filtroS)) return;
         
         tVentas += v.total; 
         tGanancias += v.ganancia; 
-        tComisiones += v.comision; 
         tUnidades += v.cantidad;
+        if (v.comision) tComisiones += v.comision;
 
-        tbody.innerHTML += `<tr><td>${v.fecha}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>${v.vendedor}</td><td>${v.sede}</td><td>$${v.total.toLocaleString()}</td><td>$${v.comision.toLocaleString()}</td><td style="color:var(--success); font-weight:700;">+$${v.ganancia.toLocaleString()}</td></tr>`;
+        if (categoriaActual === 'dulces') {
+          tbody.innerHTML += `<tr><td>${v.fecha}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>${v.vendedor}</td><td>${v.sede}</td><td>$${v.total.toLocaleString()}</td><td>$${(v.comision || 0).toLocaleString()}</td><td style="color:var(--success); font-weight:700;">+$${v.ganancia.toLocaleString()}</td></tr>`;
+        } else {
+          tbody.innerHTML += `<tr><td>${v.fecha}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>${v.sede}</td><td>$${v.total.toLocaleString()}</td><td style="color:var(--success); font-weight:700;">+$${v.ganancia.toLocaleString()}</td></tr>`;
+        }
       });
 
       if(document.getElementById('totalVentas')) document.getElementById('totalVentas').innerText = '$' + tVentas.toLocaleString();
@@ -836,10 +871,14 @@
     }
 
     function exportarExcel() {
-      let csv = 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n';
+      let csv = categoriaActual === 'dulces' ? 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n' : 'Fecha,Producto,Cantidad,Sede,Total,Ganancia\n';
       const ventasActuales = BD_VENTAS[categoriaActual] || [];
       ventasActuales.forEach(v => { 
-        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`; 
+        if (categoriaActual === 'dulces') {
+          csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`; 
+        } else {
+          csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.sede}",${v.total},${v.ganancia}\n`; 
+        }
       });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a'); 
@@ -851,14 +890,17 @@
     function enviarCuadreWhatsApp() {
       const tv = document.getElementById('totalVentas')?.innerText || '$0';
       const tg = document.getElementById('totalGanancias')?.innerText || '$0';
-      const tc = document.getElementById('totalComisiones')?.innerText || '$0';
-      let msg = `🚀 *CUADRE KOSMIK ENTERPRISE (${categoriaActual.toUpperCase()})*%0A💰 Ventas: ${tv}%0A📈 Ganancia Neta: ${tg}%0A🤝 Comisiones: ${tc}`;
+      let msg = `🚀 *CUADRE KOSMIK ENTERPRISE (${categoriaActual.toUpperCase()})*%0A💰 Ventas: ${tv}%0A📈 Ganancia Neta: ${tg}`;
+      if (categoriaActual === 'dulces') {
+        const tc = document.getElementById('totalComisiones')?.innerText || '$0';
+        msg += `%0A🤝 Comisiones: ${tc}`;
+      }
       window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
     }
 
     /************************************************--------------------------------
      * GRÁFICAS Y ANALÍTICA VISUAL (CHART.JS)
-     ********************************************************************************/
+     ****************************************************************----------------/
     function actualizarGraficas() {
       const isDark = document.body.classList.contains('dark-mode');
       const textColor = isDark ? '#f8fafc' : '#0f172a';
@@ -867,28 +909,36 @@
       
       const ventasActuales = BD_VENTAS[categoriaActual] || [];
       ventasActuales.forEach(v => {
-        vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total;
+        if (categoriaActual === 'dulces') {
+          vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total;
+        }
         pMap[v.producto] = (pMap[v.producto] || 0) + v.cantidad;
       });
 
+      const cardGrafV = document.getElementById('cardGraficaVendedores');
       const ctxV = document.getElementById('chartVendedores');
-      if (ctxV) {
-        if (chartV) chartV.destroy();
-        chartV = new Chart(ctxV.getContext('2d'), {
-          type: 'bar', 
-          data: { 
-            labels: Object.keys(vMap), 
-            datasets: [{ data: Object.values(vMap), backgroundColor: '#4f46e5', borderRadius: 8 }] 
-          },
-          options: { 
-            responsive: true, 
-            plugins: { legend: { display: false } }, 
-            scales: { 
-              x: { ticks: { color: textColor }, grid: { color: gridColor } }, 
-              y: { ticks: { color: textColor }, grid: { color: gridColor } } 
-            } 
-          }
-        });
+      if (ctxV && cardGrafV) {
+        if (categoriaActual === 'dulces') {
+          cardGrafV.style.display = 'block';
+          if (chartV) chartV.destroy();
+          chartV = new Chart(ctxV.getContext('2d'), {
+            type: 'bar', 
+            data: { 
+              labels: Object.keys(vMap), 
+              datasets: [{ data: Object.values(vMap), backgroundColor: '#4f46e5', borderRadius: 8 }] 
+            },
+            options: { 
+              responsive: true, 
+              plugins: { legend: { display: false } }, 
+              scales: { 
+                x: { ticks: { color: textColor }, grid: { color: gridColor } }, 
+                y: { ticks: { color: textColor }, grid: { color: gridColor } } 
+              } 
+            }
+          });
+        } else {
+          cardGrafV.style.display = 'none';
+        }
       }
 
       const ctxP = document.getElementById('chartProductos');
@@ -910,7 +960,7 @@
 
     /************************************************--------------------------------
      * IA COPILOT (MOTOR LOCAL Y GOOGLE GEMINI)
-     ********************************************************************************/
+     ****************************************************************----------------/
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
@@ -922,27 +972,29 @@
         let totalG = ventasActuales.reduce((acc, v) => acc + v.ganancia, 0);
         let margen = totalV > 0 ? ((totalG / totalV) * 100).toFixed(1) : 0;
         r = `📊 **Diagnóstico Financiero (${categoriaActual.toUpperCase()}):**\n- Facturación total del sector: $${totalV.toLocaleString()}\n- Utilidad neta generada: $${totalG.toLocaleString()}\n- Margen de ganancia operativo: ${margen}%`;
-      } else if (tipo === 'ranking_vendedores') {
+      } else if (tipo === 'ranking_vendedores' && categoriaActual === 'dulces') {
         let vMap = {}; ventasActuales.forEach(v => vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total);
-        r = `🏆 **Ranking Comercial (${categoriaActual.toUpperCase()}):**\n` + (Object.keys(vMap).length ? Object.entries(vMap).map(([v, val]) => `• ${v}: $${val.toLocaleString()}`).join('\n') : 'Aún no hay transacciones registradas en esta categoría.');
+        r = `🏆 **Ranking Comercial (Dulces):**\n` + (Object.keys(vMap).length ? Object.entries(vMap).map(([v, val]) => `• ${v}: $${val.toLocaleString()}`).join('\n') : 'Aún no hay transacciones registradas.');
       } else if (tipo === 'analizar_stock') {
         let criticos = Object.values(prodsActuales).filter(p => p.stock <= 5);
         r = criticos.length === 0 ? `📦 Todos los artículos de ${categoriaActual} cuentan con inventario saludable.` : `⚠️ Alerta de Reabastecimiento Crítico:\n` + criticos.map(p => `• ${p.nombre} (${p.stock} unid. restantes)`).join('\n');
-      } else if (tipo === 'auditoria_comisiones') {
+      } else if (tipo === 'auditoria_comisiones' && categoriaActual === 'dulces') {
         r = `🤝 **Auditoría de Comisiones Acumuladas:**\n` + Object.entries(vendedores).map(([v, info]) => `• ${v}: $${(info.acumuladoComisiones || 0).toLocaleString()} (Configurado con ${info.comisionPorcentaje || 0}%)`).join('\n');
       } else if (tipo === 'rendimiento_sedes') {
         let sMap = {}; ventasActuales.forEach(v => sMap[v.sede] = (sMap[v.sede] || 0) + v.total);
         r = `🏛️ **Análisis por Sede/Universidad (${categoriaActual.toUpperCase()}):**\n` + (Object.keys(sMap).length ? Object.entries(sMap).map(([s, val]) => `• ${s}: $${val.toLocaleString()}`).join('\n') : 'Sin registros segmentados por sede.');
       } else if (tipo === 'guiones_venta') {
-        r = `💬 **Guión de Abordaje Directo (${categoriaActual.toUpperCase()}):**\n"¡Hola! ¿Qué tal la jornada? Hoy trajimos lo mejor en ${categoriaActual} directo al campus. ¿Te llevas el tuyo para recargar energía?"`;
+        r = `💬 **Guión de Abordaje Directo (${categoriaActual.toUpperCase()}):**\n"¡Hola! ¿Qué tal la jornada? Hoy trajimos lo mejor en ${categoriaActual} directo al campus. ¿Te llevas el tuyo?"`;
       } else if (tipo === 'promo_whatsapp') {
         r = `📱 **Copy Promocional WhatsApp (${categoriaActual.toUpperCase()}):**\n🔥 ¡DISPONIBLE AHORA EN EL CAMPUS! 🔥\nNo te quedes sin tu producto favorito de ${categoriaActual}. Calidad superior y entrega inmediata. ¡Pídelo ya! 🚀`;
       } else if (tipo === 'calculadora_descuentos') {
         r = `💡 **Evaluador de Promociones:** Asegúrate de que el volumen de venta compense cualquier descuento para proteger el margen neto.`;
       } else if (tipo === 'proyecciones_metas') {
-        r = `🎯 **Proyección de Metas:** Revisa el porcentaje de avance individual en la pestaña de Vendedores para impulsar el cierre de semana.`;
+        r = `🎯 **Proyección de Metas:** Revisa el porcentaje de avance individual en la pestaña de Vendedores.`;
       } else if (tipo === 'detector_anomalias') {
         r = `🛡️ **Seguridad y Control:** El flujo de registros en ${categoriaActual} opera dentro de los parámetros normales de auditoría corporativa.`;
+      } else {
+        r = `ℹ️ Esta función de gestión humana/comisiones aplica únicamente para la categoría de Dulces.`;
       }
       box.innerText = r;
     }
@@ -962,20 +1014,11 @@
       txtInput.value = '';
 
       if (!geminiApiKey) {
-        const queryLower = txt.toLowerCase();
-        if (queryLower.includes('comision') || queryLower.includes('debe')) {
-          ejecutarPromptAccion('auditoria_comisiones');
-        } else if (queryLower.includes('ganancia') || queryLower.includes('rentabl')) {
-          ejecutarPromptAccion('diagnostico_financiero');
-        } else if (queryLower.includes('stock') || queryLower.includes('inventario')) {
-          ejecutarPromptAccion('analizar_stock');
-        } else {
-          box.innerText = `🤖 [Modo Local Inteligente]: Ingresa tu API Key de Google Gemini en la pestaña Ajustes para habilitar consultas abiertas con IA avanzada en la nube.`;
-        }
+        box.innerText = `🤖 [Modo Local Inteligente]: Ingresa tu API Key de Google Gemini en la pestaña Ajustes para habilitar consultas abiertas con IA avanzada.`;
         return;
       }
 
-      box.innerText = "🤖 Consultando con Google Gemini (modelo oficial en la nube)...";
+      box.innerText = "🤖 Consultando con Google Gemini...";
       try {
         const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
@@ -983,11 +1026,11 @@
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Actúa como analista financiero y director comercial senior de Kosmik Enterprise (sistema multinegocio). 
-                Categoría activa actual: ${categoriaActual}
-                - Inventario en esta categoría: ${JSON.stringify(BD_PRODUCTOS[categoriaActual])}
-                - Vendedores registrados: ${JSON.stringify(vendedores)}
-                - Ventas recientes de esta categoría: ${JSON.stringify((BD_VENTAS[categoriaActual] || []).slice(0, 10))}
+                text: `Actúa como analista financiero y director comercial senior de Kosmik Enterprise. 
+                Categoría activa actual: ${categoriaActual} (Nota: Vendedores y comisiones aplican SOLO si la categoría es dulces).
+                - Inventario: ${JSON.stringify(BD_PRODUCTOS[categoriaActual])}
+                - Vendedores: ${JSON.stringify(vendedores)}
+                - Ventas recientes: ${JSON.stringify((BD_VENTAS[categoriaActual] || []).slice(0, 10))}
                 
                 Pregunta u orden del operador: ${txt}`
               }]
@@ -997,7 +1040,7 @@
 
         const data = await respuesta.json();
         if (data.error) {
-          box.innerText = `❌ Error de Gemini: ${data.error.message || 'Verifica la validez de tu API Key.'}`;
+          box.innerText = `❌ Error de Gemini: ${data.error.message || 'Verifica tu API Key.'}`;
           return;
         }
 
@@ -1008,7 +1051,7 @@
         }
       } catch (err) {
         console.error("Error de red IA:", err);
-        box.innerText = "Error de red al conectar con los servidores de Google Gemini. Intenta nuevamente en unos segundos.";
+        box.innerText = "Error de red al conectar con los servidores de Google Gemini.";
       }
     }
   </script>
