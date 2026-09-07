@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kosmik - Control de Ventas, Inventario & Analítica Cloud</title>
+  <title>Kosmik Enterprise Ultimate - Sistema Multicategoría Cloud (Dulces, Huevos, Vapes)</title>
   
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- Chart.js para Gráficas -->
+  <!-- Chart.js para Gráficas Avanzadas -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Firebase SDKs -->
@@ -36,410 +36,116 @@
       --border: #e2e8f0;
       --table-header: #f1f5f9;
       --input-bg: #ffffff;
-      --radius: 12px;
+      --radius: 14px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     }
 
     body.dark-mode {
-      --bg: #0f172a;
+      --bg: #0b0f19;
       --card-bg: #1e293b;
       --text-main: #f8fafc;
       --text-muted: #94a3b8;
       --border: #334155;
       --table-header: #1e293b;
       --input-bg: #0f172a;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }
 
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0; 
-      font-family: 'Inter', sans-serif; 
-    }
-
-    body { 
-      background-color: var(--bg); 
-      color: var(--text-main); 
-      max-width: 1100px; 
-      margin: 0 auto; 
-      padding: 20px; 
-      transition: background-color 0.2s, color 0.2s; 
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+    body { background-color: var(--bg); color: var(--text-main); max-width: 1280px; margin: 0 auto; padding: 24px; transition: background-color 0.25s, color 0.25s; }
 
     /* BARRA SUPERIOR NAV */
-    .header-nav { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      background: var(--card-bg); 
-      padding: 16px 24px; 
-      border-radius: var(--radius); 
-      border: 1px solid var(--border); 
-      margin-bottom: 20px; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-    }
+    .header-nav { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 18px 28px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow); }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.4rem; color: var(--primary); letter-spacing: -0.025em; }
+    .user-badge { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
+    .user-badge input { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-weight: 600; font-size: 0.9rem; }
+    .btn-toggle { background: var(--table-header); color: var(--text-main); border: 1px solid var(--border); padding: 9px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
+    .btn-toggle:hover { opacity: 0.85; transform: translateY(-1px); }
 
-    .brand { 
-      display: flex; 
-      align-items: center; 
-      gap: 12px; 
-      font-weight: 700; 
-      font-size: 1.25rem; 
-      color: var(--primary); 
-    }
-
-    .user-badge { 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-      font-size: 0.9rem; 
-      color: var(--text-muted); 
-    }
-
-    .user-badge input { 
-      padding: 6px 12px; 
-      border-radius: 6px; 
-      border: 1px solid var(--border); 
-      background: var(--input-bg); 
-      color: var(--text-main); 
-      font-weight: 500; 
-    }
-
-    .btn-toggle { 
-      background: var(--table-header); 
-      color: var(--text-main); 
-      border: 1px solid var(--border); 
-      padding: 8px 16px; 
-      border-radius: 20px; 
-      cursor: pointer; 
-      font-weight: 600; 
-      font-size: 0.85rem; 
-    }
+    /* SELECTOR MAESTRO DE CATEGORÍAS (DULCES, HUEVOS, VAPES) */
+    .master-category-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .master-cat-btn { background: var(--card-bg); border: 2px solid var(--border); padding: 18px; border-radius: var(--radius); cursor: pointer; font-weight: 700; font-size: 1.15rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow); }
+    .master-cat-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
+    .master-cat-btn.active { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4); transform: translateY(-3px); }
 
     /* TARJETAS METRICAS */
-    .metrics-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-      gap: 16px; 
-      margin-bottom: 24px; 
-    }
-
-    .metric-card { 
-      background: var(--card-bg); 
-      padding: 20px; 
-      border-radius: var(--radius); 
-      border: 1px solid var(--border); 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-      position: relative; 
-      overflow: hidden; 
-    }
-
-    .metric-title { 
-      font-size: 0.8rem; 
-      text-transform: uppercase; 
-      letter-spacing: 0.05em; 
-      color: var(--text-muted); 
-      font-weight: 600; 
-      margin-bottom: 8px; 
-    }
-
-    .metric-value { 
-      font-size: 1.75rem; 
-      font-weight: 700; 
-      color: var(--text-main); 
-    }
-
-    .metric-icon { 
-      position: absolute; 
-      right: 20px; 
-      top: 20px; 
-      font-size: 1.5rem; 
-      opacity: 0.15; 
-    }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .metric-card { background: var(--card-bg); padding: 22px 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: transform 0.2s; }
+    .metric-card:hover { transform: translateY(-2px); }
+    .metric-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700; margin-bottom: 10px; }
+    .metric-value { font-size: 2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
+    .metric-icon { position: absolute; right: 22px; top: 22px; font-size: 1.8rem; opacity: 0.12; }
 
     /* PESTAÑAS */
-    .nav-tabs { 
-      display: flex; 
-      gap: 10px; 
-      margin-bottom: 20px; 
-      border-bottom: 1px solid var(--border); 
-      padding-bottom: 10px; 
-      overflow-x: auto; 
-    }
+    .nav-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
+    .tab-btn { padding: 11px 20px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 9px; white-space: nowrap; transition: all 0.2s; }
+    .tab-btn:hover { background: var(--table-header); color: var(--text-main); }
+    .tab-btn.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+    .tab-btn.ai-tab { color: var(--ai-color); }
+    .tab-btn.ai-tab:hover { background: rgba(139, 92, 246, 0.1); color: var(--ai-color); }
+    .tab-btn.ai-tab.active { background: var(--ai-color); color: white !important; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
+    .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+    .tab-content.active { display: block; }
 
-    .tab-btn { 
-      padding: 10px 18px; 
-      border: none; 
-      background: transparent; 
-      color: var(--text-muted); 
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      border-radius: 8px; 
-      cursor: pointer; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-      white-space: nowrap; 
-    }
-
-    .tab-btn.active { 
-      background: var(--primary); 
-      color: white !important; 
-    }
-
-    .tab-btn.ai-tab { 
-      color: var(--ai-color); 
-    }
-
-    .tab-btn.ai-tab.active { 
-      background: var(--ai-color); 
-      color: white !important; 
-    }
-
-    .tab-content { 
-      display: none; 
-    }
-
-    .tab-content.active { 
-      display: block; 
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     /* CONTENEDORES / CARDS */
-    .card { 
-      background: var(--card-bg); 
-      padding: 24px; 
-      border-radius: var(--radius); 
-      border: 1px solid var(--border); 
-      margin-bottom: 20px; 
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05); 
-    }
-
-    .card h3 { 
-      font-size: 1.1rem; 
-      font-weight: 700; 
-      margin-bottom: 16px; 
-      display: flex; 
-      align-items: center; 
-      gap: 10px; 
-    }
+    .card { background: var(--card-bg); padding: 28px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow); }
+    .card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em; }
 
     /* FORMULARIOS */
-    .form-grid { 
-      display: grid; 
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 16px; 
-    }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
+    input, select, textarea { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-size: 0.95rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
 
-    @media (max-width: 650px) { 
-      .form-grid { 
-        grid-template-columns: 1fr; 
-      } 
-    }
-
-    .form-group { 
-      display: flex; 
-      flex-direction: column; 
-      gap: 6px; 
-    }
-
-    .form-group.full { 
-      grid-column: 1 / -1; 
-    }
-
-    label { 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      color: var(--text-muted); 
-    }
-
-    input, select, textarea { 
-      padding: 10px 14px; 
-      border-radius: 8px; 
-      border: 1px solid var(--border); 
-      background: var(--input-bg); 
-      color: var(--text-main); 
-      font-size: 0.95rem; 
-      outline: none; 
-    }
-
-    input:focus, select:focus, textarea:focus { 
-      border-color: var(--primary); 
-    }
-
-    /* CHAT INPUT CONTAINER (ESTILO WHATSAPP) */
-    .chat-input-wrapper { 
-      position: relative; 
-      display: flex; 
-      align-items: center; 
-    }
-
-    .chat-input-wrapper textarea { 
-      width: 100%; 
-      padding-right: 50px; 
-      resize: none; 
-      height: 60px; 
-    }
-
-    .btn-send-whatsapp { 
-      position: absolute; 
-      right: 10px; 
-      bottom: 12px; 
-      background: var(--ai-color); 
-      color: white; 
-      border: none; 
-      width: 38px; 
-      height: 38px; 
-      border-radius: 50%; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      cursor: pointer; 
-      font-size: 1rem; 
-      transition: background 0.2s, transform 0.1s; 
-    }
-
-    .btn-send-whatsapp:hover { 
-      background: #7c3aed; 
-      transform: scale(1.05); 
-    }
+    /* CHAT INPUT CONTAINER */
+    .chat-input-wrapper { position: relative; display: flex; align-items: center; }
+    .chat-input-wrapper textarea { width: 100%; padding-right: 55px; resize: none; height: 75px; font-size: 0.95rem; line-height: 1.5; }
+    .btn-send-whatsapp { position: absolute; right: 12px; bottom: 14px; background: var(--ai-color); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; transition: background 0.2s, transform 0.15s; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
+    .btn-send-whatsapp:hover { background: #7c3aed; transform: scale(1.08); }
 
     /* BOTONES GENERALES */
-    .btn { 
-      padding: 10px 18px; 
-      border-radius: 8px; 
-      border: none; 
-      font-weight: 600; 
-      font-size: 0.9rem; 
-      cursor: pointer; 
-      display: inline-flex; 
-      align-items: center; 
-      justify-content: center; 
-      gap: 8px; 
-    }
-
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-ai { background: var(--ai-color); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-warning { background: var(--warning); color: #0f172a; }
-    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 15px; }
+    .btn { padding: 12px 20px; border-radius: 10px; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: all 0.2s; }
+    .btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
+    .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
+    .btn-ai { background: var(--ai-color); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25); }
+    .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
+    .btn-warning { background: var(--warning); color: #0f172a; font-weight: 700; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
+    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 700; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25); }
 
     /* TABLAS */
-    table { 
-      width: 100%; 
-      border-collapse: collapse; 
-      margin-top: 10px; 
-    }
-
-    th, td { 
-      padding: 12px 14px; 
-      border-bottom: 1px solid var(--border); 
-      text-align: left; 
-      font-size: 0.88rem; 
-    }
-
-    th { 
-      background: var(--table-header); 
-      color: var(--text-muted); 
-      font-weight: 600; 
-    }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.9rem; }
+    th { background: var(--table-header); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+    th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
+    tr:hover td { background-color: rgba(79, 70, 229, 0.02); }
 
     /* VENDEDORES Y METAS */
-    .seller-card { 
-      border: 1px solid var(--border); 
-      padding: 16px; 
-      border-radius: 8px; 
-      margin-bottom: 12px; 
-      background: var(--table-header); 
-    }
-
-    .progress-bar-bg { 
-      background: var(--border); 
-      height: 8px; 
-      border-radius: 4px; 
-      overflow: hidden; 
-      margin-top: 8px; 
-    }
-
-    .progress-bar-fill { 
-      background: var(--success); 
-      height: 100%; 
-      width: 0%; 
-      transition: width 0.3s ease; 
-    }
+    .seller-card { border: 1px solid var(--border); padding: 18px 20px; border-radius: 12px; margin-bottom: 14px; background: var(--table-header); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .progress-bar-bg { background: var(--border); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 10px; }
+    .progress-bar-fill { background: var(--success); height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 5px; }
 
     /* IA OPTIONS CATEGORIZADAS */
-    .ai-category-title { 
-      font-size: 0.85rem; 
-      font-weight: 700; 
-      text-transform: uppercase; 
-      color: var(--ai-color); 
-      margin: 15px 0 10px 0; 
-    }
-
-    .quick-ai-grid { 
-      display: grid; 
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
-      gap: 10px; 
-      margin-bottom: 20px; 
-    }
-
-    .quick-ai-btn { 
-      background: var(--card-bg); 
-      border: 1px solid var(--ai-color); 
-      color: var(--text-main); 
-      padding: 10px 14px; 
-      border-radius: 8px; 
-      font-size: 0.85rem; 
-      font-weight: 600; 
-      cursor: pointer; 
-      text-align: left; 
-      display: flex; 
-      align-items: center; 
-      gap: 8px; 
-    }
-
-    .quick-ai-btn:hover { 
-      background: var(--ai-color); 
-      color: white; 
-    }
-
-    .ai-response-box { 
-      background: var(--table-header); 
-      border-left: 4px solid var(--ai-color); 
-      padding: 16px; 
-      border-radius: 8px; 
-      margin-top: 15px; 
-      line-height: 1.6; 
-      font-size: 0.95rem; 
-      white-space: pre-wrap; 
-    }
+    .ai-category-title { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--ai-color); margin: 20px 0 12px 0; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+    .quick-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 22px; }
+    .quick-ai-btn { background: var(--card-bg); border: 1px solid rgba(139, 92, 246, 0.3); color: var(--text-main); padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .quick-ai-btn:hover { background: var(--ai-color); color: white; border-color: var(--ai-color); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(139, 92, 246, 0.25); }
+    .ai-response-box { background: var(--table-header); border-left: 5px solid var(--ai-color); padding: 20px; border-radius: 10px; margin-top: 18px; line-height: 1.7; font-size: 0.98rem; white-space: pre-wrap; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02); }
 
     /* ALERTA BANNER */
-    .alert-banner { 
-      background-color: #fef3c7; 
-      color: #92400e; 
-      border: 1px solid #fde68a; 
-      border-left: 5px solid var(--warning); 
-      padding: 14px 18px; 
-      border-radius: var(--radius); 
-      margin-bottom: 20px; 
-      display: none; 
-    }
+    .alert-banner { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; border-left: 6px solid var(--warning); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 24px; display: none; box-shadow: var(--shadow); }
+    body.dark-mode .alert-banner { background-color: #451a03; color: #fde68a; border-color: #78350f; }
 
-    body.dark-mode .alert-banner { 
-      background-color: #451a03; 
-      color: #fde68a; 
-      border-color: #78350f; 
-    }
-
-    .badge-status { 
-      display: inline-block; 
-      padding: 4px 8px; 
-      border-radius: 4px; 
-      font-size: 0.75rem; 
-      font-weight: 700; 
-    }
-
+    .badge-status { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.03em; }
     .badge-offline { background: #fee2e2; color: #991b1b; }
     .badge-online { background: #d1fae5; color: #065f46; }
   </style>
@@ -449,7 +155,7 @@
   <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
   <header class="header-nav">
     <div class="brand">
-      <i class="fa-solid fa-rocket"></i> Kosmik <span id="cloudStatusBadge" class="badge-status badge-offline" style="margin-left: 8px;">Local</span>
+      <i class="fa-solid fa-rocket"></i> Kosmik Enterprise <span id="cloudStatusBadge" class="badge-status badge-offline" style="margin-left: 10px;">Local</span>
     </div>
     <div class="user-badge">
       <i class="fa-solid fa-user-gear"></i>
@@ -461,12 +167,19 @@
     </button>
   </header>
 
+  <!-- SELECTOR MAESTRO DE CATEGORÍAS (3 PÁGINAS EN 1) -->
+  <div class="master-category-bar">
+    <button class="master-cat-btn active" id="btnCatDulces" onclick="cambiarCategoriaMaster('dulces')">🍬 Dulces</button>
+    <button class="master-cat-btn" id="btnCatHuevos" onclick="cambiarCategoriaMaster('huevos')">🥚 Huevos</button>
+    <button class="master-cat-btn" id="btnCatVapes" onclick="cambiarCategoriaMaster('vapes')">💨 Vapes</button>
+  </div>
+
   <!-- BANNER ALERTA STOCK -->
   <div id="bannerAlerta" class="alert-banner">
-    <strong style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-      <i class="fa-solid fa-triangle-exclamation"></i> Atención: Stock Bajo (&le; 5 unidades)
+    <strong style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 1.05rem;">
+      <i class="fa-solid fa-triangle-exclamation"></i> Atención: Stock Crítico / Bajo (&le; 5 unidades)
     </strong>
-    <div id="listaAlertaStock"></div>
+    <div id="listaAlertaStock" style="line-height: 1.5;"></div>
   </div>
 
   <!-- TARJETAS DE MÉTRICAS -->
@@ -505,78 +218,78 @@
   <!-- PESTAÑA 1: VENTAS -->
   <div id="tab-ventas" class="tab-content active">
     <div class="card">
-      <h3><i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta</h3>
+      <h3 id="tituloRegistroVenta"><i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta (🍬 Dulces)</h3>
       <div class="form-grid">
         <div class="form-group full"><label for="vProducto">Producto / Combo</label><select id="vProducto"></select></div>
         <div class="form-group"><label for="vCantidad">Cantidad</label><input type="number" id="vCantidad" value="1" min="1"></div>
         <div class="form-group"><label for="vUni">Sede / Universidad</label><input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario"></div>
         <div class="form-group full"><label for="vVendedor">Vendedor Encargado</label><select id="vVendedor"></select></div>
       </div>
-      <button class="btn btn-success" style="width: 100%; margin-top: 15px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> Guardar Venta</button>
+      <button class="btn btn-success" style="width: 100%; margin-top: 18px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> Guardar Venta en Sistema</button>
     </div>
 
     <!-- PANEL DE GRÁFICAS -->
-    <div class="form-grid" style="margin-bottom: 20px;">
-      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-bar"></i> Ventas por Vendedor</h3><canvas id="chartVendedores" height="200"></canvas></div>
-      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-pie"></i> Distribución de Productos</h3><canvas id="chartProductos" height="200"></canvas></div>
+    <div class="form-grid" style="margin-bottom: 24px;">
+      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-bar"></i> Rendimiento por Vendedor</h3><canvas id="chartVendedores" height="210"></canvas></div>
+      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-pie"></i> Participación de Productos</h3><canvas id="chartProductos" height="210"></canvas></div>
     </div>
 
     <!-- HISTORIAL DE VENTAS -->
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
-        <h3><i class="fa-solid fa-list"></i> Historial de Ventas</h3>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> CSV</button>
-          <button class="btn btn-danger" onclick="limpiarHistorial()"><i class="fa-solid fa-trash"></i> Borrar</button>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+        <h3><i class="fa-solid fa-list"></i> Historial de Transacciones</h3>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="exportarExcel()"><i class="fa-solid fa-file-excel"></i> Exportar CSV</button>
+          <button class="btn btn-danger" onclick="limpiarHistorial()"><i class="fa-solid fa-trash"></i> Borrar Historial</button>
         </div>
       </div>
-      <div class="form-grid" style="background: var(--table-header); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-        <div class="form-group"><label for="fVendedor">Filtrar Vendedor:</label><select id="fVendedor" onchange="renderizarVentas()"></select></div>
-        <div class="form-group"><label for="fSede">Filtrar Sede:</label><input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()"></div>
+      <div class="form-grid" style="background: var(--table-header); padding: 16px; border-radius: 10px; margin-bottom: 18px;">
+        <div class="form-group"><label for="fVendedor">Filtrar por Vendedor:</label><select id="fVendedor" onchange="renderizarVentas()"></select></div>
+        <div class="form-group"><label for="fSede">Filtrar por Sede:</label><input type="text" id="fSede" placeholder="Buscar sede..." oninput="renderizarVentas()"></div>
       </div>
       <div style="overflow-x: auto;">
         <table>
-          <thead><tr><th>Fecha</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total</th><th>Comisión</th><th>Ganancia</th></tr></thead>
+          <thead><tr><th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total Venta</th><th>Comisión</th><th>Ganancia Neta</th></tr></thead>
           <tbody id="tablaVentas"></tbody>
         </table>
       </div>
-      <button class="btn btn-wapp" onclick="enviarCuadreWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Enviar Reporte por WhatsApp</button>
+      <button class="btn btn-wapp" onclick="enviarCuadreWhatsApp()"><i class="fa-brands fa-whatsapp"></i> Enviar Cuadre Diario por WhatsApp</button>
     </div>
   </div>
 
   <!-- PESTAÑA 2: VENDEDORES -->
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
-      <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor</h3>
+      <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor Comercial</h3>
       <div class="form-grid">
         <div class="form-group"><label for="vendNombre">Nombre del Vendedor</label><input type="text" id="vendNombre" placeholder="Ej: Juanjo"></div>
         <div class="form-group"><label for="vendSede">Sede Habitual</label><input type="text" id="vendSede" placeholder="Ej: Javeriana"></div>
-        <div class="form-group"><label for="vendMeta">Meta Semanal ($)</label><input type="number" id="vendMeta" placeholder="Ej: 50000"></div>
-        <div class="form-group"><label for="vendComision">Comisión Fija Defecto ($)</label><input type="number" id="vendComision" placeholder="Ej: 300"></div>
+        <div class="form-group"><label for="vendMeta">Meta Semanal ($)</label><input type="number" id="vendMeta" placeholder="Ej: 100000"></div>
+        <div class="form-group"><label for="vendComision">Comisión Fija Defecto ($)</label><input type="number" id="vendComision" placeholder="Ej: 500"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarVendedor()"><i class="fa-solid fa-save"></i> Guardar Vendedor</button>
+      <button class="btn btn-primary" style="margin-top: 18px; width: 100%;" onclick="guardarVendedor()"><i class="fa-solid fa-save"></i> Guardar Vendedor</button>
     </div>
-    <div class="card"><h3><i class="fa-solid fa-trophy"></i> Desempeño y Cumplimiento de Metas</h3><div id="listaVendedores"></div></div>
+    <div class="card"><h3><i class="fa-solid fa-trophy"></i> Desempeño Comercial & Cumplimiento de Metas</h3><div id="listaVendedores"></div></div>
   </div>
 
   <!-- PESTAÑA 3: INVENTARIO -->
   <div id="tab-productos" class="tab-content">
     <div class="card">
-      <h3><i class="fa-solid fa-box"></i> Gestionar Productos</h3>
-      <div class="form-grid">
-        <div class="form-group full"><label for="pNombre">Nombre del Producto / Combo</label><input type="text" id="pNombre" placeholder="Ej: Combo 1"></div>
-        <div class="form-group"><label for="pStock">Stock Disponible</label><input type="number" id="pStock" placeholder="0"></div>
+      <h3 id="tituloInvCard"><i class="fa-solid fa-box"></i> Gestionar Inventario de Productos</h3>
+      <div class="form-grid" id="formProductoContainer">
+        <div class="form-group full"><label for="pNombre">Nombre del Artículo / Combo</label><input type="text" id="pNombre" placeholder="Ej: Cable Ácido Especial"></div>
+        <div class="form-group"><label for="pStock">Stock Inicial</label><input type="number" id="pStock" placeholder="0"></div>
         <div class="form-group"><label for="pPrecio">Precio de Venta ($)</label><input type="number" id="pPrecio" placeholder="0"></div>
-        <div class="form-group"><label for="pCosto">Costo Insumo ($)</label><input type="number" id="pCosto" placeholder="0"></div>
-        <div class="form-group"><label for="pValorComision">Comisión ($)</label><input type="number" id="pValorComision" placeholder="0"></div>
+        <div class="form-group"><label for="pCosto">Costo de Insumo ($)</label><input type="number" id="pCosto" placeholder="0"></div>
+        <div class="form-group" id="grupoComisionInput"><label for="pValorComision">Comisión por Unidad ($)</label><input type="number" id="pValorComision" placeholder="0"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 15px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-folder-plus"></i> Guardar en Inventario</button>
+      <button class="btn btn-primary" style="margin-top: 18px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-folder-plus"></i> Guardar en Base de Datos</button>
     </div>
     <div class="card">
-      <h3><i class="fa-solid fa-warehouse"></i> Inventario Actual</h3>
+      <h3><i class="fa-solid fa-warehouse"></i> Inventario Actual Activo</h3>
       <div style="overflow-x: auto;">
         <table>
-          <thead><tr><th>Nombre</th><th>Stock</th><th>Precio</th><th>Costo</th><th>Comisión</th><th>Acción</th></tr></thead>
+          <thead><tr id="tablaProductosHeader"><th>Artículo</th><th>Stock</th><th>Precio</th><th>Costo</th><th>Comisión</th><th>Acciones</th></tr></thead>
           <tbody id="tablaProductos"></tbody>
         </table>
       </div>
@@ -586,19 +299,19 @@
   <!-- PESTAÑA 4: IA COPILOT -->
   <div id="tab-ia" class="tab-content">
     <div class="card" style="border-top: 4px solid var(--ai-color);">
-      <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik IA (Gemini & Local)</h3>
-      <p style="font-size: 0.9rem; color: var(--text-muted);">Selecciona una herramienta estratégica o escribe tu propia consulta para generar diagnósticos automáticos.</p>
+      <h3 id="tituloIAHeader"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise (Gemini & Local)</h3>
+      <p style="font-size: 0.95rem; color: var(--text-muted);">Selecciona una herramienta estratégica de automatización o escribe tu propia consulta para generar diagnósticos en tiempo real.</p>
     </div>
 
     <div class="card">
-      <div class="ai-category-title"><i class="fa-solid fa-chart-line"></i> Estrategia & Finanzas</div>
+      <div class="ai-category-title"><i class="fa-solid fa-chart-line"></i> Estrategia Financiera & Comercial</div>
       <div class="quick-ai-grid">
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('diagnostico_financiero')"><i class="fa-solid fa-scale-balanced"></i> Diagnóstico Financiero</button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('proyecciones_metas')"><i class="fa-solid fa-bullseye"></i> Ritmo de Ventas & Proyección</button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('calculadora_descuentos')"><i class="fa-solid fa-percent"></i> Evaluador de Promociones</button>
       </div>
 
-      <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Comercial & Comisiones</div>
+      <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Humana & Comisiones</div>
       <div class="quick-ai-grid">
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('auditoria_comisiones')"><i class="fa-solid fa-hand-holding-dollar"></i> Auditoría de Comisiones</button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')"><i class="fa-solid fa-trophy"></i> Ranking de Vendedores</button>
@@ -606,7 +319,7 @@
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('guiones_venta')"><i class="fa-solid fa-comments"></i> Guiones de Abordaje Directo</button>
       </div>
 
-      <div class="ai-category-title"><i class="fa-solid fa-box-archive"></i> Inventario & Seguridad</div>
+      <div class="ai-category-title"><i class="fa-solid fa-box-archive"></i> Logística & Seguridad Cloud</div>
       <div class="quick-ai-grid">
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('analizar_stock')"><i class="fa-solid fa-boxes-packing"></i> Diagnóstico de Reabastecimiento</button>
         <button class="quick-ai-btn" onclick="ejecutarPromptAccion('promo_whatsapp')"><i class="fa-brands fa-whatsapp"></i> Copys de Combos WhatsApp</button>
@@ -615,22 +328,22 @@
     </div>
 
     <div class="card">
-      <h3><i class="fa-solid fa-message"></i> Consulta Personalizada (IA)</h3>
+      <h3><i class="fa-solid fa-message"></i> Consulta Personalizada con IA</h3>
       <div class="form-group">
         <div class="chat-input-wrapper">
-          <textarea id="aiPromptInput" placeholder="Escribe tu consulta y presiona Enter..." onkeydown="manejarEnterChat(event)"></textarea>
+          <textarea id="aiPromptInput" placeholder="Escribe tu consulta estratégica y presiona Enter..." onkeydown="manejarEnterChat(event)"></textarea>
           <button class="btn-send-whatsapp" onclick="consultarIA()" title="Enviar consulta"><i class="fa-solid fa-arrow-up"></i></button>
         </div>
       </div>
-      <div class="ai-response-box" id="aiResponseBox"><em>Selecciona una opción o escribe tu consulta para generar el reporte...</em></div>
+      <div class="ai-response-box" id="aiResponseBox"><em>Selecciona una opción o escribe tu consulta analítica para generar el reporte corporativo...</em></div>
     </div>
   </div>
 
   <!-- PESTAÑA 5: AJUSTES -->
   <div id="tab-ajustes" class="tab-content">
     <div class="card" style="border-top: 4px solid var(--primary);">
-      <h3><i class="fa-solid fa-cloud"></i> Configuración de Sincronización en la Nube (Firebase)</h3>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Conecta tus credenciales de Firebase Firestore para respaldar datos en tiempo real.</p>
+      <h3><i class="fa-solid fa-cloud"></i> Configuración de Sincronización en la Nube (Firebase Firestore)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px;">Conecta tus credenciales corporativas de Firebase para mantener respaldo multiplataforma en vivo.</p>
       <div class="form-grid">
         <div class="form-group"><label for="fbApiKey">Firebase API Key</label><input type="password" id="fbApiKey" placeholder="AIzaSy..."></div>
         <div class="form-group"><label for="fbAuthDomain">Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="tu-proyecto.firebaseapp.com"></div>
@@ -639,39 +352,59 @@
         <div class="form-group"><label for="fbMessagingSenderId">Messaging Sender ID</label><input type="text" id="fbMessagingSenderId" placeholder="123456789"></div>
         <div class="form-group"><label for="fbAppId">App ID</label><input type="text" id="fbAppId" placeholder="1:12345:web:abcde"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 15px;" onclick="guardarConexionFirebase()"><i class="fa-solid fa-plug"></i> Guardar y Conectar Firebase</button>
+      <button class="btn btn-primary" style="margin-top: 18px;" onclick="guardarConexionFirebase()"><i class="fa-solid fa-plug"></i> Guardar y Conectar Firebase Cloud</button>
     </div>
 
     <div class="card" style="border-top: 4px solid var(--ai-color);">
-      <h3><i class="fa-solid fa-key"></i> Configuración de Inteligencia Artificial (Gemini API Key)</h3>
-      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Ingresa tu clave de API de Google Gemini para habilitar el modelo oficial en la nube.</p>
+      <h3><i class="fa-solid fa-key"></i> Configuración de Inteligencia Artificial (Google Gemini API Key)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 18px;">Ingresa tu clave de API de Google Gemini para habilitar el modelo de lenguaje oficial en la nube.</p>
       <div class="form-group full"><label for="aiApiKey">Google Gemini API Key</label><input type="password" id="aiApiKey" placeholder="AIzaSy..."></div>
-      <button class="btn btn-ai" style="margin-top: 15px;" onclick="guardarApiKeyIA()"><i class="fa-solid fa-save"></i> Guardar API Key IA</button>
+      <button class="btn btn-ai" style="margin-top: 18px;" onclick="guardarApiKeyIA()"><i class="fa-solid fa-save"></i> Guardar API Key IA</button>
     </div>
   </div>
 
   <script>
+    /********************************************************************************
+     * KOSMIK ENTERPRISE ULTIMATE - NÚCLEO DE LÓGICA Y ESTADO GLOBAL MULTICATEGORÍA
+     ********************************************************************************/
+    let categoriaActual = 'dulces'; // dulces, huevos, vapes
+
     let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
     let dbFirebase = null;
 
-    let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
-      'c1': { nombre: 'Cable (Unidad)', stock: 8, precio: 1000, costo: 400, valorComision: 150 },
-      'm1': { nombre: 'Menta (Unidad)', stock: 40, precio: 2000, costo: 800, valorComision: 200 },
-      'cb1': { nombre: 'Combo 1 (1 Cable + 1 Menta)', stock: 4, precio: 2800, costo: 1200, valorComision: 300 }
+    // Bases de datos independientes por categoría con valores robustos iniciales
+    let BD_PRODUCTOS = JSON.parse(localStorage.getItem('kosmik_bd_prods')) || {
+      dulces: {
+        'c1': { nombre: 'Cable Ácido (Unidad)', stock: 25, precio: 1000, costo: 400 },
+        'm1': { nombre: 'Menta Fuerte (Unidad)', stock: 50, precio: 500, costo: 200 },
+        'cb1': { nombre: 'Combo Dulce Universitario', stock: 15, precio: 3000, costo: 1200 }
+      },
+      huevos: {
+        'h1': { nombre: 'Cartón Huevos AA (30 und)', stock: 12, precio: 18000, costo: 13000, valorComision: 1000 },
+        'h2': { nombre: 'Cartón Huevos A (30 und)', stock: 20, precio: 16000, costo: 11500, valorComision: 800 }
+      },
+      vapes: {
+        'v1': { nombre: 'Vape Desechable 5000 Puffs', stock: 10, precio: 35000, costo: 20000, valorComision: 3000 },
+        'v2': { nombre: 'Vape Recargable Pod System', stock: 6, precio: 55000, costo: 35000, valorComision: 5000 }
+      }
     };
 
     let vendedores = JSON.parse(localStorage.getItem('cat_vends')) || {
-      'Bettina': { sede: 'Javeriana', meta: 50000, comisionDefecto: 200, acumuladoComisiones: 0 },
-      'Juanjo': { sede: 'Rosario', meta: 45000, comisionDefecto: 200, acumuladoComisiones: 0 },
-      'Vale': { sede: 'Andes', meta: 40000, comisionDefecto: 200, acumuladoComisiones: 0 },
-      'Alejo': { sede: 'Sabana', meta: 40000, comisionDefecto: 200, acumuladoComisiones: 0 }
+      'Bettina': { sede: 'Javeriana', meta: 100000, comisionDefecto: 500, acumuladoComisiones: 0 },
+      'Juanjo': { sede: 'Rosario', meta: 90000, comisionDefecto: 500, acumuladoComisiones: 0 },
+      'Vale': { sede: 'Andes', meta: 80000, comisionDefecto: 500, acumuladoComisiones: 0 },
+      'Alejo': { sede: 'Sabana', meta: 80000, comisionDefecto: 500, acumuladoComisiones: 0 }
     };
 
-    let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
+    let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
     let chartV = null, chartP = null;
 
+    /********************************************************************************
+     * CICLO DE VIDA E INICIALIZACIÓN
+     ********************************************************************************/
     document.addEventListener("DOMContentLoaded", () => {
+      console.log("🚀 Kosmik Enterprise Ultimate inicializado correctamente.");
       if (localStorage.getItem('theme_dark') === 'true') {
         document.body.classList.add('dark-mode');
         document.getElementById('btnTheme').innerHTML = '<i class="fa-solid fa-sun"></i> Modo Claro';
@@ -689,11 +422,41 @@
 
       if (geminiApiKey) document.getElementById('aiApiKey').value = geminiApiKey;
 
+      actualizarUIReferenciasCategoria();
       renderizarVendedoresSelect();
       renderizarProductos();
       renderizarVendedoresLista();
       renderizarVentas();
     });
+
+    /********************************************************************************
+     * GESTIÓN DE CATEGORÍAS MAESTRAS Y UI
+     ********************************************************************************/
+    function cambiarCategoriaMaster(cat) {
+      categoriaActual = cat;
+      document.querySelectorAll('.master-cat-btn').forEach(btn => btn.classList.remove('active'));
+      if(cat === 'dulces') document.getElementById('btnCatDulces').classList.add('active');
+      if(cat === 'huevos') document.getElementById('btnCatHuevos').classList.add('active');
+      if(cat === 'vapes') document.getElementById('btnCatVapes').classList.add('active');
+
+      actualizarUIReferenciasCategoria();
+      renderizarProductos();
+      renderizarVentas();
+      renderizarVendedoresLista();
+    }
+
+    function actualizarUIReferenciasCategoria() {
+      const iconos = { dulces: '🍬 Dulces', huevos: '🥚 Huevos', vapes: '💨 Vapes' };
+      document.getElementById('tituloRegistroVenta').innerHTML = `<i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta (${iconos[categoriaActual]})`;
+      document.getElementById('tituloIAHeader').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise - ${iconos[categoriaActual]}`;
+      
+      const grupoComision = document.getElementById('grupoComisionInput');
+      if (categoriaActual === 'dulces') {
+        grupoComision.style.display = 'none'; // Ocultar input comisión en dulces (se calcula 25% automático obligatorio)
+      } else {
+        grupoComision.style.display = 'flex'; // Mostrar en huevos y vapes
+      }
+    }
 
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle('dark-mode');
@@ -708,12 +471,16 @@
 
       const tabs = ['ventas', 'vendedores', 'productos', 'ia', 'ajustes'];
       const idx = tabs.indexOf(p);
-      
-      document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-      document.getElementById(`tab-${p}`).classList.add('active');
+      if(idx !== -1) {
+        document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+        document.getElementById(`tab-${p}`).classList.add('active');
+      }
       if(p === 'ventas') actualizarGraficas();
     }
 
+    /********************************************************************************
+     * CONEXIÓN Y SINCRONIZACIÓN FIREBASE CLOUD
+     ********************************************************************************/
     function guardarConexionFirebase() {
       const config = {
         apiKey: document.getElementById('fbApiKey').value.trim(),
@@ -724,11 +491,11 @@
         appId: document.getElementById('fbAppId').value.trim()
       };
 
-      if (!config.apiKey || !config.projectId) return alert('Ingresa API Key y Project ID.');
+      if (!config.apiKey || !config.projectId) return alert('Por favor ingresa al menos API Key y Project ID.');
       localStorage.setItem('kosmik_fb_config', JSON.stringify(config));
       firebaseConfig = config;
       inicializarFirebaseCloud(config);
-      alert('Configuración de Firebase guardada.');
+      alert('Configuración de Firebase guardada con éxito.');
     }
 
     function inicializarFirebaseCloud(config) {
@@ -739,6 +506,7 @@
         document.getElementById('cloudStatusBadge').innerText = 'Cloud (Firebase)';
         sincronizarDesdeCloud();
       } catch (e) {
+        console.error("Error inicializando Firebase:", e);
         document.getElementById('cloudStatusBadge').className = 'badge-status badge-offline';
         document.getElementById('cloudStatusBadge').innerText = 'Error Conexión';
       }
@@ -748,15 +516,47 @@
       const key = document.getElementById('aiApiKey').value.trim();
       localStorage.setItem('kosmik_ai_key', key);
       geminiApiKey = key;
-      alert('API Key de Gemini guardada.');
+      alert('API Key de Google Gemini guardada con éxito.');
     }
 
+    function sincronizarHaciaCloud() {
+      if (!dbFirebase) return;
+      dbFirebase.collection("kosmik_multicategoria").doc("estado_global").set({ 
+        productos: BD_PRODUCTOS, 
+        vendedores, 
+        ventas: BD_VENTAS, 
+        actualizado: new Date().toISOString() 
+      }).catch(err => console.error("Error al sincronizar hacia cloud:", err));
+    }
+
+    function sincronizarDesdeCloud() {
+      if (!dbFirebase) return;
+      dbFirebase.collection("kosmik_multicategoria").doc("estado_global").get().then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.productos) BD_PRODUCTOS = data.productos;
+          if (data.vendedores) vendedores = data.vendedores;
+          if (data.ventas) BD_VENTAS = data.ventas;
+          localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
+          localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+          localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
+          renderizarVendedoresSelect();
+          renderizarProductos();
+          renderizarVendedoresLista();
+          renderizarVentas();
+        }
+      }).catch(err => console.error("Error al descargar desde cloud:", err));
+    }
+
+    /********************************************************************************
+     * GESTIÓN COMERCIAL DE VENDEDORES Y METAS
+     ********************************************************************************/
     function guardarVendedor() {
       const nom = document.getElementById('vendNombre').value.trim();
       const sede = document.getElementById('vendSede').value.trim() || 'General';
       const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
       const com = parseFloat(document.getElementById('vendComision').value) || 0;
-      if (!nom) return alert('Ingresa el nombre.');
+      if (!nom) return alert('Por favor ingresa el nombre del vendedor.');
 
       vendedores[nom] = { sede, meta, comisionDefecto: com, acumuladoComisiones: vendedores[nom]?.acumuladoComisiones || 0 };
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
@@ -770,25 +570,27 @@
       renderizarVendedoresSelect();
       renderizarVendedoresLista();
       renderizarVentas();
-      alert('Vendedor guardado.');
+      alert('Vendedor guardado correctamente.');
     }
 
     function editarVendedor(nombreActual) {
       const info = vendedores[nombreActual];
       if (!info) return;
 
-      const nuevoNombre = prompt("Editar nombre:", nombreActual);
+      const nuevoNombre = prompt("Editar nombre del vendedor:", nombreActual);
       if (!nuevoNombre || !nuevoNombre.trim()) return;
       const nombreLimpio = nuevoNombre.trim();
 
-      const nuevaSede = prompt("Editar sede:", info.sede);
-      const nuevaMeta = prompt("Editar meta ($):", info.meta);
+      const nuevaSede = prompt("Editar sede habitual:", info.sede);
+      const nuevaMeta = prompt("Editar meta semanal ($):", info.meta);
 
       if (nombreLimpio !== nombreActual) {
         vendedores[nombreLimpio] = { sede: nuevaSede || info.sede, meta: parseFloat(nuevaMeta) || info.meta, comisionDefecto: info.comisionDefecto, acumuladoComisiones: info.acumuladoComisiones };
         delete vendedores[nombreActual];
-        ventas.forEach(v => { if (v.vendedor === nombreActual) v.vendedor = nombreLimpio; });
-        localStorage.setItem('vnts', JSON.stringify(ventas));
+        Object.keys(BD_VENTAS).forEach(cat => {
+          BD_VENTAS[cat].forEach(v => { if (v.vendedor === nombreActual) v.vendedor = nombreLimpio; });
+        });
+        localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
       } else {
         info.sede = nuevaSede || info.sede;
         info.meta = parseFloat(nuevaMeta) || info.meta;
@@ -802,7 +604,7 @@
     }
 
     function eliminarVendedor(vendedor) {
-      if (confirm(`¿Eliminar a ${vendedor}?`)) {
+      if (confirm(`¿Estás seguro de eliminar al vendedor ${vendedor}?`)) {
         delete vendedores[vendedor];
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
         sincronizarHaciaCloud();
@@ -813,12 +615,13 @@
     }
 
     function liquidarComisiones(vendedor) {
-      if (confirm(`¿Liquidar comisiones de ${vendedor}?`)) {
+      if (confirm(`¿Confirmar liquidación y pago de comisiones para ${vendedor}?`)) {
         if (vendedores[vendedor]) {
           vendedores[vendedor].acumuladoComisiones = 0;
           localStorage.setItem('cat_vends', JSON.stringify(vendedores));
           sincronizarHaciaCloud();
           renderizarVendedoresLista();
+          alert(`Comisiones liquidadas y reseteadas a $0 para ${vendedor}.`);
         }
       }
     }
@@ -826,6 +629,8 @@
     function renderizarVendedoresSelect() {
       const selVenta = document.getElementById('vVendedor');
       const selFiltro = document.getElementById('fVendedor');
+      if (!selVenta || !selFiltro) return;
+      
       selVenta.innerHTML = '';
       selFiltro.innerHTML = '<option value="todos">-- Todos los Vendedores --</option>';
 
@@ -837,9 +642,13 @@
 
     function renderizarVendedoresLista() {
       const cont = document.getElementById('listaVendedores');
+      if (!cont) return;
       cont.innerHTML = '';
       let vTotals = {};
-      ventas.forEach(v => { vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total; });
+      
+      Object.keys(BD_VENTAS).forEach(cat => {
+        BD_VENTAS[cat].forEach(v => { vTotals[v.vendedor] = (vTotals[v.vendedor] || 0) + v.total; });
+      });
 
       Object.keys(vendedores).forEach(v => {
         const info = vendedores[v];
@@ -851,38 +660,56 @@
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
               <strong>${v} (${info.sede})</strong>
               <div style="display:flex; gap:6px;">
-                <button class="btn btn-warning" style="padding:4px 8px; font-size:0.75rem;" onclick="editarVendedor('${v}')">Editar</button>
-                <button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem;" onclick="eliminarVendedor('${v}')">Eliminar</button>
-                <button class="btn btn-primary" style="padding:4px 8px; font-size:0.75rem;" onclick="liquidarComisiones('${v}')">Liquidar ($${(info.acumuladoComisiones || 0).toLocaleString()})</button>
+                <button class="btn btn-warning" style="padding:5px 10px; font-size:0.75rem;" onclick="editarVendedor('${v}')">Editar</button>
+                <button class="btn btn-danger" style="padding:5px 10px; font-size:0.75rem;" onclick="eliminarVendedor('${v}')">Eliminar</button>
+                <button class="btn btn-primary" style="padding:5px 10px; font-size:0.75rem;" onclick="liquidarComisiones('${v}')">Liquidar ($${(info.acumuladoComisiones || 0).toLocaleString()})</button>
               </div>
             </div>
-            <div style="margin-top:6px; font-size:0.85rem; color:var(--text-muted);">Vendido: $${vendido.toLocaleString()} / Meta: $${info.meta.toLocaleString()} (${pct}%)</div>
+            <div style="margin-top:8px; font-size:0.88rem; color:var(--text-muted);">Vendido: $${vendido.toLocaleString()} / Meta Semanal: $${info.meta.toLocaleString()} (${pct}%)</div>
             <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%;"></div></div>
           </div>
         `;
       });
     }
 
+    /****************************************************************----------------
+     * GESTIÓN DE INVENTARIO Y PRODUCTOS
+     ********************************************************************************/
     function guardarProducto() {
       const nombre = document.getElementById('pNombre').value.trim();
       const stock = parseInt(document.getElementById('pStock').value, 10) || 0;
       const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
       const costo = parseFloat(document.getElementById('pCosto').value) || 0;
-      const valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
-      if (!nombre || precio <= 0) return alert('Datos de producto inválidos.');
+      
+      let valorComision = 0;
+      if (categoriaActual !== 'dulces') {
+        valorComision = parseFloat(document.getElementById('pValorComision').value) || 0;
+      }
+
+      if (!nombre || precio <= 0) return alert('Por favor ingresa un nombre y un precio de venta válido.');
 
       const id = 'prod_' + Date.now();
-      productos[id] = { nombre, stock, precio, costo, valorComision };
-      localStorage.setItem('cat_prods', JSON.stringify(productos));
+      BD_PRODUCTOS[categoriaActual][id] = categoriaActual === 'dulces' 
+        ? { nombre, stock, precio, costo } 
+        : { nombre, stock, precio, costo, valorComision };
+
+      localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
       sincronizarHaciaCloud();
       renderizarProductos();
-      alert('Producto guardado.');
+
+      document.getElementById('pNombre').value = '';
+      document.getElementById('pStock').value = '';
+      document.getElementById('pPrecio').value = '';
+      document.getElementById('pCosto').value = '';
+      if(document.getElementById('pValorComision')) document.getElementById('pValorComision').value = '';
+
+      alert('Producto guardado exitosamente en el inventario corporativo.');
     }
 
     function eliminarProducto(id) {
-      if (confirm('¿Eliminar producto?')) {
-        delete productos[id];
-        localStorage.setItem('cat_prods', JSON.stringify(productos));
+      if (confirm('¿Estás seguro de eliminar este producto del inventario?')) {
+        delete BD_PRODUCTOS[categoriaActual][id];
+        localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
         sincronizarHaciaCloud();
         renderizarProductos();
       }
@@ -893,36 +720,56 @@
       const tbody = document.getElementById('tablaProductos');
       const banner = document.getElementById('bannerAlerta');
       const listaA = document.getElementById('listaAlertaStock');
+      if (!sel || !tbody) return;
+
       sel.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
       tbody.innerHTML = '';
       let alertas = [];
 
-      Object.keys(productos).forEach(id => {
-        const p = productos[id];
-        if (p.stock <= 5) alertas.push(`• <strong>${p.nombre}</strong> (${p.stock} unid.)`);
+      const prodsActuales = BD_PRODUCTOS[categoriaActual] || {};
+      Object.keys(prodsActuales).forEach(id => {
+        const p = prodsActuales[id];
+        if (p.stock <= 5) alertas.push(`• <strong>${p.nombre}</strong> (${p.stock} unidades restantes)`);
         sel.innerHTML += `<option value="${id}">${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${p.stock}]</option>`;
-        tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.stock} unid.</td><td>$${p.precio.toLocaleString()}</td><td>$${p.costo.toLocaleString()}</td><td>$${p.valorComision.toLocaleString()}</td><td><button class="btn btn-danger" style="padding:4px 8px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+        
+        const comText = categoriaActual === 'dulces' ? '25% (Automático)' : `$${(p.valorComision || 0).toLocaleString()}`;
+        tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.stock} unid.</td><td>$${p.precio.toLocaleString()}</td><td>$${p.costo.toLocaleString()}</td><td>${comText}</td><td><button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
       });
 
-      banner.style.display = alertas.length > 0 ? 'block' : 'none';
-      listaA.innerHTML = alertas.join('<br>');
+      if (banner && listaA) {
+        banner.style.display = alertas.length > 0 ? 'block' : 'none';
+        listaA.innerHTML = alertas.join('<br>');
+      }
     }
 
+    /************************************************--------------------------------
+     * PUNTO DE VENTA Y REGISTRO DE TRANSACCIONES
+     ********************************************************************************/
     function registrarVenta() {
       const pId = document.getElementById('vProducto').value;
-      const p = productos[pId];
-      if (!p) return alert('Selecciona un producto.');
+      const prodsActuales = BD_PRODUCTOS[categoriaActual] || {};
+      const p = prodsActuales[pId];
+      if (!p) return alert('Por favor selecciona un producto válido.');
+      
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
-      if (p.stock < cant) return alert(`Stock insuficiente. Quedan ${p.stock}.`);
+      if (p.stock < cant) return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades disponibles.`);
 
       const vendedor = document.getElementById('vVendedor').value;
       const sede = document.getElementById('vUni').value.trim() || vendedores[vendedor]?.sede || 'General';
       
       p.stock -= cant;
-      localStorage.setItem('cat_prods', JSON.stringify(productos));
+      localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
 
       const totalVenta = p.precio * cant;
-      const totalComision = (p.valorComision || 0) * cant;
+      
+      // COMISIÓN EXACTA DEL 25% PARA DULCES, PERSONALIZADA PARA HUEVOS Y VAPES
+      let totalComision = 0;
+      if (categoriaActual === 'dulces') {
+        totalComision = totalVenta * 0.25; // 25% exacto de la venta
+      } else {
+        totalComision = (p.valorComision || 0) * cant;
+      }
+
       const totalCosto = (p.costo || 0) * cant;
       const gananciaNeta = totalVenta - totalCosto - totalComision;
 
@@ -931,46 +778,63 @@
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       }
 
-      ventas.unshift({
+      BD_VENTAS[categoriaActual].unshift({
         fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        producto: p.nombre, cantidad: cant, vendedor, sede, total: totalVenta, comision: totalComision, ganancia: gananciaNeta
+        producto: p.nombre, 
+        cantidad: cant, 
+        vendedor, 
+        sede, 
+        total: totalVenta, 
+        comision: totalComision, 
+        ganancia: gananciaNeta
       });
-      localStorage.setItem('vnts', JSON.stringify(ventas));
+      
+      localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
       sincronizarHaciaCloud();
 
       document.getElementById('vCantidad').value = '1';
       document.getElementById('vUni').value = '';
+      
       renderizarProductos();
       renderizarVendedoresLista();
       renderizarVentas();
-      alert('¡Venta registrada!');
+      alert('¡Venta registrada exitosamente en el sistema!');
     }
 
     function renderizarVentas() {
       const tbody = document.getElementById('tablaVentas');
-      const filtroV = document.getElementById('fVendedor').value;
-      const filtroS = document.getElementById('fSede').value.toLowerCase();
+      const filtroV = document.getElementById('fVendedor')?.value || 'todos';
+      const filtroS = document.getElementById('fSede')?.value.toLowerCase() || '';
+      if (!tbody) return;
+
       tbody.innerHTML = '';
       let tVentas = 0, tGanancias = 0, tComisiones = 0, tUnidades = 0;
 
-      ventas.forEach(v => {
+      const ventasActuales = BD_VENTAS[categoriaActual] || [];
+      ventasActuales.forEach(v => {
         if (filtroV !== 'todos' && v.vendedor !== filtroV) return;
         if (filtroS && !v.sede.toLowerCase().includes(filtroS)) return;
-        tVentas += v.total; tGanancias += v.ganancia; tComisiones += v.comision; tUnidades += v.cantidad;
-        tbody.innerHTML += `<tr><td>${v.fecha}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>${v.vendedor}</td><td>${v.sede}</td><td>$${v.total.toLocaleString()}</td><td>$${v.comision.toLocaleString()}</td><td style="color:var(--success);">+$${v.ganancia.toLocaleString()}</td></tr>`;
+        
+        tVentas += v.total; 
+        tGanancias += v.ganancia; 
+        tComisiones += v.comision; 
+        tUnidades += v.cantidad;
+
+        tbody.innerHTML += `<tr><td>${v.fecha}</td><td>${v.producto}</td><td>${v.cantidad}</td><td>${v.vendedor}</td><td>${v.sede}</td><td>$${v.total.toLocaleString()}</td><td>$${v.comision.toLocaleString()}</td><td style="color:var(--success); font-weight:700;">+$${v.ganancia.toLocaleString()}</td></tr>`;
       });
 
-      document.getElementById('totalVentas').innerText = '$' + tVentas.toLocaleString();
-      document.getElementById('totalGanancias').innerText = '$' + tGanancias.toLocaleString();
-      document.getElementById('totalComisiones').innerText = '$' + tComisiones.toLocaleString();
-      document.getElementById('totalUnidades').innerText = tUnidades.toLocaleString();
+      if(document.getElementById('totalVentas')) document.getElementById('totalVentas').innerText = '$' + tVentas.toLocaleString();
+      if(document.getElementById('totalGanancias')) document.getElementById('totalGanancias').innerText = '$' + tGanancias.toLocaleString();
+      if(document.getElementById('totalComisiones')) document.getElementById('totalComisiones').innerText = '$' + tComisiones.toLocaleString();
+      if(document.getElementById('totalUnidades')) document.getElementById('totalUnidades').innerText = tUnidades.toLocaleString();
+      
       actualizarGraficas();
     }
 
     function limpiarHistorial() {
-      if (confirm('¿Borrar todo el historial?')) {
-        ventas = [];
-        localStorage.setItem('vnts', JSON.stringify(ventas));
+      if (confirm(`¿Estás seguro de borrar todo el historial de ventas de la categoría ${categoriaActual}?`)) {
+        BD_VENTAS[categoriaActual] = [];
+        localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
         sincronizarHaciaCloud();
         renderizarVentas();
         renderizarVendedoresLista();
@@ -979,92 +843,112 @@
 
     function exportarExcel() {
       let csv = 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n';
-      ventas.forEach(v => { csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`; });
+      const ventasActuales = BD_VENTAS[categoriaActual] || [];
+      ventasActuales.forEach(v => { 
+        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`; 
+      });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'reporte_kosmik.csv'; a.click();
+      const a = document.createElement('a'); 
+      a.href = URL.createObjectURL(blob); 
+      a.download = `reporte_kosmik_${categoriaActual}.csv`; 
+      a.click();
     }
 
     function enviarCuadreWhatsApp() {
-      let msg = `🚀 *CUADRE KOSMIK*%0A💰 Ventas: ${document.getElementById('totalVentas').innerText}%0A📈 Ganancia: ${document.getElementById('totalGanancias').innerText}%0A🤝 Comisiones: ${document.getElementById('totalComisiones').innerText}`;
+      const tv = document.getElementById('totalVentas')?.innerText || '$0';
+      const tg = document.getElementById('totalGanancias')?.innerText || '$0';
+      const tc = document.getElementById('totalComisiones')?.innerText || '$0';
+      let msg = `🚀 *CUADRE KOSMIK ENTERPRISE (${categoriaActual.toUpperCase()})*%0A💰 Ventas: ${tv}%0A📈 Ganancia Neta: ${tg}%0A🤝 Comisiones: ${tc}`;
       window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
     }
 
-    function sincronizarHaciaCloud() {
-      if (!dbFirebase) return;
-      dbFirebase.collection("kosmik_data").doc("estado_global").set({ productos, vendedores, ventas, actualizado: new Date().toISOString() }).catch(err => console.error(err));
-    }
-
-    function sincronizarDesdeCloud() {
-      if (!dbFirebase) return;
-      dbFirebase.collection("kosmik_data").doc("estado_global").get().then((doc) => {
-        if (doc.exists) {
-          const data = doc.data();
-          if (data.productos) productos = data.productos;
-          if (data.vendedores) vendedores = data.vendedores;
-          if (data.ventas) ventas = data.ventas;
-          localStorage.setItem('cat_prods', JSON.stringify(productos));
-          localStorage.setItem('cat_vends', JSON.stringify(vendedores));
-          localStorage.setItem('vnts', JSON.stringify(ventas));
-          renderizarVendedoresSelect();
-          renderizarProductos();
-          renderizarVendedoresLista();
-          renderizarVentas();
-        }
-      }).catch(err => console.error(err));
-    }
-
+    /************************************************--------------------------------
+     * GRÁFICAS Y ANALÍTICA VISUAL (CHART.JS)
+     ****************************************************************----------------/
     function actualizarGraficas() {
       const isDark = document.body.classList.contains('dark-mode');
       const textColor = isDark ? '#f8fafc' : '#0f172a';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
       let vMap = {}, pMap = {};
-      ventas.forEach(v => {
+      
+      const ventasActuales = BD_VENTAS[categoriaActual] || [];
+      ventasActuales.forEach(v => {
         vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total;
         pMap[v.producto] = (pMap[v.producto] || 0) + v.cantidad;
       });
 
-      if (chartV) chartV.destroy();
-      chartV = new Chart(document.getElementById('chartVendedores').getContext('2d'), {
-        type: 'bar', data: { labels: Object.keys(vMap), datasets: [{ data: Object.values(vMap), backgroundColor: '#4f46e5', borderRadius: 6 }] },
-        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: textColor }, grid: { color: gridColor } }, y: { ticks: { color: textColor }, grid: { color: gridColor } } } }
-      });
+      const ctxV = document.getElementById('chartVendedores');
+      if (ctxV) {
+        if (chartV) chartV.destroy();
+        chartV = new Chart(ctxV.getContext('2d'), {
+          type: 'bar', 
+          data: { 
+            labels: Object.keys(vMap), 
+            datasets: [{ data: Object.values(vMap), backgroundColor: '#4f46e5', borderRadius: 8 }] 
+          },
+          options: { 
+            responsive: true, 
+            plugins: { legend: { display: false } }, 
+            scales: { 
+              x: { ticks: { color: textColor }, grid: { color: gridColor } }, 
+              y: { ticks: { color: textColor }, grid: { color: gridColor } } 
+            } 
+          }
+        });
+      }
 
-      if (chartP) chartP.destroy();
-      chartP = new Chart(document.getElementById('chartProductos').getContext('2d'), {
-        type: 'doughnut', data: { labels: Object.keys(pMap), datasets: [{ data: Object.values(pMap), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }] },
-        options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: textColor } } } }
-      });
+      const ctxP = document.getElementById('chartProductos');
+      if (ctxP) {
+        if (chartP) chartP.destroy();
+        chartP = new Chart(ctxP.getContext('2d'), {
+          type: 'doughnut', 
+          data: { 
+            labels: Object.keys(pMap), 
+            datasets: [{ data: Object.values(pMap), backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'] }] 
+          },
+          options: { 
+            responsive: true, 
+            plugins: { legend: { position: 'bottom', labels: { color: textColor } } } 
+          }
+        });
+      }
     }
 
+    /************************************************--------------------------------
+     * IA COPILOT (MOTOR LOCAL Y GOOGLE GEMINI)
+     ********************************************************************************/
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
+      const ventasActuales = BD_VENTAS[categoriaActual] || [];
+      const prodsActuales = BD_PRODUCTOS[categoriaActual] || {};
+
       if (tipo === 'diagnostico_financiero') {
-        let totalV = ventas.reduce((acc, v) => acc + v.total, 0);
-        let totalG = ventas.reduce((acc, v) => acc + v.ganancia, 0);
+        let totalV = ventasActuales.reduce((acc, v) => acc + v.total, 0);
+        let totalG = ventasActuales.reduce((acc, v) => acc + v.ganancia, 0);
         let margen = totalV > 0 ? ((totalG / totalV) * 100).toFixed(1) : 0;
-        r = `📊 **Diagnóstico Financiero Rápido:**\n- Facturación global: $${totalV.toLocaleString()}\n- Margen de utilidad neto: ${margen}%`;
+        r = `📊 **Diagnóstico Financiero (${categoriaActual.toUpperCase()}):**\n- Facturación total del sector: $${totalV.toLocaleString()}\n- Utilidad neta generada: $${totalG.toLocaleString()}\n- Margen de ganancia operativo: ${margen}%`;
       } else if (tipo === 'ranking_vendedores') {
-        let vMap = {}; ventas.forEach(v => vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total);
-        r = `🏆 **Ranking de Vendedores:**\n` + Object.entries(vMap).map(([v, val]) => `• ${v}: $${val.toLocaleString()}`).join('\n');
+        let vMap = {}; ventasActuales.forEach(v => vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total);
+        r = `🏆 **Ranking Comercial (${categoriaActual.toUpperCase()}):**\n` + (Object.keys(vMap).length ? Object.entries(vMap).map(([v, val]) => `• ${v}: $${val.toLocaleString()}`).join('\n') : 'Aún no hay transacciones registradas en esta categoría.');
       } else if (tipo === 'analizar_stock') {
-        let criticos = Object.values(productos).filter(p => p.stock <= 5);
-        r = criticos.length === 0 ? `📦 Todos los productos tienen stock saludable.` : `⚠️ Stock crítico en:\n` + criticos.map(p => `• ${p.nombre} (${p.stock} unid.)`).join('\n');
+        let criticos = Object.values(prodsActuales).filter(p => p.stock <= 5);
+        r = criticos.length === 0 ? `📦 Todos los artículos de ${categoriaActual} cuentan con inventario saludable.` : `⚠️ Alerta de Reabastecimiento Crítico:\n` + criticos.map(p => `• ${p.nombre} (${p.stock} unid. restantes)`).join('\n');
       } else if (tipo === 'auditoria_comisiones') {
-        r = `🤝 **Comisiones Acumuladas:**\n` + Object.entries(vendedores).map(([v, info]) => `• ${v}: $${(info.acumuladoComisiones || 0).toLocaleString()}`).join('\n');
+        r = `🤝 **Auditoría de Comisiones Acumuladas:**\n` + Object.entries(vendedores).map(([v, info]) => `• ${v}: $${(info.acumuladoComisiones || 0).toLocaleString()}`).join('\n');
       } else if (tipo === 'rendimiento_sedes') {
-        let sMap = {}; ventas.forEach(v => sMap[v.sede] = (sMap[v.sede] || 0) + v.total);
-        r = `🏛️ **Ventas por Sede:**\n` + Object.entries(sMap).map(([s, val]) => `• ${s}: $${val.toLocaleString()}`).join('\n');
+        let sMap = {}; ventasActuales.forEach(v => sMap[v.sede] = (sMap[v.sede] || 0) + v.total);
+        r = `🏛️ **Análisis por Sede/Universidad (${categoriaActual.toUpperCase()}):**\n` + (Object.keys(sMap).length ? Object.entries(sMap).map(([s, val]) => `• ${s}: $${val.toLocaleString()}`).join('\n') : 'Sin registros segmentados por sede.');
       } else if (tipo === 'guiones_venta') {
-        r = `💬 **Guión de Abordaje:**\n"¡Hola! ¿Qué tal? Hoy traemos combos energéticos ideales para la jornada. ¿Te llevas uno?"`;
+        r = `💬 **Guión de Abordaje Directo (${categoriaActual.toUpperCase()}):**\n"¡Hola! ¿Qué tal la jornada? Hoy trajimos lo mejor en ${categoriaActual} directo al campus. ¿Te llevas el tuyo para recargar energía?"`;
       } else if (tipo === 'promo_whatsapp') {
-        r = `📱 **Copy WhatsApp:**\n🔥 ¡ATENCIÓN UNIVERSITARIOS! 🔥\nNo dejes que tu día se apague. Llévate tu combo favorito al mejor precio. ¡Stock limitado! 🚀`;
+        r = `📱 **Copy Promocional WhatsApp (${categoriaActual.toUpperCase()}):**\n🔥 ¡DISPONIBLE AHORA EN EL CAMPUS! 🔥\nNo te quedes sin tu producto favorito de ${categoriaActual}. Calidad superior y entrega inmediata. ¡Pídelo ya! 🚀`;
       } else if (tipo === 'calculadora_descuentos') {
-        r = `💡 **Promociones:** Valida que el volumen cubra el descuento para no perder margen.`;
+        r = `💡 **Evaluador de Promociones:** Asegúrate de que el volumen de venta compense cualquier descuento para proteger el margen neto del 25% en comisiones.`;
       } else if (tipo === 'proyecciones_metas') {
-        r = `🎯 **Metas:** Revisa el porcentaje de avance en la pestaña de Vendedores.`;
+        r = `🎯 **Proyección de Metas:** Revisa el porcentaje de avance individual en la pestaña de Vendedores para impulsar el cierre de semana.`;
       } else if (tipo === 'detector_anomalias') {
-        r = `🛡️ **Seguridad:** El sistema opera con normalidad y sin anomalías.`;
+        r = `🛡️ **Seguridad y Control:** El flujo de registros en ${categoriaActual} opera dentro de los parámetros normales de auditoría corporativa.`;
       }
       box.innerText = r;
     }
@@ -1092,27 +976,26 @@
         } else if (queryLower.includes('stock') || queryLower.includes('inventario')) {
           ejecutarPromptAccion('analizar_stock');
         } else {
-          box.innerText = `🤖 [Modo Local]: Ingresa tu API Key de Gemini en la pestaña Ajustes para consultas abiertas con inteligencia artificial.`;
+          box.innerText = `🤖 [Modo Local Inteligente]: Ingresa tu API Key de Google Gemini en la pestaña Ajustes para habilitar consultas abiertas con IA avanzada en la nube.`;
         }
         return;
       }
 
-      box.innerText = "🤖 Consultando con Google Gemini...";
+      box.innerText = "🤖 Consultando con Google Gemini (modelo oficial en la nube)...";
       try {
-        // Modelo actualizado a gemini-3.6-flash
-        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiApiKey}`, {
+        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{
               parts: [{
-                text: `Actúa como analista financiero y comercial de Kosmik (sistema de snacks universitarios). 
-                Datos del negocio:
-                - Productos: ${JSON.stringify(productos)}
-                - Vendedores: ${JSON.stringify(vendedores)}
-                - Ventas recientes: ${JSON.stringify(ventas.slice(0, 10))}
+                text: `Actúa como analista financiero y director comercial senior de Kosmik Enterprise (sistema multinegocio). 
+                Categoría activa actual: ${categoriaActual}
+                - Inventario en esta categoría: ${JSON.stringify(BD_PRODUCTOS[categoriaActual])}
+                - Vendedores registrados: ${JSON.stringify(vendedores)}
+                - Ventas recientes de esta categoría: ${JSON.stringify((BD_VENTAS[categoriaActual] || []).slice(0, 10))}
                 
-                Pregunta del operador: ${txt}`
+                Pregunta u orden del operador: ${txt}`
               }]
             }]
           })
@@ -1120,18 +1003,18 @@
 
         const data = await respuesta.json();
         if (data.error) {
-          box.innerText = `❌ Error de Gemini: ${data.error.message || 'Verifica tu clave.'}`;
+          box.innerText = `❌ Error de Gemini: ${data.error.message || 'Verifica la validez de tu API Key.'}`;
           return;
         }
 
         if (data.candidates && data.candidates[0].content) {
           box.innerText = data.candidates[0].content.parts[0].text;
         } else {
-          box.innerText = "No se pudo obtener respuesta de la API de Gemini.";
+          box.innerText = "No se pudo obtener respuesta estructurada de la API de Gemini.";
         }
       } catch (err) {
-        console.error(err);
-        box.innerText = "Error de red al conectar con Google Gemini.";
+        console.error("Error de red IA:", err);
+        box.innerText = "Error de red al conectar con los servidores de Google Gemini. Intenta nuevamente en unos segundos.";
       }
     }
   </script>
