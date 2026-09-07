@@ -465,7 +465,6 @@
         if(aiGridV) aiGridV.style.display = 'grid';
         if(thHeaders) thHeaders.innerHTML = '<th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Vendedor</th><th>Sede</th><th>Total Venta</th><th>Comisión</th><th>Ganancia Neta</th>';
       } else {
-        // En Huevos y Vapes se oculta todo lo relacionado a vendedores y comisiones
         if(tabVend) tabVend.style.display = 'none';
         if(grupoVend) grupoVend.style.display = 'none';
         if(cardComs) cardComs.style.display = 'none';
@@ -475,7 +474,6 @@
         if(aiGridV) aiGridV.style.display = 'none';
         if(thHeaders) thHeaders.innerHTML = '<th>Fecha / Hora</th><th>Producto</th><th>Cant</th><th>Sede</th><th>Total Venta</th><th>Ganancia Neta</th>';
         
-        // Si estaba en la pestaña de vendedores, lo devolvemos a ventas por seguridad
         const activeTab = document.querySelector('.tab-content.active');
         if(activeTab && activeTab.id === 'tab-vendedores') {
           cambiarPestana('ventas');
@@ -780,7 +778,6 @@
         const porc = infoVendedor ? (infoVendedor.comisionPorcentaje || 0) : 0;
         
         const totalVentaCalc = p.precio * cant;
-        // Si es dulces, comisión 25% automático o porc vendedor según config previa
         totalComision = totalVentaCalc * (porc > 0 ? porc / 100 : 0.25);
       }
       
@@ -900,7 +897,7 @@
 
     /************************************************--------------------------------
      * GRÁFICAS Y ANALÍTICA VISUAL (CHART.JS)
-     ****************************************************************----------------/
+     ************************************************--------------------------------/
     function actualizarGraficas() {
       const isDark = document.body.classList.contains('dark-mode');
       const textColor = isDark ? '#f8fafc' : '#0f172a';
@@ -960,7 +957,7 @@
 
     /************************************************--------------------------------
      * IA COPILOT (MOTOR LOCAL Y GOOGLE GEMINI)
-     ****************************************************************----------------/
+     ************************************************--------------------------------/
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
