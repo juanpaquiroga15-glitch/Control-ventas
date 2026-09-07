@@ -16,7 +16,7 @@
   <!-- Chart.js para Gráficas -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Firebase SDKs (Compat / Modular o carga perezosa) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -250,7 +250,44 @@
       border-color: var(--primary);
     }
 
-    /* BOTONES */
+    /* CHAT INPUT CONTAINER (ESTILO WHATSAPP) */
+    .chat-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .chat-input-wrapper textarea {
+      width: 100%;
+      padding-right: 50px; /* Espacio para el botón flotante */
+      resize: none;
+      height: 60px;
+    }
+
+    .btn-send-whatsapp {
+      position: absolute;
+      right: 10px;
+      bottom: 12px;
+      background: var(--ai-color);
+      color: white;
+      border: none;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-send-whatsapp:hover {
+      background: #7c3aed;
+      transform: scale(1.05);
+    }
+
+    /* BOTONES GENERALES */
     .btn {
       padding: 10px 18px;
       border-radius: 8px;
@@ -661,11 +698,13 @@
     <div class="card">
       <h3><i class="fa-solid fa-message"></i> Consulta Personalizada (IA)</h3>
       <div class="form-group">
-        <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cuánto se le debe en comisiones a cada vendedor o qué producto genera más ganancias?"></textarea>
+        <div class="chat-input-wrapper">
+          <textarea id="aiPromptInput" placeholder="Escribe tu consulta y presiona Enter..." onkeydown="manejarEnterChat(event)"></textarea>
+          <button class="btn-send-whatsapp" onclick="consultarIA()" title="Enviar consulta">
+            <i class="fa-solid fa-arrow-up"></i>
+          </button>
+        </div>
       </div>
-      <button class="btn btn-ai" style="width: 100%; margin-top: 10px;" onclick="consultarIA()">
-        <i class="fa-solid fa-microchip"></i> Generar Diagnóstico Inteligente
-      </button>
 
       <div class="ai-response-box" id="aiResponseBox">
         <em>Selecciona una opción o escribe tu consulta para generar el reporte...</em>
@@ -753,7 +792,6 @@
         document.getElementById('btnTheme').innerHTML = '<i class="fa-solid fa-sun"></i> Modo Claro';
       }
 
-      // Cargar campos de ajustes si existen
       if (firebaseConfig) {
         document.getElementById('fbApiKey').value = firebaseConfig.apiKey || '';
         document.getElementById('fbAuthDomain').value = firebaseConfig.authDomain || '';
@@ -1206,7 +1244,6 @@
           renderizarProductos();
           renderizarVendedoresLista();
           renderizarVentas();
-          console.log("Datos sincronizados desde Firebase exitosamente.");
         }
       }).catch(err => console.error("Error cargando desde Firebase:", err));
     }
@@ -1327,13 +1364,22 @@
       box.innerText = r;
     }
 
+    function manejarEnterChat(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault(); // Evita el salto de línea
+        consultarIA();
+      }
+    }
+
     async function consultarIA() {
-      const txt = document.getElementById('aiPromptInput').value.trim();
+      const txtInput = document.getElementById('aiPromptInput');
+      const txt = txtInput.value.trim();
       const box = document.getElementById('aiResponseBox');
-      if (!txt) return alert('Por favor escribe tu consulta.');
+      if (!txt) return;
+
+      txtInput.value = ''; // Limpia el input de inmediato tipo WhatsApp
 
       if (!geminiApiKey) {
-        // Fallback local inteligente
         const queryLower = txt.toLowerCase();
         if (queryLower.includes('comision') || queryLower.includes('debe')) {
           ejecutarPromptAccion('auditoria_comisiones');
@@ -1369,10 +1415,16 @@
         });
 
         const data = await respuesta.json();
+        
+        if (data.error) {
+          box.innerText = `❌ Error de Google Gemini: ${data.error.message || 'Verifica tu clave.'}`;
+          return;
+        }
+
         if (data.candidates && data.candidates[0].content) {
           box.innerText = data.candidates[0].content.parts[0].text;
         } else {
-          box.innerText = "No se pudo obtener respuesta de la API de Gemini. Revisa tu clave.";
+          box.innerText = "No se pudo obtener respuesta de la API de Gemini.";
         }
       } catch (err) {
         console.error(err);
