@@ -1099,7 +1099,8 @@
 
       box.innerText = "🤖 Consultando con Google Gemini...";
       try {
-        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
+        // Modelo actualizado a gemini-3.6-flash
+        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
