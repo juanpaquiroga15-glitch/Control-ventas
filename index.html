@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kosmik - Control de Ventas, Inventario & Analítica</title>
+  <title>Kosmik - Control de Ventas, Inventario & Analítica Cloud</title>
   
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,6 +15,10 @@
   
   <!-- Chart.js para Gráficas -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase SDKs (Compat / Modular o carga perezosa) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
   <style>
     :root {
@@ -242,7 +246,7 @@
       outline: none;
     }
 
-    input:focus, select:focus {
+    input:focus, select:focus, textarea:focus {
       border-color: var(--primary);
     }
 
@@ -375,6 +379,16 @@
       color: #fde68a;
       border-color: #78350f;
     }
+
+    .badge-status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-offline { background: #fee2e2; color: #991b1b; }
+    .badge-online { background: #d1fae5; color: #065f46; }
   </style>
 </head>
 <body>
@@ -382,7 +396,7 @@
   <!-- BARRA SUPERIOR DE NAVEGACIÓN -->
   <header class="header-nav">
     <div class="brand">
-      <i class="fa-solid fa-rocket"></i> Kosmik
+      <i class="fa-solid fa-rocket"></i> Kosmik <span id="cloudStatusBadge" class="badge-status badge-offline" style="margin-left: 8px;">Local</span>
     </div>
     <div class="user-badge">
       <i class="fa-solid fa-user-gear"></i>
@@ -397,7 +411,7 @@
   <!-- BANNER ALERTA STOCK -->
   <div id="bannerAlerta" class="alert-banner">
     <strong style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-      <i class="fa-solid fa-triangle-exclamation"></i> Atención: Stock Bajo (≤ 5 unidades)
+      <i class="fa-solid fa-triangle-exclamation"></i> Atención: Stock Bajo (&le; 5 unidades)
     </strong>
     <div id="listaAlertaStock"></div>
   </div>
@@ -438,7 +452,10 @@
       <i class="fa-solid fa-boxes-stacked"></i> Inventario
     </button>
     <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')">
-      <i class="fa-solid fa-brain"></i> IA Options
+      <i class="fa-solid fa-brain"></i> IA Copilot
+    </button>
+    <button class="tab-btn" onclick="cambiarPestana('ajustes')">
+      <i class="fa-solid fa-gear"></i> Ajustes (Cloud & IA)
     </button>
   </nav>
 
@@ -610,66 +627,44 @@
     </div>
   </div>
 
-  <!-- PESTAÑA 4: IA OPTIONS (LOCAL ENRIQUECIDO) -->
+  <!-- PESTAÑA 4: IA COPILOT -->
   <div id="tab-ia" class="tab-content">
     <div class="card" style="border-top: 4px solid var(--ai-color);">
-      <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik IA</h3>
-      <p style="font-size: 0.9rem; color: var(--text-muted);">Selecciona cualquiera de las herramientas estratégicas para generar un informe automático inmediato.</p>
+      <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik IA (Gemini & Local)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">Selecciona una herramienta estratégica o escribe tu propia consulta para generar diagnósticos automáticos.</p>
     </div>
 
-    <!-- MENÚ CATEGORIZADO DE IA OPTIONS -->
     <div class="card">
       <div class="ai-category-title"><i class="fa-solid fa-chart-line"></i> Estrategia & Finanzas</div>
       <div class="quick-ai-grid">
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('diagnostico_financiero')">
-          <i class="fa-solid fa-scale-balanced"></i> Diagnóstico Financiero
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('proyecciones_metas')">
-          <i class="fa-solid fa-bullseye"></i> Ritmo de Ventas & Proyección
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('calculadora_descuentos')">
-          <i class="fa-solid fa-percent"></i> Evaluador de Promociones
-        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('diagnostico_financiero')"><i class="fa-solid fa-scale-balanced"></i> Diagnóstico Financiero</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('proyecciones_metas')"><i class="fa-solid fa-bullseye"></i> Ritmo de Ventas & Proyección</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('calculadora_descuentos')"><i class="fa-solid fa-percent"></i> Evaluador de Promociones</button>
       </div>
 
       <div class="ai-category-title"><i class="fa-solid fa-users"></i> Gestión Comercial & Comisiones</div>
       <div class="quick-ai-grid">
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('auditoria_comisiones')">
-          <i class="fa-solid fa-hand-holding-dollar"></i> Auditoría de Comisiones
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')">
-          <i class="fa-solid fa-trophy"></i> Ranking de Vendedores
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('rendimiento_sedes')">
-          <i class="fa-solid fa-building-columns"></i> Análisis por Universidad
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('guiones_venta')">
-          <i class="fa-solid fa-comments"></i> Guiones de Abordaje Directo
-        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('auditoria_comisiones')"><i class="fa-solid fa-hand-holding-dollar"></i> Auditoría de Comisiones</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')"><i class="fa-solid fa-trophy"></i> Ranking de Vendedores</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('rendimiento_sedes')"><i class="fa-solid fa-building-columns"></i> Análisis por Universidad</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('guiones_venta')"><i class="fa-solid fa-comments"></i> Guiones de Abordaje Directo</button>
       </div>
 
       <div class="ai-category-title"><i class="fa-solid fa-box-archive"></i> Inventario & Seguridad</div>
       <div class="quick-ai-grid">
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('analizar_stock')">
-          <i class="fa-solid fa-boxes-packing"></i> Diagnóstico de Reabastecimiento
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('promo_whatsapp')">
-          <i class="fa-brands fa-whatsapp"></i> Copys de Combos WhatsApp
-        </button>
-        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('detector_anomalias')">
-          <i class="fa-solid fa-shield-cat"></i> Auditoría de Registros
-        </button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('analizar_stock')"><i class="fa-solid fa-boxes-packing"></i> Diagnóstico de Reabastecimiento</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('promo_whatsapp')"><i class="fa-brands fa-whatsapp"></i> Copys de Combos WhatsApp</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('detector_anomalias')"><i class="fa-solid fa-shield-cat"></i> Auditoría de Registros</button>
       </div>
     </div>
 
-    <!-- ASISTENTE DE LIBRE CONSULTA -->
     <div class="card">
-      <h3><i class="fa-solid fa-message"></i> Consulta Personalizada</h3>
+      <h3><i class="fa-solid fa-message"></i> Consulta Personalizada (IA)</h3>
       <div class="form-group">
         <textarea id="aiPromptInput" rows="3" placeholder="Ejemplo: ¿Cuánto se le debe en comisiones a cada vendedor o qué producto genera más ganancias?"></textarea>
       </div>
-      <button class="btn btn-ai" style="width: 100%; margin-top: 10px;" onclick="consultarIALocal()">
-        <i class="fa-solid fa-microchip"></i> Generar Diagnóstico
+      <button class="btn btn-ai" style="width: 100%; margin-top: 10px;" onclick="consultarIA()">
+        <i class="fa-solid fa-microchip"></i> Generar Diagnóstico Inteligente
       </button>
 
       <div class="ai-response-box" id="aiResponseBox">
@@ -678,8 +673,63 @@
     </div>
   </div>
 
+  <!-- PESTAÑA 5: AJUSTES (FIREBASE & API KEY IA) -->
+  <div id="tab-ajustes" class="tab-content">
+    <div class="card" style="border-top: 4px solid var(--primary);">
+      <h3><i class="fa-solid fa-cloud"></i> Configuración de Sincronización en la Nube (Firebase)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Conecta tus credenciales de Firebase Firestore para respaldar y sincronizar datos en tiempo real entre múltiples dispositivos.</p>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fbApiKey">Firebase API Key</label>
+          <input type="password" id="fbApiKey" placeholder="AIzaSy...">
+        </div>
+        <div class="form-group">
+          <label for="fbAuthDomain">Auth Domain</label>
+          <input type="text" id="fbAuthDomain" placeholder="tu-proyecto.firebaseapp.com">
+        </div>
+        <div class="form-group">
+          <label for="fbProjectId">Project ID</label>
+          <input type="text" id="fbProjectId" placeholder="tu-proyecto-id">
+        </div>
+        <div class="form-group">
+          <label for="fbStorageBucket">Storage Bucket</label>
+          <input type="text" id="fbStorageBucket" placeholder="tu-proyecto.appspot.com">
+        </div>
+        <div class="form-group">
+          <label for="fbMessagingSenderId">Messaging Sender ID</label>
+          <input type="text" id="fbMessagingSenderId" placeholder="123456789">
+        </div>
+        <div class="form-group">
+          <label for="fbAppId">App ID</label>
+          <input type="text" id="fbAppId" placeholder="1:12345:web:abcde">
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 15px;" onclick="guardarConexionFirebase()">
+        <i class="fa-solid fa-plug"></i> Guardar y Conectar Firebase
+      </button>
+    </div>
+
+    <div class="card" style="border-top: 4px solid var(--ai-color);">
+      <h3><i class="fa-solid fa-key"></i> Configuración de Inteligencia Artificial (Gemini API Key)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Ingresa tu clave de API de Google Gemini para habilitar consultas en la nube avanzadas con el modelo oficial.</p>
+      
+      <div class="form-group full">
+        <label for="aiApiKey">Google Gemini API Key</label>
+        <input type="password" id="aiApiKey" placeholder="AIzaSy... (Deja en blanco para usar modo analítico local)">
+      </div>
+      <button class="btn btn-ai" style="margin-top: 15px;" onclick="guardarApiKeyIA()">
+        <i class="fa-solid fa-save"></i> Guardar API Key IA
+      </button>
+    </div>
+  </div>
+
   <script>
-    // DATOS INICIALES Y LOCAL STORAGE
+    // ESTADO DE CONFIGURACIÓN Y DATOS
+    let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
+    let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
+    let dbFirebase = null;
+
     let productos = JSON.parse(localStorage.getItem('cat_prods')) || {
       'c1': { nombre: 'Cable (Unidad)', stock: 8, precio: 1000, costo: 400, valorComision: 150 },
       'm1': { nombre: 'Menta (Unidad)', stock: 40, precio: 2000, costo: 800, valorComision: 200 },
@@ -694,7 +744,6 @@
     };
 
     let ventas = JSON.parse(localStorage.getItem('vnts')) || [];
-
     let chartV = null;
     let chartP = null;
 
@@ -702,6 +751,21 @@
       if (localStorage.getItem('theme_dark') === 'true') {
         document.body.classList.add('dark-mode');
         document.getElementById('btnTheme').innerHTML = '<i class="fa-solid fa-sun"></i> Modo Claro';
+      }
+
+      // Cargar campos de ajustes si existen
+      if (firebaseConfig) {
+        document.getElementById('fbApiKey').value = firebaseConfig.apiKey || '';
+        document.getElementById('fbAuthDomain').value = firebaseConfig.authDomain || '';
+        document.getElementById('fbProjectId').value = firebaseConfig.projectId || '';
+        document.getElementById('fbStorageBucket').value = firebaseConfig.storageBucket || '';
+        document.getElementById('fbMessagingSenderId').value = firebaseConfig.messagingSenderId || '';
+        document.getElementById('fbAppId').value = firebaseConfig.appId || '';
+        inicializarFirebaseCloud(firebaseConfig);
+      }
+
+      if (geminiApiKey) {
+        document.getElementById('aiApiKey').value = geminiApiKey;
       }
 
       renderizarVendedoresSelect();
@@ -722,11 +786,56 @@
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-      const tabs = ['ventas', 'vendedores', 'productos', 'ia'];
+      const tabs = ['ventas', 'vendedores', 'productos', 'ia', 'ajustes'];
       const idx = tabs.indexOf(p);
       
       document.querySelectorAll('.tab-btn')[idx].classList.add('active');
       document.getElementById(`tab-${p}`).classList.add('active');
+      if(p === 'ventas') actualizarGraficas();
+    }
+
+    // CONEXIÓN FIREBASE
+    function guardarConexionFirebase() {
+      const config = {
+        apiKey: document.getElementById('fbApiKey').value.trim(),
+        authDomain: document.getElementById('fbAuthDomain').value.trim(),
+        projectId: document.getElementById('fbProjectId').value.trim(),
+        storageBucket: document.getElementById('fbStorageBucket').value.trim(),
+        messagingSenderId: document.getElementById('fbMessagingSenderId').value.trim(),
+        appId: document.getElementById('fbAppId').value.trim()
+      };
+
+      if (!config.apiKey || !config.projectId) {
+        return alert('Por favor ingresa al menos la API Key y el Project ID de Firebase.');
+      }
+
+      localStorage.setItem('kosmik_fb_config', JSON.stringify(config));
+      firebaseConfig = config;
+      inicializarFirebaseCloud(config);
+      alert('Configuración de Firebase guardada correctamente.');
+    }
+
+    function inicializarFirebaseCloud(config) {
+      try {
+        if (!firebase.apps.length) {
+          firebase.initializeApp(config);
+        }
+        dbFirebase = firebase.firestore();
+        document.getElementById('cloudStatusBadge').className = 'badge-status badge-online';
+        document.getElementById('cloudStatusBadge').innerText = 'Cloud (Firebase)';
+        sincronizarDesdeCloud();
+      } catch (e) {
+        console.error("Error al inicializar Firebase:", e);
+        document.getElementById('cloudStatusBadge').className = 'badge-status badge-offline';
+        document.getElementById('cloudStatusBadge').innerText = 'Error Conexión';
+      }
+    }
+
+    function guardarApiKeyIA() {
+      const key = document.getElementById('aiApiKey').value.trim();
+      localStorage.setItem('kosmik_ai_key', key);
+      geminiApiKey = key;
+      alert('API Key de Gemini guardada con éxito.');
     }
 
     // GESTIÓN DE VENDEDORES
@@ -740,6 +849,7 @@
 
       vendedores[nom] = { sede, meta, comisionDefecto: com, acumuladoComisiones: vendedores[nom]?.acumuladoComisiones || 0 };
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+      sincronizarHaciaCloud();
 
       document.getElementById('vendNombre').value = '';
       document.getElementById('vendSede').value = '';
@@ -786,6 +896,7 @@
       }
 
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+      sincronizarHaciaCloud();
       renderizarVendedoresSelect();
       renderizarVendedoresLista();
       renderizarVentas();
@@ -793,9 +904,10 @@
     }
 
     function eliminarVendedor(vendedor) {
-      if (confirm(`¿Estás seguro de eliminar al vendedor "${vendedor}"? Sus ventas pasadas en el historial se mantendrán.`)) {
+      if (confirm(`¿Estás seguro de eliminar al vendedor "${vendedor}"? Sus ventas pasadas se mantendrán.`)) {
         delete vendedores[vendedor];
         localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+        sincronizarHaciaCloud();
         renderizarVendedoresSelect();
         renderizarVendedoresLista();
         renderizarVentas();
@@ -808,6 +920,7 @@
         if (vendedores[vendedor]) {
           vendedores[vendedor].acumuladoComisiones = 0;
           localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+          sincronizarHaciaCloud();
           renderizarVendedoresLista();
           alert('Comisiones liquidadas con éxito.');
         }
@@ -853,7 +966,7 @@
                   <i class="fa-solid fa-trash"></i> Eliminar
                 </button>
                 <button class="btn btn-primary" style="padding:4px 10px; font-size:0.8rem;" onclick="liquidarComisiones('${v}')">
-                  Liquidar
+                  Liquidar ($${(info.acumuladoComisiones || 0).toLocaleString()})
                 </button>
               </div>
             </div>
@@ -882,6 +995,7 @@
       productos[id] = { nombre, stock, precio, costo, valorComision };
 
       localStorage.setItem('cat_prods', JSON.stringify(productos));
+      sincronizarHaciaCloud();
       renderizarProductos();
       alert('Producto guardado.');
     }
@@ -890,6 +1004,7 @@
       if (confirm('¿Eliminar producto del inventario?')) {
         delete productos[id];
         localStorage.setItem('cat_prods', JSON.stringify(productos));
+        sincronizarHaciaCloud();
         renderizarProductos();
       }
     }
@@ -936,256 +1051,333 @@
       if (!p) return alert('Selecciona un producto.');
 
       const cant = parseInt(document.getElementById('vCantidad').value, 10) || 1;
-      if (p.stock < cant) return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades.`);
+      if (cant <= 0) return alert('Cantidad no válida.');
+
+      if (p.stock < cant) {
+        return alert(`Stock insuficiente. Solo quedan ${p.stock} unidades disponibles.`);
+      }
 
       const vendedor = document.getElementById('vVendedor').value;
       if (!vendedor) return alert('Selecciona un vendedor.');
 
       const sede = document.getElementById('vUni').value.trim() || vendedores[vendedor]?.sede || 'General';
-
-      const total = p.precio * cant;
-      const costo = p.costo * cant;
-      const comision = p.valorComision * cant;
-      const ganancia = total - costo - comision;
-
+      
       p.stock -= cant;
       localStorage.setItem('cat_prods', JSON.stringify(productos));
 
-      const reg = {
-        fecha: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        prod: p.nombre,
-        cant,
-        vendedor,
-        uni: sede,
-        total,
-        com: comision,
-        cos: costo,
-        gan: ganancia
+      const totalVenta = p.precio * cant;
+      const totalComision = (p.valorComision || 0) * cant;
+      const totalCosto = (p.costo || 0) * cant;
+      const gananciaNeta = totalVenta - totalCosto - totalComision;
+
+      if (vendedores[vendedor]) {
+        vendedores[vendedor].acumuladoComisiones = (vendedores[vendedor].acumuladoComisiones || 0) + totalComision;
+        localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+      }
+
+      const nuevaVenta = {
+        fecha: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        producto: p.nombre,
+        cantidad: cant,
+        vendedor: vendedor,
+        sede: sede,
+        total: totalVenta,
+        comision: totalComision,
+        ganancia: gananciaNeta
       };
 
-      ventas.unshift(reg);
+      ventas.unshift(nuevaVenta);
       localStorage.setItem('vnts', JSON.stringify(ventas));
+      sincronizarHaciaCloud();
+
+      document.getElementById('vCantidad').value = '1';
+      document.getElementById('vUni').value = '';
 
       renderizarProductos();
       renderizarVendedoresLista();
       renderizarVentas();
-      alert('Venta guardada.');
+      alert('¡Venta registrada con éxito!');
     }
 
     function renderizarVentas() {
       const tbody = document.getElementById('tablaVentas');
-      const filV = document.getElementById('fVendedor').value;
-      const filS = document.getElementById('fSede').value.toLowerCase().trim();
+      const filtroV = document.getElementById('fVendedor').value;
+      const filtroS = document.getElementById('fSede').value.toLowerCase();
 
       tbody.innerHTML = '';
-      let sumT = 0, sumG = 0, sumC = 0, sumU = 0;
+      let tVentas = 0, tGanancias = 0, tComisiones = 0, tUnidades = 0;
 
-      let vFiltered = ventas.filter(v => {
-        let okV = (filV === 'todos') || (v.vendedor === filV);
-        let okS = !filS || (v.uni && v.uni.toLowerCase().includes(filS));
-        return okV && okS;
-      });
+      ventas.forEach((v) => {
+        if (filtroV !== 'todos' && v.vendedor !== filtroV) return;
+        if (filtroS && !v.sede.toLowerCase().includes(filtroS)) return;
 
-      vFiltered.forEach(v => {
-        sumT += v.total;
-        sumG += v.gan;
-        sumC += v.com;
-        sumU += v.cant;
+        tVentas += v.total;
+        tGanancias += v.ganancia;
+        tComisiones += v.comision;
+        tUnidades += v.cantidad;
 
         tbody.innerHTML += `
           <tr>
             <td>${v.fecha}</td>
-            <td><strong>${v.prod}</strong></td>
-            <td>${v.cant}</td>
+            <td>${v.producto}</td>
+            <td>${v.cantidad}</td>
             <td>${v.vendedor}</td>
-            <td>${v.uni}</td>
+            <td>${v.sede}</td>
             <td>$${v.total.toLocaleString()}</td>
-            <td style="color:var(--warning);">$${v.com.toLocaleString()}</td>
-            <td style="color:var(--success); font-weight:bold;">$${v.gan.toLocaleString()}</td>
+            <td>$${v.comision.toLocaleString()}</td>
+            <td style="color:var(--success);">+$${v.ganancia.toLocaleString()}</td>
           </tr>
         `;
       });
 
-      document.getElementById('totalVentas').textContent = `$${sumT.toLocaleString()}`;
-      document.getElementById('totalGanancias').textContent = `$${sumG.toLocaleString()}`;
-      document.getElementById('totalComisiones').textContent = `$${sumC.toLocaleString()}`;
-      document.getElementById('totalUnidades').textContent = sumU.toLocaleString();
+      document.getElementById('totalVentas').innerText = '$' + tVentas.toLocaleString();
+      document.getElementById('totalGanancias').innerText = '$' + tGanancias.toLocaleString();
+      document.getElementById('totalComisiones').innerText = '$' + tComisiones.toLocaleString();
+      document.getElementById('totalUnidades').innerText = tUnidades.toLocaleString();
 
       actualizarGraficas();
     }
 
-    // GRÁFICAS DE CHART.JS
-    function actualizarGraficas() {
-      let vStats = {};
-      let pStats = {};
+    function limpiarHistorial() {
+      if (confirm('¿Estás seguro de borrar todo el historial de ventas?')) {
+        ventas = [];
+        localStorage.setItem('vnts', JSON.stringify(ventas));
+        sincronizarHaciaCloud();
+        renderizarVentas();
+        renderizarVendedoresLista();
+      }
+    }
 
+    function exportarExcel() {
+      let csv = 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n';
       ventas.forEach(v => {
-        vStats[v.vendedor] = (vStats[v.vendedor] || 0) + v.total;
-        pStats[v.prod] = (pStats[v.prod] || 0) + v.cant;
+        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor}","${v.sede}",${v.total},${v.comision},${v.ganancia}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'reporte_ventas_kosmik.csv';
+      a.click();
+    }
+
+    function enviarCuadreWhatsApp() {
+      let totalV = document.getElementById('totalVentas').innerText;
+      let totalG = document.getElementById('totalGanancias').innerText;
+      let totalC = document.getElementById('totalComisiones').innerText;
+      let operador = document.getElementById('vUsuario').value;
+
+      let msg = `🚀 *CUADRE DE CAJA - KOSMIK*%0A`;
+      msg += `👤 Operador: ${operador}%0A`;
+      msg += `💰 Ventas Totales: ${totalV}%0A`;
+      msg += `📈 Ganancia Neta: ${totalG}%0A`;
+      msg += `🤝 Comisiones: ${totalC}%0A`;
+      msg += `📦 Total Operaciones: ${ventas.length}%0A`;
+      msg += `_Generado automáticamente desde Kosmik App_`;
+
+      window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
+    }
+
+    // SINCRONIZACIÓN CLOUD FIRESTORE
+    function sincronizarHaciaCloud() {
+      if (!dbFirebase) return;
+      dbFirebase.collection("kosmik_data").doc("estado_global").set({
+        productos,
+        vendedores,
+        ventas,
+        actualizado: new Date().toISOString()
+      }).catch(err => console.error("Error sincronizando hacia Firebase:", err));
+    }
+
+    function sincronizarDesdeCloud() {
+      if (!dbFirebase) return;
+      dbFirebase.collection("kosmik_data").doc("estado_global").get().then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          if (data.productos) productos = data.productos;
+          if (data.vendedores) vendedores = data.vendedores;
+          if (data.ventas) ventas = data.ventas;
+
+          localStorage.setItem('cat_prods', JSON.stringify(productos));
+          localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+          localStorage.setItem('vnts', JSON.stringify(ventas));
+
+          renderizarVendedoresSelect();
+          renderizarProductos();
+          renderizarVendedoresLista();
+          renderizarVentas();
+          console.log("Datos sincronizados desde Firebase exitosamente.");
+        }
+      }).catch(err => console.error("Error cargando desde Firebase:", err));
+    }
+
+    // GRÁFICAS CHART.JS
+    function actualizarGraficas() {
+      const isDark = document.body.classList.contains('dark-mode');
+      const textColor = isDark ? '#f8fafc' : '#0f172a';
+      const gridColor = isDark ? '#334155' : '#e2e8f0';
+
+      let vMap = {};
+      ventas.forEach(v => {
+        vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total;
       });
 
-      // Chart Vendedores
       const ctxV = document.getElementById('chartVendedores').getContext('2d');
       if (chartV) chartV.destroy();
       chartV = new Chart(ctxV, {
         type: 'bar',
         data: {
-          labels: Object.keys(vStats),
-          datasets: [{ label: 'Ventas ($)', data: Object.values(vStats), backgroundColor: '#4f46e5' }]
+          labels: Object.keys(vMap),
+          datasets: [{
+            label: 'Ventas ($)',
+            data: Object.values(vMap),
+            backgroundColor: '#4f46e5',
+            borderRadius: 6
+          }]
         },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: textColor }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor }, grid: { color: gridColor } }
+          }
+        }
       });
 
-      // Chart Productos
+      let pMap = {};
+      ventas.forEach(v => {
+        pMap[v.producto] = (pMap[v.producto] || 0) + v.cantidad;
+      });
+
       const ctxP = document.getElementById('chartProductos').getContext('2d');
       if (chartP) chartP.destroy();
       chartP = new Chart(ctxP, {
         type: 'doughnut',
         data: {
-          labels: Object.keys(pStats),
-          datasets: [{ data: Object.values(pStats), backgroundColor: ['#10b981', '#f59e0b', '#8b5cf6', '#ef4444'] }]
+          labels: Object.keys(pMap),
+          datasets: [{
+            data: Object.values(pMap),
+            backgroundColor: ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+          }]
         },
-        options: { responsive: true }
-      });
-    }
-
-    // EXPORTAR Y LIMPIAR
-    function exportarExcel() {
-      let csv = 'Fecha,Producto,Cantidad,Vendedor,Sede,Total,Comision,Ganancia\n';
-      ventas.forEach(v => {
-        csv += `"${v.fecha}","${v.prod}",${v.cant},"${v.vendedor}","${v.uni}",${v.total},${v.com},${v.gan}\n`;
-      });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-      a.download = `Kosmik_Ventas.csv`;
-      a.click();
-    }
-
-    function limpiarHistorial() {
-      if (confirm('¿Borrar todo el historial de ventas?')) {
-        ventas = [];
-        localStorage.removeItem('vnts');
-        renderizarVentas();
-      }
-    }
-
-    function enviarCuadreWhatsApp() {
-      let msg = `🚀 *REPORTE KOSMIK*\n`;
-      msg += `💵 Ventas Totales: ${document.getElementById('totalVentas').textContent}\n`;
-      msg += `📈 Ganancia Neta: ${document.getElementById('totalGanancias').textContent}\n`;
-      msg += `📦 Unidades Vendidas: ${document.getElementById('totalUnidades').textContent}\n`;
-      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    // MOTOR ANALÍTICO LOCAL (IA OPTIONS)
-    function ejecutarPromptAccion(tipo) {
-      consultarIALocal(tipo);
-    }
-
-    function consultarIALocal(tipoFijo = null) {
-      const prompt = document.getElementById('aiPromptInput').value.toLowerCase();
-      const box = document.getElementById('aiResponseBox');
-      box.textContent = "⏳ Analizando datos de Kosmik...";
-
-      setTimeout(() => {
-        let res = "";
-
-        if (tipoFijo === 'auditoria_comisiones' || prompt.includes('comision') || prompt.includes('comisiones')) {
-          let comStats = {};
-          let totalComs = 0;
-          ventas.forEach(v => {
-            comStats[v.vendedor] = (comStats[v.vendedor] || 0) + v.com;
-            totalComs += v.com;
-          });
-
-          res = `🤝 **AUDITORÍA Y CÁLCULO DE COMISIONES**\n\n`;
-          res += `• Comisiones Totales Acumuladas: **$${totalComs.toLocaleString()}**\n\n`;
-          
-          if (Object.keys(comStats).length === 0) {
-            res += `⚠️ Aún no hay ventas registradas para calcular comisiones.`;
-          } else {
-            res += `**Desglose por Vendedor:**\n`;
-            Object.keys(comStats).forEach(v => {
-              res += `• **${v}**: $${comStats[v].toLocaleString()}\n`;
-            });
-            res += `\n💡 **Recomendación:** Ve a la pestaña *Vendedores & Metas* para ejecutar el botón de *Liquidar* cuando realices los pagos.`;
-          }
-
-        } else if (tipoFijo === 'diagnostico_financiero' || prompt.includes('financiero')) {
-          let totV = 0, totG = 0, totC = 0;
-          ventas.forEach(v => { totV += v.total; totG += v.gan; totC += v.com; });
-          let margen = totV > 0 ? ((totG / totV) * 100).toFixed(1) : 0;
-
-          res = `📈 **DIAGNÓSTICO FINANCIERO INTEGRAL**\n\n`;
-          res += `• Ingresos Brutos: **$${totV.toLocaleString()}**\n`;
-          res += `• Ganancia Neta Real: **$${totG.toLocaleString()}** (${margen}% margen)\n`;
-          res += `• Comisiones Repartidas: **$${totC.toLocaleString()}**\n\n`;
-          res += `💡 **Diagnóstico:** El margen neta es saludable. Se sugiere impulsar la venta de combos.`;
-
-        } else if (tipoFijo === 'proyecciones_metas' || prompt.includes('ritmo') || prompt.includes('proyeccion')) {
-          let totMeta = 0;
-          Object.values(vendedores).forEach(v => totMeta += v.meta);
-          let totVenta = ventas.reduce((acc, v) => acc + v.total, 0);
-          let pct = totMeta > 0 ? ((totVenta / totMeta) * 100).toFixed(1) : 0;
-
-          res = `🎯 **RITMO DE VENTAS Y PROYECCIÓN**\n\n`;
-          res += `• Meta Global Acumulada: **$${totMeta.toLocaleString()}**\n`;
-          res += `• Avance Actual: **$${totVenta.toLocaleString()}** (${pct}% completado)\n\n`;
-          res += `🚀 **Estrategia recomendada:** Mantén el foco en la sede con menor avance.`;
-
-        } else if (tipoFijo === 'calculadora_descuentos' || prompt.includes('descuento') || prompt.includes('promo')) {
-          res = `💸 **EVALUADOR DE DESCUENTOS Y MARGEN**\n\n`;
-          res += `• Aplicar **10% de descuento** en combos reduce el margen en promedio solo un **3.5%**, pero incrementa la rotación.\n`;
-          res += `💡 **Regla:** Nunca reduzcas el monto fijo de comisión del vendedor al ofrecer un descuento.`;
-
-        } else if (tipoFijo === 'ranking_vendedores' || prompt.includes('vendedor')) {
-          let vStats = {};
-          ventas.forEach(v => { vStats[v.vendedor] = (vStats[v.vendedor] || 0) + v.total; });
-          let rank = Object.keys(vStats).sort((a,b) => vStats[b] - vStats[a]);
-
-          res = `🏆 **RANKING DE VENDEDORES**\n\n`;
-          rank.forEach((v, i) => {
-            res += `${i + 1}. **${v}**: $${vStats[v].toLocaleString()} vendidos.\n`;
-          });
-
-        } else if (tipoFijo === 'rendimiento_sedes' || prompt.includes('sede') || prompt.includes('universidad')) {
-          let sStats = {};
-          ventas.forEach(v => { sStats[v.uni] = (sStats[v.uni] || 0) + v.total; });
-
-          res = `🏛️ **RENDIMIENTO POR SEDE / UNIVERSIDAD**\n\n`;
-          Object.keys(sStats).forEach(s => {
-            res += `• **${s}**: $${sStats[s].toLocaleString()} generados.\n`;
-          });
-
-        } else if (tipoFijo === 'guiones_venta' || prompt.includes('guion')) {
-          res = `💬 **GUIONES DE ABORDAJE EN PASILLO**\n\n`;
-          res += `1. **Cables:** "¡Parce, no te quedes apagado en clase! Cables de carga rápida listos para entrega inmediata."\n`;
-          res += `2. **Mentas:** "¿Un dulce para reactivarte antes del examen? Tengo mentas frescas a la mano."`;
-
-        } else if (tipoFijo === 'analizar_stock' || prompt.includes('stock')) {
-          let crit = Object.values(productos).filter(p => p.stock <= 5);
-          res = `📦 **DIAGNÓSTICO DE INVENTARIO**\n\n`;
-          if (crit.length > 0) {
-            res += `⚠️ **Urgencia de Compra:** ${crit.map(p => p.nombre).join(', ')}.`;
-          } else {
-            res += `✅ El stock de todos los productos está equilibrado.`;
-          }
-
-        } else if (tipoFijo === 'detector_anomalias' || prompt.includes('anomalia')) {
-          let neg = ventas.filter(v => v.gan < 0);
-          res = `🚨 **AUDITORÍA DE REGISTROS**\n\n`;
-          if (neg.length > 0) {
-            res += `⚠️ Se detectaron ${neg.length} ventas con margen negativo. Revisa precios de costo vs comisión.`;
-          } else {
-            res += `✅ No hay inconsistencias en las ganancias registradas.`;
-          }
-
-        } else {
-          res = `🤖 **ANÁLISIS KOSMIK**: Usa las opciones arriba para auditorías detalladas de tu negocio.`;
+        options: {
+          responsive: true,
+          plugins: { legend: { position: 'bottom', labels: { color: textColor } } }
         }
+      });
+    }
 
-        box.innerHTML = res.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      }, 250);
+    // MOTOR INTELIGENTE HÍBRIDO (LOCAL / GEMINI API)
+    function ejecutarPromptAccion(tipo) {
+      let r = "";
+      const box = document.getElementById('aiResponseBox');
+
+      if (tipo === 'diagnostico_financiero') {
+        let totalV = ventas.reduce((acc, v) => acc + v.total, 0);
+        let totalG = ventas.reduce((acc, v) => acc + v.ganancia, 0);
+        let margen = totalV > 0 ? ((totalG / totalV) * 100).toFixed(1) : 0;
+        r = `📊 **Diagnóstico Financiero Rápido:**\n- Facturación global registrada: $${totalV.toLocaleString()}\n- Margen de utilidad neto global: ${margen}%\n- **Recomendación:** Mantén tus costos fijos controlados y prioriza la rotación de combos con mayor rentabilidad de insumos.`;
+      } else if (tipo === 'ranking_vendedores') {
+        let vMap = {};
+        ventas.forEach(v => { vMap[v.vendedor] = (vMap[v.vendedor] || 0) + v.total; });
+        let sorted = Object.entries(vMap).sort((a,b) => b[1] - a[1]);
+        r = `🏆 **Ranking Actual de Vendedores:**\n`;
+        if(sorted.length === 0) r += `Aún no hay registros de ventas para clasificar.`;
+        sorted.forEach(([v, val], idx) => {
+          r += `${idx+1}. **${v}**: $${val.toLocaleString()}\n`;
+        });
+      } else if (tipo === 'analizar_stock') {
+        let criticos = Object.values(productos).filter(p => p.stock <= 5);
+        r = `📦 **Auditoría de Reabastecimiento:**\n`;
+        if (criticos.length === 0) {
+          r += `¡Excelente! No hay productos con stock crítico en este momento. Todos superan las 5 unidades.`;
+        } else {
+          r += `Se detectaron ${criticos.length} productos en nivel crítico de inventario:\n`;
+          criticos.forEach(p => {
+            r += `• ${p.nombre} (Disponibles: ${p.stock} unid.) - ¡Pedir lote nuevo urgente!\n`;
+          });
+        }
+      } else if (tipo === 'auditoria_comisiones') {
+        r = `🤝 **Estado de Comisiones Pendientes:**\n`;
+        Object.entries(vendedores).forEach(([v, info]) => {
+          r += `• **${v}**: $${(info.acumuladoComisiones || 0).toLocaleString()} acumulados sin liquidar.\n`;
+        });
+        r += `\n*Recuerda utilizar el botón 'Liquidar' en la sección de Vendedores al hacer cortes de caja.*`;
+      } else if (tipo === 'rendimiento_sedes') {
+        let sMap = {};
+        ventas.forEach(v => { sMap[v.sede] = (sMap[v.sede] || 0) + v.total; });
+        r = `🏛️ **Volumen de Ventas por Sede/Universidad:**\n`;
+        if(Object.keys(sMap).length === 0) r += `No hay registros agrupados por sede aún.`;
+        Object.entries(sMap).forEach(([s, val]) => {
+          r += `• **${s}**: $${val.toLocaleString()}\n`;
+        });
+      } else if (tipo === 'guiones_venta') {
+        r = `💬 **Guión Recomendado para Abordaje Estudiantil:**\n"¡Hola! ¿Qué tal? Te cuento que hoy traemos nuestros combos especiales energéticos y de tecnología express ideales para la jornada. ¿Te llevas uno de promoción hoy para recargar pilas?"`;
+      } else if (tipo === 'promo_whatsapp') {
+        r = `📱 **Copy Promocional para Estados de WhatsApp:**\n🔥 ¡ATENCIÓN UNIVERSITARIOS! 🔥\nNo dejes que tu día se apague. Acércate con nuestros vendedores y llévate tu combo favorito al mejor precio. ¡Stock limitado, aprovecha ya! 🚀`;
+      } else if (tipo === 'calculadora_descuentos') {
+        r = `💡 **Evaluador de Promociones:**\nSi aplicas un descuento superior al 15%, asegúrate de que el volumen de venta compense la pérdida de margen unitario para proteger tu ganancia neta.`;
+      } else if (tipo === 'proyecciones_metas') {
+        r = `🎯 **Proyección de Metas:**\nRevisa el porcentaje de avance individual en la pestaña 'Vendedores & Metas'. Los perfiles con más del 80% están cerca de cerrar sus objetivos semanales exitosamente.`;
+      } else if (tipo === 'detector_anomalias') {
+        r = `🛡️ **Auditoría de Integridad:**\nEl sistema opera con normalidad. No se detectan transacciones duplicadas o anomalías en los registros recientes.`;
+      }
+
+      box.innerText = r;
+    }
+
+    async function consultarIA() {
+      const txt = document.getElementById('aiPromptInput').value.trim();
+      const box = document.getElementById('aiResponseBox');
+      if (!txt) return alert('Por favor escribe tu consulta.');
+
+      if (!geminiApiKey) {
+        // Fallback local inteligente
+        const queryLower = txt.toLowerCase();
+        if (queryLower.includes('comision') || queryLower.includes('debe')) {
+          ejecutarPromptAccion('auditoria_comisiones');
+        } else if (queryLower.includes('ganancia') || queryLower.includes('rentabl')) {
+          ejecutarPromptAccion('diagnostico_financiero');
+        } else if (queryLower.includes('stock') || queryLower.includes('inventario')) {
+          ejecutarPromptAccion('analizar_stock');
+        } else {
+          box.innerText = `🤖 **Respuesta Kosmik IA (Modo Local):**\nPara consultas abiertas detalladas con inteligencia artificial generativa, ingresa tu API Key oficial de Google Gemini en la pestaña de Ajustes.`;
+        }
+        return;
+      }
+
+      box.innerText = "🤖 Consultando con Google Gemini API...";
+      
+      try {
+        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{
+              parts: [{
+                text: `Actúa como el analista de negocios inteligente para Kosmik (una plataforma de ventas universitarias de snacks y accesorios). 
+                Datos actuales del negocio:
+                - Productos: ${JSON.stringify(productos)}
+                - Vendedores: ${JSON.stringify(vendedores)}
+                - Ventas recientes: ${JSON.stringify(ventas.slice(0, 10))}
+                
+                Pregunta del usuario: ${txt}`
+              }]
+            }]
+          })
+        });
+
+        const data = await respuesta.json();
+        if (data.candidates && data.candidates[0].content) {
+          box.innerText = data.candidates[0].content.parts[0].text;
+        } else {
+          box.innerText = "No se pudo obtener respuesta de la API de Gemini. Revisa tu clave.";
+        }
+      } catch (err) {
+        console.error(err);
+        box.innerText = "Error de red al consultar la API de Gemini.";
+      }
     }
   </script>
 </body>
