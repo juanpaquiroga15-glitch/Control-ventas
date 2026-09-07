@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kosmik Enterprise Ultimate - Sistema Multicategoría Cloud (Dulces, Huevos, Vapes)</title>
+  <title>Kosmik Enterprise Ultimate - Sistema Multicategoría Cloud</title>
   
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,98 +54,69 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
     body { background-color: var(--bg); color: var(--text-main); max-width: 1280px; margin: 0 auto; padding: 24px; transition: background-color 0.25s, color 0.25s; }
 
-    /* BARRA SUPERIOR NAV */
     .header-nav { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 18px 28px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow); }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.4rem; color: var(--primary); letter-spacing: -0.025em; }
     .user-badge { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
     .user-badge input { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-weight: 600; font-size: 0.9rem; }
-    .btn-toggle { background: var(--table-header); color: var(--text-main); border: 1px solid var(--border); padding: 9px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; }
-    .btn-toggle:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-toggle { background: var(--table-header); color: var(--text-main); border: 1px solid var(--border); padding: 9px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
 
-    /* SELECTOR MAESTRO DE CATEGORÍAS */
     .master-category-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-    .master-cat-btn { background: var(--card-bg); border: 2px solid var(--border); padding: 18px; border-radius: var(--radius); cursor: pointer; font-weight: 700; font-size: 1.15rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: var(--shadow); }
-    .master-cat-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
-    .master-cat-btn.active { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4); transform: translateY(-3px); }
+    .master-cat-btn { background: var(--card-bg); border: 2px solid var(--border); padding: 18px; border-radius: var(--radius); cursor: pointer; font-weight: 700; font-size: 1.15rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.25s ease; box-shadow: var(--shadow); }
+    .master-cat-btn.active { border-color: var(--primary); background: var(--primary); color: white; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4); }
 
-    /* TARJETAS METRICAS */
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 28px; }
-    .metric-card { background: var(--card-bg); padding: 22px 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: transform 0.2s; }
-    .metric-card:hover { transform: translateY(-2px); }
+    .metric-card { background: var(--card-bg); padding: 22px 24px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; }
     .metric-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); font-weight: 700; margin-bottom: 10px; }
-    .metric-value { font-size: 2rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
+    .metric-value { font-size: 2rem; font-weight: 800; color: var(--text-main); }
     .metric-icon { position: absolute; right: 22px; top: 22px; font-size: 1.8rem; opacity: 0.12; }
 
-    /* PESTAÑAS */
     .nav-tabs { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
-    .tab-btn { padding: 11px 20px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 9px; white-space: nowrap; transition: all 0.2s; }
-    .tab-btn:hover { background: var(--table-header); color: var(--text-main); }
+    .tab-btn { padding: 11px 20px; border: none; background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.95rem; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 9px; white-space: nowrap; }
     .tab-btn.active { background: var(--primary); color: white !important; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
     .tab-btn.ai-tab { color: var(--ai-color); }
-    .tab-btn.ai-tab:hover { background: rgba(139, 92, 246, 0.1); color: var(--ai-color); }
-    .tab-btn.ai-tab.active { background: var(--ai-color); color: white !important; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
-    .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+    .tab-btn.ai-tab.active { background: var(--ai-color); color: white !important; }
+    .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* CONTENEDORES / CARDS */
     .card { background: var(--card-bg); padding: 28px; border-radius: var(--radius); border: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow); }
-    .card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: -0.02em; }
+    .card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
 
-    /* FORMULARIOS */
     .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
     @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
     .form-group { display: flex; flex-direction: column; gap: 7px; }
     .form-group.full { grid-column: 1 / -1; }
     label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); }
-    input, select, textarea { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-size: 0.95rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
-    input:focus, select:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
+    input, select, textarea { padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-size: 0.95rem; outline: none; }
 
-    /* CHAT INPUT CONTAINER */
     .chat-input-wrapper { position: relative; display: flex; align-items: center; }
-    .chat-input-wrapper textarea { width: 100%; padding-right: 55px; resize: none; height: 75px; font-size: 0.95rem; line-height: 1.5; }
-    .btn-send-whatsapp { position: absolute; right: 12px; bottom: 14px; background: var(--ai-color); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; transition: background 0.2s, transform 0.15s; box-shadow: 0 4px 10px rgba(139, 92, 246, 0.3); }
-    .btn-send-whatsapp:hover { background: #7c3aed; transform: scale(1.08); }
+    .chat-input-wrapper textarea { width: 100%; padding-right: 55px; resize: none; height: 75px; }
+    .btn-send-whatsapp { position: absolute; right: 12px; bottom: 14px; background: var(--ai-color); color: white; border: none; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; }
 
-    /* BOTONES GENERALES */
-    .btn { padding: 12px 20px; border-radius: 10px; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; transition: all 0.2s; }
-    .btn:hover { filter: brightness(1.05); transform: translateY(-1px); }
-    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); }
-    .btn-success { background: var(--success); color: white; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
-    .btn-ai { background: var(--ai-color); color: white; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25); }
-    .btn-danger { background: var(--danger); color: white; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
-    .btn-warning { background: var(--warning); color: #0f172a; font-weight: 700; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25); }
-    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 700; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25); }
+    .btn { padding: 12px 20px; border-radius: 10px; border: none; font-weight: 600; font-size: 0.95rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-ai { background: var(--ai-color); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: #0f172a; font-weight: 700; }
+    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 700; }
 
-    /* TABLAS */
     table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
     th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.9rem; }
-    th { background: var(--table-header); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
-    th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
-    th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; }
-    tr:hover td { background-color: rgba(79, 70, 229, 0.02); }
+    th { background: var(--table-header); color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; }
 
-    /* VENDEDORES Y METAS */
-    .seller-card { border: 1px solid var(--border); padding: 18px 20px; border-radius: 12px; margin-bottom: 14px; background: var(--table-header); box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+    .seller-card { border: 1px solid var(--border); padding: 18px 20px; border-radius: 12px; margin-bottom: 14px; background: var(--table-header); }
     .progress-bar-bg { background: var(--border); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 10px; }
-    .progress-bar-fill { background: var(--success); height: 100%; width: 0%; transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 5px; }
+    .progress-bar-fill { background: var(--success); height: 100%; width: 0%; border-radius: 5px; }
 
-    /* IA OPTIONS CATEGORIZADAS */
-    .ai-category-title { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--ai-color); margin: 20px 0 12px 0; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+    .ai-category-title { font-size: 0.82rem; font-weight: 800; text-transform: uppercase; color: var(--ai-color); margin: 20px 0 12px 0; }
     .quick-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-bottom: 22px; }
-    .quick-ai-btn { background: var(--card-bg); border: 1px solid rgba(139, 92, 246, 0.3); color: var(--text-main); padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-    .quick-ai-btn:hover { background: var(--ai-color); color: white; border-color: var(--ai-color); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(139, 92, 246, 0.25); }
-    .ai-response-box { background: var(--table-header); border-left: 5px solid var(--ai-color); padding: 20px; border-radius: 10px; margin-top: 18px; line-height: 1.7; font-size: 0.98rem; white-space: pre-wrap; box-shadow: inset 0 1px 3px rgba(0,0,0,0.02); }
+    .quick-ai-btn { background: var(--card-bg); border: 1px solid rgba(139, 92, 246, 0.3); color: var(--text-main); padding: 12px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 600; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; }
+    .ai-response-box { background: var(--table-header); border-left: 5px solid var(--ai-color); padding: 20px; border-radius: 10px; margin-top: 18px; line-height: 1.7; font-size: 0.98rem; white-space: pre-wrap; }
 
-    /* ALERTA BANNER */
-    .alert-banner { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; border-left: 6px solid var(--warning); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 24px; display: none; box-shadow: var(--shadow); }
+    .alert-banner { background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a; border-left: 6px solid var(--warning); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 24px; display: none; }
     body.dark-mode .alert-banner { background-color: #451a03; color: #fde68a; border-color: #78350f; }
 
-    .badge-status { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.03em; }
+    .badge-status { display: inline-block; padding: 5px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
     .badge-offline { background: #fee2e2; color: #991b1b; }
     .badge-online { background: #d1fae5; color: #065f46; }
   </style>
@@ -207,7 +178,7 @@
   </div>
 
   <!-- PESTAÑAS PRINCIPALES -->
-  <nav class="nav-tabs" id="navTabsContainer">
+  <nav class="nav-tabs">
     <button class="tab-btn active" onclick="cambiarPestana('ventas')"><i class="fa-solid fa-cart-shopping"></i> Ventas</button>
     <button class="tab-btn" id="tabBtnVendedores" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users"></i> Vendedores & Metas</button>
     <button class="tab-btn" onclick="cambiarPestana('productos')"><i class="fa-solid fa-boxes-stacked"></i> Inventario</button>
@@ -223,10 +194,8 @@
         <div class="form-group full"><label for="vProducto">Producto / Combo</label><select id="vProducto"></select></div>
         <div class="form-group"><label for="vCantidad">Cantidad</label><input type="number" id="vCantidad" value="1" min="1"></div>
         <div class="form-group"><label for="vUni">Sede / Universidad</label><input type="text" id="vUni" placeholder="Ej: Javeriana / Rosario"></div>
-        <!-- GRUPO VENDEDOR (SOLO VISIBLE EN DULCES) -->
         <div class="form-group full" id="grupoVendedorVenta">
-          <label for="vVendedor">Vendedor Encargado (Solo Dulces)</label>
-          <select id="vVendedor"></select>
+          <label for="vVendedor">Vendedor Encargado (Solo Dulces)</label><select id="vVendedor"></select>
         </div>
       </div>
       <button class="btn btn-success" style="width: 100%; margin-top: 18px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> Guardar Venta en Sistema</button>
@@ -261,7 +230,7 @@
     </div>
   </div>
 
-  <!-- PESTAÑA 2: VENDEDORES (SOLO DULCES) -->
+  <!-- PESTAÑA 2: VENDEDORES -->
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
       <h3><i class="fa-solid fa-user-plus"></i> Registrar / Editar Vendedor Comercial (Exclusivo Dulces)</h3>
@@ -302,7 +271,7 @@
   <!-- PESTAÑA 4: IA COPILOT -->
   <div id="tab-ia" class="tab-content">
     <div class="card" style="border-top: 4px solid var(--ai-color);">
-      <h3 id="tituloIAHeader"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise (Gemini & Local)</h3>
+      <h3 id="tituloIAHeader"><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise</h3>
       <p style="font-size: 0.95rem; color: var(--text-muted);">Selecciona una herramienta estratégica de automatización o escribe tu propia consulta para generar diagnósticos en tiempo real.</p>
     </div>
 
@@ -367,10 +336,7 @@
   </div>
 
   <script>
-    /********************************************************************************
-     * KOSMIK ENTERPRISE ULTIMATE - NÚCLEO DE LÓGICA Y ESTADO GLOBAL MULTICATEGORÍA
-     ********************************************************************************/
-    let categoriaActual = 'dulces'; // dulces, huevos, vapes
+    let categoriaActual = 'dulces';
 
     let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
@@ -379,61 +345,63 @@
     let BD_PRODUCTOS = JSON.parse(localStorage.getItem('kosmik_bd_prods')) || {
       dulces: {
         'c1': { nombre: 'Cable Ácido (Unidad)', stock: 25, precio: 1000, costo: 400 },
-        'm1': { nombre: 'Menta Fuerte (Unidad)', stock: 50, precio: 500, costo: 200 },
-        'cb1': { nombre: 'Combo Dulce Universitario', stock: 15, precio: 3000, costo: 1200 }
+        'm1': { nombre: 'Menta Fuerte (Unidad)', stock: 50, precio: 500, costo: 200 }
       },
       huevos: {
-        'h1': { nombre: 'Cartón Huevos AA (30 und)', stock: 12, precio: 18000, costo: 13000 },
-        'h2': { nombre: 'Cartón Huevos A (30 und)', stock: 20, precio: 16000, costo: 11500 }
+        'h1': { nombre: 'Cartón Huevos AA (30 und)', stock: 12, precio: 18000, costo: 13000 }
       },
       vapes: {
-        'v1': { nombre: 'Vape Desechable 5000 Puffs', stock: 10, precio: 35000, costo: 20000 },
-        'v2': { nombre: 'Vape Recargable Pod System', stock: 6, precio: 55000, costo: 35000 }
+        'v1': { nombre: 'Vape Desechable 5000 Puffs', stock: 10, precio: 35000, costo: 20000 }
       }
     };
 
     let vendedores = JSON.parse(localStorage.getItem('cat_vends')) || {
       'Bettina': { sede: 'Javeriana', meta: 100000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
-      'Juanjo': { sede: 'Rosario', meta: 90000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
-      'Vale': { sede: 'Andes', meta: 80000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
-      'Alejo': { sede: 'Sabana', meta: 80000, comisionPorcentaje: 10, acumuladoComisiones: 0 }
+      'Juanjo': { sede: 'Rosario', meta: 90000, comisionPorcentaje: 10, acumuladoComisiones: 0 }
     };
 
     let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
     let chartV = null, chartP = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      console.log("🚀 Kosmik Enterprise Ultimate inicializado correctamente.");
-      if (localStorage.getItem('theme_dark') === 'true') {
-        document.body.classList.add('dark-mode');
-        document.getElementById('btnTheme').innerHTML = '<i class="fa-solid fa-sun"></i> Modo Claro';
+      console.log("🚀 Sistema Kosmik inicializado de forma segura.");
+      try {
+        if (localStorage.getItem('theme_dark') === 'true') {
+          document.body.classList.add('dark-mode');
+          const btnT = document.getElementById('btnTheme');
+          if(btnT) btnT.innerHTML = '<i class="fa-solid fa-sun"></i> Modo Claro';
+        }
+
+        if (firebaseConfig) {
+          if(document.getElementById('fbApiKey')) document.getElementById('fbApiKey').value = firebaseConfig.apiKey || '';
+          if(document.getElementById('fbAuthDomain')) document.getElementById('fbAuthDomain').value = firebaseConfig.authDomain || '';
+          if(document.getElementById('fbProjectId')) document.getElementById('fbProjectId').value = firebaseConfig.projectId || '';
+          if(document.getElementById('fbStorageBucket')) document.getElementById('fbStorageBucket').value = firebaseConfig.storageBucket || '';
+          if(document.getElementById('fbMessagingSenderId')) document.getElementById('fbMessagingSenderId').value = firebaseConfig.messagingSenderId || '';
+          if(document.getElementById('fbAppId')) document.getElementById('fbAppId').value = firebaseConfig.appId || '';
+          inicializarFirebaseCloud(firebaseConfig);
+        }
+
+        if (geminiApiKey && document.getElementById('aiApiKey')) {
+          document.getElementById('aiApiKey').value = geminiApiKey;
+        }
+
+        actualizarUIReferenciasCategoria();
+        renderizarVendedoresSelect();
+        renderizarProductos();
+        renderizarVendedoresLista();
+        renderizarVentas();
+      } catch (err) {
+        console.error("Error crítico en el arranque DOM:", err);
       }
-
-      if (firebaseConfig) {
-        document.getElementById('fbApiKey').value = firebaseConfig.apiKey || '';
-        document.getElementById('fbAuthDomain').value = firebaseConfig.authDomain || '';
-        document.getElementById('fbProjectId').value = firebaseConfig.projectId || '';
-        document.getElementById('fbStorageBucket').value = firebaseConfig.storageBucket || '';
-        document.getElementById('fbMessagingSenderId').value = firebaseConfig.messagingSenderId || '';
-        document.getElementById('fbAppId').value = firebaseConfig.appId || '';
-        inicializarFirebaseCloud(firebaseConfig);
-      }
-
-      if (geminiApiKey) document.getElementById('aiApiKey').value = geminiApiKey;
-
-      actualizarUIReferenciasCategoria();
-      renderizarVendedoresSelect();
-      renderizarProductos();
-      renderizarVendedoresLista();
-      renderizarVentas();
     });
 
     function cambiarCategoriaMaster(cat) {
       categoriaActual = cat;
       document.querySelectorAll('.master-cat-btn').forEach(btn => btn.classList.remove('active'));
-      if(cat === 'dulces') document.getElementById('btnCatDulces').classList.add('active');
-      if(cat === 'huevos') document.getElementById('btnCatHuevos').classList.add('active');
-      if(cat === 'vapes') document.getElementById('btnCatVapes').classList.add('active');
+      if(cat === 'dulces' && document.getElementById('btnCatDulces')) document.getElementById('btnCatDulces').classList.add('active');
+      if(cat === 'huevos' && document.getElementById('btnCatHuevos')) document.getElementById('btnCatHuevos').classList.add('active');
+      if(cat === 'vapes' && document.getElementById('btnCatVapes')) document.getElementById('btnCatVapes').classList.add('active');
 
       actualizarUIReferenciasCategoria();
       renderizarProductos();
@@ -443,8 +411,10 @@
 
     function actualizarUIReferenciasCategoria() {
       const iconos = { dulces: '🍬 Dulces', huevos: '🥚 Huevos', vapes: '💨 Vapes' };
-      document.getElementById('tituloRegistroVenta').innerHTML = `<i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta (${iconos[categoriaActual]})`;
-      document.getElementById('tituloIAHeader').innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise - ${iconos[categoriaActual]}`;
+      const tituloReg = document.getElementById('tituloRegistroVenta');
+      const tituloIA = document.getElementById('tituloIAHeader');
+      if(tituloReg) tituloReg.innerHTML = `<i class="fa-solid fa-cash-register"></i> Registrar Nueva Venta (${iconos[categoriaActual]})`;
+      if(tituloIA) tituloIA.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles" style="color: var(--ai-color);"></i> Motor Analítico Kosmik AI Enterprise - ${iconos[categoriaActual]}`;
 
       const tabVend = document.getElementById('tabBtnVendedores');
       const grupoVend = document.getElementById('grupoVendedorVenta');
@@ -484,7 +454,8 @@
     function toggleDarkMode() {
       const isDark = document.body.classList.toggle('dark-mode');
       localStorage.setItem('theme_dark', isDark);
-      document.getElementById('btnTheme').innerHTML = isDark ? '<i class="fa-solid fa-sun"></i> Modo Claro' : '<i class="fa-solid fa-moon"></i> Modo Oscuro';
+      const btnT = document.getElementById('btnTheme');
+      if(btnT) btnT.innerHTML = isDark ? '<i class="fa-solid fa-sun"></i> Modo Claro' : '<i class="fa-solid fa-moon"></i> Modo Oscuro';
       actualizarGraficas();
     }
 
@@ -496,8 +467,10 @@
       const tabs = ['ventas', 'vendedores', 'productos', 'ia', 'ajustes'];
       const idx = tabs.indexOf(p);
       if(idx !== -1) {
-        document.querySelectorAll('.tab-btn')[idx].classList.add('active');
-        document.getElementById(`tab-${p}`).classList.add('active');
+        const btnList = document.querySelectorAll('.tab-btn');
+        if(btnList[idx]) btnList[idx].classList.add('active');
+        const tabTarget = document.getElementById(`tab-${p}`);
+        if(tabTarget) tabTarget.classList.add('active');
       }
       if(p === 'ventas') actualizarGraficas();
     }
@@ -521,15 +494,18 @@
 
     function inicializarFirebaseCloud(config) {
       try {
-        if (!firebase.apps.length) firebase.initializeApp(config);
-        dbFirebase = firebase.firestore();
-        document.getElementById('cloudStatusBadge').className = 'badge-status badge-online';
-        document.getElementById('cloudStatusBadge').innerText = 'Cloud (Firebase)';
-        sincronizarDesdeCloud();
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+          firebase.initializeApp(config);
+          dbFirebase = firebase.firestore();
+          const badge = document.getElementById('cloudStatusBadge');
+          if(badge) {
+            badge.className = 'badge-status badge-online';
+            badge.innerText = 'Cloud (Firebase)';
+          }
+          sincronizarDesdeCloud();
+        }
       } catch (e) {
         console.error("Error inicializando Firebase:", e);
-        document.getElementById('cloudStatusBadge').className = 'badge-status badge-offline';
-        document.getElementById('cloudStatusBadge').innerText = 'Error Conexión';
       }
     }
 
@@ -895,10 +871,8 @@
       window.open(`https://api.whatsapp.com/send?text=${msg}`, '_blank');
     }
 
-    /************************************************--------------------------------
-     * GRÁFICAS Y ANALÍTICA VISUAL (CHART.JS)
-     ************************************************--------------------------------/
     function actualizarGraficas() {
+      if (typeof Chart === 'undefined') return;
       const isDark = document.body.classList.contains('dark-mode');
       const textColor = isDark ? '#f8fafc' : '#0f172a';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
@@ -955,9 +929,6 @@
       }
     }
 
-    /************************************************--------------------------------
-     * IA COPILOT (MOTOR LOCAL Y GOOGLE GEMINI)
-     ************************************************--------------------------------/
     function ejecutarPromptAccion(tipo) {
       let r = "";
       const box = document.getElementById('aiResponseBox');
@@ -993,7 +964,7 @@
       } else {
         r = `ℹ️ Esta función de gestión humana/comisiones aplica únicamente para la categoría de Dulces.`;
       }
-      box.innerText = r;
+      if(box) box.innerText = r;
     }
 
     function manejarEnterChat(event) {
@@ -1007,7 +978,7 @@
       const txtInput = document.getElementById('aiPromptInput');
       const txt = txtInput.value.trim();
       const box = document.getElementById('aiResponseBox');
-      if (!txt) return;
+      if (!txt || !box) return;
       txtInput.value = '';
 
       if (!geminiApiKey) {
