@@ -259,7 +259,7 @@
 
     .chat-input-wrapper textarea {
       width: 100%;
-      padding-right: 50px; /* Espacio para el botón flotante */
+      padding-right: 50px;
       resize: none;
       height: 60px;
     }
@@ -1377,7 +1377,7 @@
       const box = document.getElementById('aiResponseBox');
       if (!txt) return;
 
-      txtInput.value = ''; // Limpia el input de inmediato tipo WhatsApp
+      txtInput.value = ''; // Limpia el input de inmediato estilo WhatsApp
 
       if (!geminiApiKey) {
         const queryLower = txt.toLowerCase();
@@ -1396,7 +1396,8 @@
       box.innerText = "🤖 Consultando con Google Gemini API...";
       
       try {
-        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+        // Usando el modelo actualizado gemini-2.0-flash
+        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
