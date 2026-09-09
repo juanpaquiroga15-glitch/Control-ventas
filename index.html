@@ -112,7 +112,7 @@
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.8rem; }
     th { background: var(--table-header); color: var(--gta-yellow); font-weight: 900; text-transform: uppercase; font-size: 0.7rem; }
 
-    .seller-card { border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); margin-bottom: 12px; background: var(--table-header); border-left: 3px solid var(--gta-yellow); }
+    .seller-card, .client-card { border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); margin-bottom: 12px; background: var(--table-header); border-left: 3px solid var(--gta-yellow); }
     .progress-bar-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
     .progress-bar-fill { background: var(--success); height: 100%; width: 0%; border-radius: 4px; }
 
@@ -188,6 +188,7 @@
   <nav class="nav-tabs">
     <button class="tab-btn active" onclick="cambiarPestana('ventas')"><i class="fa-solid fa-cash-register"></i> CAJA / VENTAS</button>
     <button class="tab-btn" id="tabBtnVendedores" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users-gear"></i> TRIPULACIÓN & METAS</button>
+    <button class="tab-btn" id="tabBtnClientes" onclick="cambiarPestana('clientes')"><i class="fa-solid fa-address-book"></i> CLIENTES & RESTOCK</button>
     <button class="tab-btn" onclick="cambiarPestana('productos')"><i class="fa-solid fa-warehouse"></i> ALMACÉN</button>
     <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')"><i class="fa-solid fa-brain"></i> LESTER AI COPILOT</button>
     <button class="tab-btn" onclick="cambiarPestana('ajustes')"><i class="fa-solid fa-sliders"></i> CONFIGURACIÓN</button>
@@ -200,7 +201,17 @@
       <div class="form-grid">
         <div class="form-group full"><label for="vProducto">ARTÍCULO / COMBO</label><select id="vProducto"></select></div>
         <div class="form-group"><label for="vCantidad">CANTIDAD</label><input type="number" id="vCantidad" value="1" min="1"></div>
-        <div class="form-group"><label for="vUni">UBICACIÓN / ZONA</label><input type="text" id="vUni" placeholder="Ej: JAVERIANA / ROSARIO"></div>
+        
+        <!-- Campo dinámico: Ubicación (para dulces) o Cliente/Casa (para huevos y vapes) -->
+        <div class="form-group" id="grupoUbicacionContainer">
+          <label id="labelUbicacionInput" for="vUni">UBICACIÓN / ZONA</label>
+          <input type="text" id="vUni" placeholder="Ej: JAVERIANA / ROSARIO">
+        </div>
+        <div class="form-group" id="grupoClienteContainer" style="display:none;">
+          <label for="vClienteSelect">CLIENTE DESTINO (RESTOCK)</label>
+          <select id="vClienteSelect"></select>
+        </div>
+
         <div class="form-group full" id="grupoVendedorVenta">
           <label for="vVendedor">VENDEDOR ENCARGADO</label><select id="vVendedor"></select>
         </div>
@@ -225,11 +236,11 @@
       </div>
       <div class="form-grid" style="background: var(--table-header); padding: 14px; border-radius: var(--radius); margin-bottom: 16px;" id="filtroVendedorContainer">
         <div class="form-group"><label for="fVendedor">FILTRAR POR OPERADOR:</label><select id="fVendedor" onchange="renderizarVentas()"></select></div>
-        <div class="form-group"><label for="fSede">FILTRAR POR ZONA:</label><input type="text" id="fSede" placeholder="Buscar zona..." oninput="renderizarVentas()"></div>
+        <div class="form-group"><label for="fSede">FILTRAR POR ZONA / CLIENTE:</label><input type="text" id="fSede" placeholder="Buscar zona..." oninput="renderizarVentas()"></div>
       </div>
       <div style="overflow-x: auto;">
         <table>
-          <thead><tr id="tablaVentasHeaders"><th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>ZONA</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th></tr></thead>
+          <thead><tr id="tablaVentasHeaders"><th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>DESTINO</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th></tr></thead>
           <tbody id="tablaVentas"></tbody>
         </table>
       </div>
@@ -241,8 +252,7 @@
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-        <h3 id="tituloVendedorCard" style="margin:0;"><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
-        <button class="btn btn-warning" id="btnCancelarEdicion" style="display:none;" onclick="cancelarEdicionVendedor()">CANCELAR EDICIÓN</button>
+        <h3 style="margin:0;"><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
       </div>
       <div class="form-grid">
         <div class="form-group"><label for="vendNombre">NOMBRE DEL OPERADOR</label><input type="text" id="vendNombre" placeholder="Ej: MICHAEL"></div>
@@ -259,6 +269,25 @@
         <button class="btn btn-warning" onclick="liquidarTodasComisiones()"><i class="fa-solid fa-hand-holding-dollar"></i> LIQUIDAR TODAS LAS COMISIONES</button>
       </div>
       <div id="listaVendedores"></div>
+    </div>
+  </div>
+
+  <!-- PESTAÑA NUEVA: CLIENTES & RESTOCK DOMICILIO -->
+  <div id="tab-clientes" class="tab-content">
+    <div class="card">
+      <h3><i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK DE HUEVOS Y VAPES)</h3>
+      <div class="form-grid">
+        <div class="form-group"><label for="cliNombre">NOMBRE DEL CLIENTE</label><input type="text" id="cliNombre" placeholder="Ej: DOÑA MARÍA"></div>
+        <div class="form-group"><label for="cliDireccion">DIRECCIÓN / CASA / ZONA</label><input type="text" id="cliDireccion" placeholder="Ej: CALLE 100 #15-40 (CASA AZUL)"></div>
+        <div class="form-group"><label for="cliTelefono">TELÉFONO (WHATSAPP)</label><input type="text" id="cliTelefono" placeholder="Ej: 3101234567"></div>
+        <div class="form-group"><label for="cliFrecuencia">FRECUENCIA APROX. DE COMPRA (DÍAS)</label><input type="number" id="cliFrecuencia" value="7" min="1"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarCliente()"><i class="fa-solid fa-user-plus"></i> GUARDAR CLIENTE EN RUTA</button>
+    </div>
+
+    <div class="card">
+      <h3><i class="fa-solid fa-route"></i> AGENDA DE CLIENTES & CONTROL DE RESTOCK</h3>
+      <div id="listaClientesRestock"></div>
     </div>
   </div>
 
@@ -381,6 +410,10 @@
       'MICHAEL': { sede: 'ROSARIO', meta: 90000, comisionPorcentaje: 10, acumuladoComisiones: 0 }
     };
 
+    let clientesRestock = JSON.parse(localStorage.getItem('kosmik_clientes')) || {
+      'DOÑA MARÍA': { direccion: 'CALLE 100 #15-40', telefono: '3101234567', frecuenciaDias: 7, ultimaCompra: new Date().toLocaleDateString() }
+    };
+
     let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
     let chartV = null, chartP = null;
 
@@ -410,6 +443,8 @@
 
         actualizarUIReferenciasCategoria();
         renderizarVendedoresSelect();
+        renderizarClientesSelect();
+        renderizarClientesLista();
         renderizarProductos();
         renderizarVendedoresLista();
         renderizarVentas();
@@ -430,6 +465,7 @@
       renderizarProductos();
       renderizarVentas();
       renderizarVendedoresLista();
+      renderizarClientesLista();
     }
 
     function actualizarUIReferenciasCategoria() {
@@ -440,7 +476,10 @@
       if(tituloIA) tituloIA.innerHTML = `<i class="fa-solid fa-terminal" style="color: var(--ai-color);"></i> LESTER AI COPILOT - ${iconos[categoriaActual]}`;
 
       const tabVend = document.getElementById('tabBtnVendedores');
+      const tabCli = document.getElementById('tabBtnClientes');
       const grupoVend = document.getElementById('grupoVendedorVenta');
+      const grupoUbica = document.getElementById('grupoUbicacionContainer');
+      const grupoCliente = document.getElementById('grupoClienteContainer');
       const cardComs = document.getElementById('cardComisionesContainer');
       const cardGrafV = document.getElementById('cardGraficaVendedores');
       const filtroVContainer = document.getElementById('filtroVendedorContainer');
@@ -450,7 +489,10 @@
 
       if (categoriaActual === 'dulces') {
         if(tabVend) tabVend.style.display = 'flex';
+        if(tabCli) tabCli.style.display = 'none';
         if(grupoVend) grupoVend.style.display = 'flex';
+        if(grupoUbica) grupoUbica.style.display = 'flex';
+        if(grupoCliente) grupoCliente.style.display = 'none';
         if(cardComs) cardComs.style.display = 'block';
         if(cardGrafV) cardGrafV.style.display = 'block';
         if(filtroVContainer) filtroVContainer.style.display = 'grid';
@@ -458,17 +500,21 @@
         if(aiGridV) aiGridV.style.display = 'grid';
         if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>ZONA</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th>';
       } else {
+        // Para Huevos y Vapes activamos la gestión de clientes/casas para restock
         if(tabVend) tabVend.style.display = 'none';
+        if(tabCli) tabCli.style.display = 'flex';
         if(grupoVend) grupoVend.style.display = 'none';
+        if(grupoUbica) grupoUbica.style.display = 'none';
+        if(grupoCliente) grupoCliente.style.display = 'flex';
         if(cardComs) cardComs.style.display = 'none';
         if(cardGrafV) cardGrafV.style.display = 'none';
         if(filtroVContainer) filtroVContainer.style.display = 'none';
         if(aiTitleV) aiTitleV.style.display = 'none';
         if(aiGridV) aiGridV.style.display = 'none';
-        if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>ZONA</th><th>TOTAL VENTA</th><th>GANANCIA NETA</th>';
+        if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>CLIENTE / CASA</th><th>TOTAL VENTA</th><th>GANANCIA NETA</th>';
         
         const activeTab = document.querySelector('.tab-content.active');
-        if(activeTab && activeTab.id === 'tab-vendedores') {
+        if(activeTab && (activeTab.id === 'tab-vendedores')) {
           cambiarPestana('ventas');
         }
       }
@@ -484,10 +530,11 @@
 
     function cambiarPestana(p) {
       if (p === 'vendedores' && categoriaActual !== 'dulces') return;
+      if (p === 'clientes' && categoriaActual === 'dulces') return;
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-      const tabs = ['ventas', 'vendedores', 'productos', 'ia', 'ajustes'];
+      const tabs = ['ventas', 'vendedores', 'clientes', 'productos', 'ia', 'ajustes'];
       const idx = tabs.indexOf(p);
       if(idx !== -1) {
         const btnList = document.querySelectorAll('.tab-btn');
@@ -531,29 +578,25 @@
       }
     }
 
-    // HOOKS DE SINCRONIZACIÓN EN TIEMPO REAL (FIREBASE CLOUD)
     function sincronizarDatosCloud() {
       if (!dbFirebase) return;
 
-      // Sincronizar Inventario
       dbFirebase.collection('kosmik_cloud').doc('inventario').onSnapshot((doc) => {
         if (doc.exists) {
           BD_PRODUCTOS = doc.data();
           guardarLocalStorageLocalOnly();
           renderizarProductos();
         }
-      }, (err) => console.error("Error sincronizando inventario cloud:", err));
+      });
 
-      // Sincronizar Ventas
       dbFirebase.collection('kosmik_cloud').doc('ventas').onSnapshot((doc) => {
         if (doc.exists) {
           BD_VENTAS = doc.data();
           guardarLocalStorageLocalOnly();
           renderizarVentas();
         }
-      }, (err) => console.error("Error sincronizando ventas cloud:", err));
+      });
 
-      // Sincronizar Vendedores
       dbFirebase.collection('kosmik_cloud').doc('vendedores').onSnapshot((doc) => {
         if (doc.exists) {
           vendedores = doc.data();
@@ -561,7 +604,16 @@
           renderizarVendedoresSelect();
           renderizarVendedoresLista();
         }
-      }, (err) => console.error("Error sincronizando vendedores cloud:", err));
+      });
+
+      dbFirebase.collection('kosmik_cloud').doc('clientes').onSnapshot((doc) => {
+        if (doc.exists) {
+          clientesRestock = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarClientesSelect();
+          renderizarClientesLista();
+        }
+      });
     }
 
     async function subirDatosCloud() {
@@ -570,6 +622,7 @@
         await dbFirebase.collection('kosmik_cloud').doc('inventario').set(BD_PRODUCTOS);
         await dbFirebase.collection('kosmik_cloud').doc('ventas').set(BD_VENTAS);
         await dbFirebase.collection('kosmik_cloud').doc('vendedores').set(vendedores);
+        await dbFirebase.collection('kosmik_cloud').doc('clientes').set(clientesRestock);
       } catch (e) {
         console.error("Error subiendo datos a la nube:", e);
       }
@@ -587,11 +640,85 @@
       localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
+      localStorage.setItem('kosmik_clientes', JSON.stringify(clientesRestock));
     }
 
     function guardarLocalStorage() {
       guardarLocalStorageLocalOnly();
       subirDatosCloud();
+    }
+
+    function renderizarClientesSelect() {
+      const selC = document.getElementById('vClienteSelect');
+      if(!selC) return;
+      selC.innerHTML = '<option value="">-- SELECCIONAR CLIENTE / CASA --</option>';
+      Object.keys(clientesRestock).forEach(nombre => {
+        const c = clientesRestock[nombre];
+        selC.innerHTML += `<option value="${nombre}">${nombre} [${c.direccion}]</option>`;
+      });
+    }
+
+    function guardarCliente() {
+      const nombre = document.getElementById('cliNombre').value.trim().toUpperCase();
+      const direccion = document.getElementById('cliDireccion').value.trim().toUpperCase();
+      const telefono = document.getElementById('cliTelefono').value.trim();
+      const frecuenciaDias = parseInt(document.getElementById('cliFrecuencia').value) || 7;
+
+      if(!nombre || !direccion) {
+        alert('Ingresa el nombre y la dirección del cliente.');
+        return;
+      }
+
+      clientesRestock[nombre] = {
+        direccion,
+        telefono,
+        frecuenciaDias,
+        ultimaCompra: new Date().toLocaleDateString()
+      };
+
+      guardarLocalStorage();
+      renderizarClientesSelect();
+      renderizarClientesLista();
+
+      document.getElementById('cliNombre').value = '';
+      document.getElementById('cliDireccion').value = '';
+      document.getElementById('cliTelefono').value = '';
+      alert('¡Cliente registrado en la ruta de restock!');
+    }
+
+    function renderizarClientesLista() {
+      const container = document.getElementById('listaClientesRestock');
+      if(!container) return;
+      container.innerHTML = '';
+
+      Object.keys(clientesRestock).forEach(nombre => {
+        const c = clientesRestock[nombre];
+        container.innerHTML += `
+          <div class="client-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="font-size: 0.95rem; color: var(--gta-yellow);">${nombre}</strong> 
+                <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">[DIR: ${c.direccion}]</span>
+              </div>
+              <div style="font-weight: 700; font-size: 0.8rem; color: var(--success);">
+                ÚLTIMO RESTOCK: ${c.ultimaCompra} (CADA ${c.frecuenciaDias} DÍAS)
+              </div>
+            </div>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 0.75rem; color: var(--text-muted);">TEL: ${c.telefono || 'N/A'}</span>
+              <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> AVISAR RESTOCK WHATSAPP</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function enviarMensajeRestockWhatsApp(nombre) {
+      const c = clientesRestock[nombre];
+      if(!c) return;
+      let mensaje = `¡Hola ${nombre}! 👋 Te saluda Kosmik Enterprise. Notamos que ya es tiempo de hacerte un nuevo *restock* en casa (${c.direccion}). ¿Te enviamos de una vez tu pedido habitual de huevos/vapes? 🥚💨`;
+      let url = `https://api.whatsapp.com/send?phone=${c.telefono}&text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
     }
 
     function renderizarProductos() {
@@ -818,7 +945,22 @@
     function registrarVenta() {
       const prodId = document.getElementById('vProducto').value;
       const cantidad = parseInt(document.getElementById('vCantidad').value);
-      const sede = document.getElementById('vUni').value.trim() || 'PRINCIPAL';
+      
+      let destino = 'PRINCIPAL';
+      if(categoriaActual === 'dulces') {
+        destino = document.getElementById('vUni').value.trim() || 'PRINCIPAL';
+      } else {
+        destino = document.getElementById('vClienteSelect').value;
+        if(!destino) {
+          alert('Selecciona un cliente destino para el restock.');
+          return;
+        }
+        // Actualizar la última fecha de compra del cliente
+        if(clientesRestock[destino]) {
+          clientesRestock[destino].ultimaCompra = new Date().toLocaleDateString();
+        }
+      }
+
       const vendedor = categoriaActual === 'dulces' ? document.getElementById('vVendedor').value : 'DIRECTO';
 
       if(!prodId || isNaN(cantidad) || cantidad <= 0) {
@@ -852,7 +994,7 @@
         producto: productoObj.nombre,
         cantidad,
         vendedor: vendedor || 'DIRECTO',
-        sede,
+        sede: destino,
         total: totalVenta,
         comision: comisionMonto,
         ganancia: gananciaNeta
@@ -863,9 +1005,10 @@
       renderizarProductos();
       renderizarVentas();
       renderizarVendedoresLista();
+      renderizarClientesLista();
 
       document.getElementById('vCantidad').value = '1';
-      document.getElementById('vUni').value = '';
+      if(document.getElementById('vUni')) document.getElementById('vUni').value = '';
       alert(`¡TRANSACCIÓN EXITOSA!\nTOTAL: $${totalVenta.toLocaleString()}`);
     }
 
@@ -935,7 +1078,7 @@
       const ventas = BD_VENTAS[categoriaActual] || [];
       if(ventas.length === 0) return alert('No hay registros para exportar.');
       
-      let csv = 'FECHA,PRODUCTO,CANTIDAD,OPERADOR,ZONA,TOTAL,COMISION,GANANCIA\n';
+      let csv = 'FECHA,PRODUCTO,CANTIDAD,OPERADOR,DESTINO,TOTAL,COMISION,GANANCIA\n';
       ventas.forEach(v => {
         csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor || 'DIRECTO'}","${v.sede}",${v.total},${v.comision || 0},${v.ganancia}\n`;
       });
