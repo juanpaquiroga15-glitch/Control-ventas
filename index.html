@@ -107,12 +107,14 @@
     .btn-warning { background: var(--warning); color: #000; font-weight: 900; }
     .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 900; padding: 12px; font-size: 0.85rem; }
     .btn-stock { background: #27272a; color: var(--gta-yellow); border: 1px solid var(--border); padding: 4px 8px; font-weight: 900; }
+    .btn-gps { background: #3b82f6; color: white; }
 
     table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.8rem; }
     th { background: var(--table-header); color: var(--gta-yellow); font-weight: 900; text-transform: uppercase; font-size: 0.7rem; }
 
     .seller-card, .client-card { border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); margin-bottom: 12px; background: var(--table-header); border-left: 3px solid var(--gta-yellow); }
+    .client-card.vencido { border-left-color: var(--danger); background: #1c1010; }
     .progress-bar-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
     .progress-bar-fill { background: var(--success); height: 100%; width: 0%; border-radius: 4px; }
 
@@ -190,6 +192,7 @@
     <button class="tab-btn" id="tabBtnVendedores" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users-gear"></i> TRIPULACIÓN & METAS</button>
     <button class="tab-btn" id="tabBtnClientes" onclick="cambiarPestana('clientes')"><i class="fa-solid fa-address-book"></i> CLIENTES & RESTOCK</button>
     <button class="tab-btn" onclick="cambiarPestana('productos')"><i class="fa-solid fa-warehouse"></i> ALMACÉN</button>
+    <button class="tab-btn" onclick="cambiarPestana('balance')"><i class="fa-solid fa-file-invoice-dollar"></i> BALANCE GENERAL</button>
     <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')"><i class="fa-solid fa-brain"></i> LESTER AI COPILOT</button>
     <button class="tab-btn" onclick="cambiarPestana('ajustes')"><i class="fa-solid fa-sliders"></i> CONFIGURACIÓN</button>
   </nav>
@@ -288,8 +291,20 @@
     </div>
 
     <div class="card">
-      <h3><i class="fa-solid fa-route"></i> AGENDA DE CLIENTES & CONTROL DE RESTOCK</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
+        <h3 style="margin:0;"><i class="fa-solid fa-route"></i> AGENDA DE CLIENTES & CONTROL DE RESTOCK</h3>
+        <button class="btn btn-success" onclick="copiarTextoRutaCompleta()"><i class="fa-solid fa-copy"></i> COPIAR TEXTO DE RUTA COMPLETA</button>
+      </div>
       <div id="listaClientesRestock"></div>
+    </div>
+  </div>
+
+  <!-- PESTAÑA: BALANCE GENERAL -->
+  <div id="tab-balance" class="tab-content">
+    <div class="card" style="border-left: 4px solid var(--success);">
+      <h3><i class="fa-solid fa-scale-balanced"></i> ESTADO DE RESULTADOS - KOSMIK EMPIRE</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">Resumen consolidado de ingresos, costos, comisiones deducidas y ganancia neta real por categoría.</p>
+      <div id="contenidoBalanceGeneral"></div>
     </div>
   </div>
 
@@ -451,6 +466,7 @@
         renderizarProductos();
         renderizarVendedoresLista();
         renderizarVentas();
+        renderizarBalanceGeneral();
       } catch (err) {
         console.error("Error en arranque:", err);
       }
@@ -537,7 +553,7 @@
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
 
-      const tabs = ['ventas', 'vendedores', 'clientes', 'productos', 'ia', 'ajustes'];
+      const tabs = ['ventas', 'vendedores', 'clientes', 'productos', 'balance', 'ia', 'ajustes'];
       const idx = tabs.indexOf(p);
       if(idx !== -1) {
         const btnList = document.querySelectorAll('.tab-btn');
@@ -546,6 +562,7 @@
         if(tabTarget) tabTarget.classList.add('active');
       }
       if(p === 'ventas') actualizarGraficas();
+      if(p === 'balance') renderizarBalanceGeneral();
     }
 
     function guardarConexionFirebase() {
@@ -737,6 +754,16 @@
       }
     }
 
+    function calcularDiasTranscurridos(fechaStr) {
+      if(!fechaStr) return 0;
+      const partes = fechaStr.split('/');
+      if(partes.length !== 3) return 0;
+      const fechaC = new Date(partes[2], partes[1] - 1, partes[0]);
+      const hoy = new Date();
+      const diffTime = hoy - fechaC;
+      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    }
+
     function renderizarClientesLista() {
       const container = document.getElementById('listaClientesRestock');
       if(!container) return;
@@ -744,21 +771,26 @@
 
       Object.keys(clientesRestock).forEach(nombre => {
         const c = clientesRestock[nombre];
+        const diasPasados = calcularDiasTranscurridos(c.ultimaCompra);
+        const vencido = diasPasados >= c.frecuenciaDias;
+        const claseCard = vencido ? 'client-card vencido' : 'client-card';
+        const badgeVencido = vencido ? `<span class="badge-status badge-offline" style="margin-left: 6px;">¡RESTOCK VENCIDO (${diasPasados} DÍAS)!</span>` : `<span style="color: var(--success); font-size: 0.75rem;">ÚLTIMO: ${c.ultimaCompra}</span>`;
+        const urlGps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.direccion + ' Bogota')}`;
+
         container.innerHTML += `
-          <div class="client-card">
+          <div class="${claseCard}">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div>
                 <strong style="font-size: 0.95rem; color: var(--gta-yellow);">${nombre}</strong> 
                 <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">[DIR: ${c.direccion}]</span>
               </div>
-              <div style="font-weight: 700; font-size: 0.8rem; color: var(--success);">
-                ÚLTIMO RESTOCK: ${c.ultimaCompra} (CADA ${c.frecuenciaDias} DÍAS)
-              </div>
+              <div>${badgeVencido}</div>
             </div>
             <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: 0.75rem; color: var(--text-muted);">TEL: ${c.telefono || 'N/A'}</span>
-              <div style="display: flex; gap: 6px;">
-                <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> RESTOCK WAPP</button>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">TEL: ${c.telefono || 'N/A'} | FRECUENCIA: CADA ${c.frecuenciaDias} DÍAS</span>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <a href="${urlGps}" target="_blank" class="btn btn-gps" style="padding: 4px 8px; font-size: 0.7rem; text-decoration: none;"><i class="fa-solid fa-map-location-dot"></i> GPS</a>
+                <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> AVISAR</button>
                 <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="prepararEdicionCliente('${nombre}')"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="eliminarCliente('${nombre}')"><i class="fa-solid fa-trash"></i></button>
               </div>
@@ -768,12 +800,79 @@
       });
     }
 
+    function copiarTextoRutaCompleta() {
+      let texto = `📋 *RUTA DE DOMICILIOS Y RESTOCK - KOSMIK* 🎮\n\n`;
+      Object.keys(clientesRestock).forEach((nombre, idx) => {
+        const c = clientesRestock[nombre];
+        texto += `${idx + 1}. *${nombre}*\n   📍 Dir: ${c.direccion}\n   📞 Tel: ${c.telefono || 'N/A'}\n   ⏱️ Frecuencia: Cada ${c.frecuenciaDias} días (Último: ${c.ultimaCompra})\n\n`;
+      });
+
+      navigator.clipboard.writeText(texto).then(() => {
+        alert('¡Texto de la ruta copiado al portapapeles con éxito!');
+      }).catch(err => {
+        alert('Error al copiar el texto.');
+      });
+    }
+
     function enviarMensajeRestockWhatsApp(nombre) {
       const c = clientesRestock[nombre];
       if(!c) return;
-      let mensaje = `¡Hola ${nombre}! 👋 Te saluda Kosmik Enterprise. Notamos que ya es tiempo de hacerte un nuevo *restock* en casa (${c.direccion}). ¿Te enviamos de una vez tu pedido habitual de huevos/vapes? 🥚💨`;
+      const tipoProd = categoriaActual === 'huevos' ? 'huevos' : 'vapes';
+      let mensaje = `¡Hola ${nombre}! 👋 Te saluda Kosmik Enterprise. Notamos que ya es tiempo de hacerte un nuevo *restock* en casa (${c.direccion}). ¿Te enviamos de una vez tu pedido habitual de ${tipoProd}? 🥚💨`;
       let url = `https://api.whatsapp.com/send?phone=${c.telefono}&text=${encodeURIComponent(mensaje)}`;
       window.open(url, '_blank');
+    }
+
+    function renderizarBalanceGeneral() {
+      const container = document.getElementById('contenidoBalanceGeneral');
+      if(!container) return;
+
+      let totalVentasDulces = BD_VENTAS.dulces.reduce((acc, curr) => acc + curr.total, 0);
+      let totalGananciaDulces = BD_VENTAS.dulces.reduce((acc, curr) => acc + curr.ganancia, 0);
+      let totalComisionesDulces = BD_VENTAS.dulces.reduce((acc, curr) => acc + (curr.comision || 0), 0);
+
+      let totalVentasHuevos = BD_VENTAS.huevos.reduce((acc, curr) => acc + curr.total, 0);
+      let totalGananciaHuevos = BD_VENTAS.huevos.reduce((acc, curr) => acc + curr.ganancia, 0);
+
+      let totalVentasVapes = BD_VENTAS.vapes.reduce((acc, curr) => acc + curr.total, 0);
+      let totalGananciaVapes = BD_VENTAS.vapes.reduce((acc, curr) => acc + curr.ganancia, 0);
+
+      let granTotalVentas = totalVentasDulces + totalVentasHuevos + totalVentasVapes;
+      let granTotalGananciaNeta = totalGananciaDulces + totalGananciaHuevos + totalGananciaVapes;
+
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div style="background: var(--table-header); padding: 16px; border-radius: var(--radius); border-left: 3px solid var(--gta-yellow);">
+            <h4 style="color: var(--gta-yellow); margin-bottom: 10px;">🍬 DULCES & SNACKS</h4>
+            <div style="font-size: 0.8rem; line-height: 1.6;">
+              • Ingresos Totales: <strong>$${totalVentasDulces.toLocaleString()}</strong><br>
+              • Comisiones Pagadas: <strong style="color: var(--warning);">-$${totalComisionesDulces.toLocaleString()}</strong><br>
+              • Ganancia Neta Categoría: <strong style="color: var(--success);">$${totalGananciaDulces.toLocaleString()}</strong>
+            </div>
+          </div>
+          <div style="background: var(--table-header); padding: 16px; border-radius: var(--radius); border-left: 3px solid var(--gta-yellow);">
+            <h4 style="color: var(--gta-yellow); margin-bottom: 10px;">🥚 HUEVOS</h4>
+            <div style="font-size: 0.8rem; line-height: 1.6;">
+              • Ingresos Totales: <strong>$${totalVentasHuevos.toLocaleString()}</strong><br>
+              • Costos / Reinversión: <strong>-$${(totalVentasHuevos - totalGananciaHuevos).toLocaleString()}</strong><br>
+              • Ganancia Neta Categoría: <strong style="color: var(--success);">$${totalGananciaHuevos.toLocaleString()}</strong>
+            </div>
+          </div>
+          <div style="background: var(--table-header); padding: 16px; border-radius: var(--radius); border-left: 3px solid var(--gta-yellow);">
+            <h4 style="color: var(--gta-yellow); margin-bottom: 10px;">💨 VAPES</h4>
+            <div style="font-size: 0.8rem; line-height: 1.6;">
+              • Ingresos Totales: <strong>$${totalVentasVapes.toLocaleString()}</strong><br>
+              • Costos / Reinversión: <strong>-$${(totalVentasVapes - totalGananciaVapes).toLocaleString()}</strong><br>
+              • Ganancia Neta Categoría: <strong style="color: var(--success);">$${totalGananciaVapes.toLocaleString()}</strong>
+            </div>
+          </div>
+        </div>
+        <div style="background: #111b12; border: 2px solid var(--success); padding: 20px; border-radius: var(--radius); text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 800; margin-bottom: 6px;">SUMA GLOBAL / UTILIDAD NETA REAL DEL IMPERIO</div>
+          <div style="font-size: 2.2rem; font-weight: 900; color: var(--success);">$${granTotalGananciaNeta.toLocaleString()}</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">(Ingresos Brutos Globales: $${granTotalVentas.toLocaleString()})</div>
+        </div>
+      `;
     }
 
     function renderizarProductos() {
@@ -1060,6 +1159,7 @@
       renderizarVentas();
       renderizarVendedoresLista();
       renderizarClientesLista();
+      renderizarBalanceGeneral();
 
       document.getElementById('vCantidad').value = '1';
       if(document.getElementById('vUni')) document.getElementById('vUni').value = '';
@@ -1125,6 +1225,7 @@
         BD_VENTAS[categoriaActual] = [];
         guardarLocalStorage();
         renderizarVentas();
+        renderizarBalanceGeneral();
       }
     }
 
