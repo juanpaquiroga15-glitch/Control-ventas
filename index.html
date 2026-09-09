@@ -1,726 +1,1276 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kosmik Enterprise | GTA V Cloud HUD Edition</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        gta: {
-                            yellow: '#facc15',
-                            dark: '#0f172a',
-                            card: '#1e293b',
-                            border: '#334155',
-                            accent: '#eab308'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .hud-font { font-family: 'Share Tech+Mono', monospace; }
-        .scanner-line {
-            background: linear-gradient(90deg, transparent, rgba(250, 204, 21, 0.2), transparent);
-            height: 2px;
-            width: 100%;
-            animation: scan 3s infinite linear;
-        }
-        @keyframes scan {
-            0% { transform: translateY(-100px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(500px); opacity: 0; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kosmik Enterprise - GTA V Cloud HUD Edition</title>
+  
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js para Gráficas Avanzadas -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+  <style>
+    :root {
+      --gta-yellow: #facc15;
+      --gta-yellow-hover: #eab308;
+      --gta-dark: #121212;
+      --gta-card: #1c1c1e;
+      --gta-card-border: #3a3a3c;
+      --primary: #facc15;
+      --primary-hover: #eab308;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --ai-color: #a855f7;
+      --whatsapp: #25D366;
+      --bg: #09090b;
+      --card-bg: #18181b;
+      --text-main: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --border: #27272a;
+      --table-header: #27272a;
+      --input-bg: #121212;
+      --radius: 6px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    body.dark-mode {
+      --bg: #050505;
+      --card-bg: #111113;
+      --text-main: #ffffff;
+      --text-muted: #8e8e93;
+      --border: #2c2c2e;
+      --table-header: #1c1c1e;
+      --input-bg: #000000;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.03em; }
+    body { background-color: var(--bg); color: var(--text-main); max-width: 1280px; margin: 0 auto; padding: 24px; transition: background-color 0.25s, color 0.25s; }
+
+    .header-nav { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 18px 28px; border-radius: var(--radius); border-left: 6px solid var(--gta-yellow); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow); }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; font-size: 1.3rem; color: var(--gta-yellow); }
+    .user-badge { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+    .user-badge input { padding: 6px 12px; border-radius: 4px; border: 1px solid var(--border); background: var(--input-bg); color: var(--gta-yellow); font-weight: 800; font-size: 0.85rem; }
+    .btn-toggle { background: var(--table-header); color: var(--text-main); border: 1px solid var(--border); padding: 8px 14px; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.75rem; }
+
+    .master-category-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+    .master-cat-btn { background: var(--card-bg); border: 2px solid var(--border); padding: 16px; border-radius: var(--radius); cursor: pointer; font-weight: 800; font-size: 1rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 12px; transition: all 0.2s ease; box-shadow: var(--shadow); }
+    .master-cat-btn.active { border-color: var(--gta-yellow); background: var(--gta-yellow); color: #000; box-shadow: 0 0 20px rgba(250, 204, 21, 0.4); }
+
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .metric-card { background: var(--card-bg); padding: 20px; border-radius: var(--radius); border: 1px solid var(--border); border-top: 4px solid var(--gta-yellow); box-shadow: var(--shadow); position: relative; overflow: hidden; }
+    .metric-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 800; margin-bottom: 8px; }
+    .metric-value { font-size: 1.8rem; font-weight: 900; color: var(--text-main); }
+    .metric-icon { position: absolute; right: 18px; top: 18px; font-size: 1.6rem; opacity: 0.15; color: var(--gta-yellow); }
+
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
+    .tab-btn { padding: 10px 18px; border: none; background: var(--card-bg); color: var(--text-muted); font-weight: 700; font-size: 0.8rem; border-radius: var(--radius); cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; border: 1px solid var(--border); }
+    .tab-btn.active { background: var(--gta-yellow); color: #000 !important; border-color: var(--gta-yellow); font-weight: 900; }
+    .tab-btn.ai-tab { color: var(--ai-color); border-color: rgba(168, 85, 247, 0.3); }
+    .tab-btn.ai-tab.active { background: var(--ai-color); color: #fff !important; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card { background: var(--card-bg); padding: 24px; border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--gta-yellow); margin-bottom: 24px; box-shadow: var(--shadow); }
+    .card h3 { font-size: 1.05rem; font-weight: 900; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; color: var(--gta-yellow); }
+
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+    label { font-size: 0.75rem; font-weight: 800; color: var(--text-muted); }
+    input, select, textarea { padding: 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); font-size: 0.85rem; font-weight: 600; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: var(--gta-yellow); }
+
+    .chat-input-wrapper { position: relative; display: flex; align-items: center; }
+    .chat-input-wrapper textarea { width: 100%; padding-right: 55px; resize: none; height: 75px; }
+    .btn-send-whatsapp { position: absolute; right: 10px; bottom: 12px; background: var(--ai-color); color: white; border: none; width: 38px; height: 38px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
+
+    .btn { padding: 10px 16px; border-radius: var(--radius); border: none; font-weight: 800; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase; }
+    .btn-primary { background: var(--gta-yellow); color: #000; }
+    .btn-primary:hover { background: var(--gta-yellow-hover); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-ai { background: var(--ai-color); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: #000; font-weight: 900; }
+    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 900; padding: 12px; font-size: 0.85rem; }
+    .btn-stock { background: #27272a; color: var(--gta-yellow); border: 1px solid var(--border); padding: 4px 8px; font-weight: 900; }
+
+    table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.8rem; }
+    th { background: var(--table-header); color: var(--gta-yellow); font-weight: 900; text-transform: uppercase; font-size: 0.7rem; }
+
+    .seller-card, .client-card { border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); margin-bottom: 12px; background: var(--table-header); border-left: 3px solid var(--gta-yellow); }
+    .progress-bar-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+    .progress-bar-fill { background: var(--success); height: 100%; width: 0%; border-radius: 4px; }
+
+    .ai-category-title { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: var(--ai-color); margin: 18px 0 10px 0; border-left: 3px solid var(--ai-color); padding-left: 8px; }
+    .quick-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 18px; }
+    .quick-ai-btn { background: var(--card-bg); border: 1px solid rgba(168, 85, 247, 0.3); color: var(--text-main); padding: 10px 14px; border-radius: var(--radius); font-size: 0.78rem; font-weight: 700; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px; }
+    .ai-response-box { background: var(--table-header); border-left: 4px solid var(--ai-color); padding: 18px; border-radius: var(--radius); margin-top: 16px; line-height: 1.6; font-size: 0.88rem; white-space: pre-wrap; font-family: monospace; }
+
+    .alert-banner { background-color: #1c150c; color: #fde68a; border: 1px solid #78350f; border-left: 6px solid var(--warning); padding: 14px 18px; border-radius: var(--radius); margin-bottom: 24px; display: none; }
+
+    .badge-status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; }
+    .badge-offline { background: #7f1d1d; color: #fca5a5; }
+    .badge-online { background: #064e3b; color: #6ee7b7; }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-yellow-400 selection:text-slate-950">
+<body class="dark-mode">
 
-    <!-- TOP HUD HEADER -->
-    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-50 px-4 py-3 shadow-lg">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-yellow-400 text-slate-950 px-3 py-1 font-bold text-sm tracking-wider uppercase rounded flex items-center gap-2 shadow-[0_0_15px_rgba(250,204,21,0.4)]">
-                    <i class="fa-solid fa-shield-halved">></i> KOSMIK HUD v3.5
-                </div>
-                <div>
-                    <h1 class="hud-font text-lg font-bold tracking-widest text-yellow-400 uppercase">LOS SANTOS OPERATIONS</h1>
-                    <p class="text-xs text-slate-400">Sincronización Cloud Activa</p>
-                </div>
-            </div>
+  <!-- BARRA SUPERIOR NAV -->
+  <header class="header-nav">
+    <div class="brand">
+      <i class="fa-solid fa-skull"></i> KOSMIK ENTERPRISE <span id="cloudStatusBadge" class="badge-status badge-offline" style="margin-left: 10px;">OFFLINE</span>
+    </div>
+    <div class="user-badge">
+      <i class="fa-solid fa-user-secret"></i>
+      <span>JUGADOR:</span>
+      <input type="text" id="vUsuario" value="FRANKLIN">
+    </div>
+    <button class="btn-toggle" onclick="toggleDarkMode()" id="btnTheme">
+      <i class="fa-solid fa-circle-half-stroke"></i> HUD CLARO
+    </button>
+  </header>
 
-            <!-- Master Category Selector -->
-            <div class="flex bg-slate-950 p-1 rounded-lg border border-slate-800" id="master-category-selector">
-                <button data-cat="dulces" class="cat-btn px-4 py-1.5 text-xs font-bold rounded transition-all bg-yellow-400 text-slate-950 shadow">Dulces & Snacks</button>
-                <button data-cat="huevos" class="cat-btn px-4 py-1.5 text-xs font-bold rounded transition-all text-slate-400 hover:text-white">Huevos</button>
-                <button data-cat="vapes" class="cat-btn px-4 py-1.5 text-xs font-bold rounded transition-all text-slate-400 hover:text-white">Vapes</button>
-            </div>
+  <!-- SELECTOR MAESTRO DE CATEGORÍAS -->
+  <div class="master-category-bar">
+    <button class="master-cat-btn active" id="btnCatDulces" onclick="cambiarCategoriaMaster('dulces')">🍬 DULCES & SNACKS</button>
+    <button class="master-cat-btn" id="btnCatHuevos" onclick="cambiarCategoriaMaster('huevos')">🥚 HUEVOS</button>
+    <button class="master-cat-btn" id="btnCatVapes" onclick="cambiarCategoriaMaster('vapes')">💨 VAPES</button>
+  </div>
 
-            <div class="flex items-center gap-3">
-                <div class="text-right hidden sm:block">
-                    <span class="text-xs text-slate-400 block">OPERADOR EN CURSO</span>
-                    <span id="operator-badge" class="hud-font text-sm text-yellow-400 font-bold uppercase">FRANKLIN</span>
-                </div>
-                <button id="btn-toggle-theme" class="bg-slate-800 hover:bg-slate-700 p-2 rounded-lg text-yellow-400 border border-slate-700 transition">
-                    <i class="fa-solid fa-circle-half-stroke"></i>
-                </button>
-            </div>
+  <!-- BANNER ALERTA STOCK -->
+  <div id="bannerAlerta" class="alert-banner">
+    <strong style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.95rem;">
+      <i class="fa-solid fa-triangle-exclamation"></i> ALERTA DE NIVEL DE INVENTARIO: STOCK CRÍTICO (&le; 5 UNIDADES)
+    </strong>
+    <div id="listaAlertaStock" style="line-height: 1.4; font-size: 0.8rem;"></div>
+  </div>
+
+  <!-- TARJETAS DE MÉTRICAS -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <i class="fa-solid fa-sack-dollar metric-icon"></i>
+      <div class="metric-title">EFECTIVO TOTAL VENTAS</div>
+      <div class="metric-value" id="totalVentas">$0</div>
+    </div>
+    <div class="metric-card">
+      <i class="fa-solid fa-chart-line metric-icon" style="color: var(--success);"></i>
+      <div class="metric-title">GANANCIA NETA</div>
+      <div class="metric-value" style="color: var(--success);" id="totalGanancias">$0</div>
+    </div>
+    <div class="metric-card" id="cardComisionesContainer">
+      <i class="fa-solid fa-handshake metric-icon" style="color: var(--warning);"></i>
+      <div class="metric-title">COMISIONES ASIGNADAS</div>
+      <div class="metric-value" style="color: var(--warning);" id="totalComisiones">$0</div>
+    </div>
+    <div class="metric-card">
+      <i class="fa-solid fa-boxes-stacked metric-icon"></i>
+      <div class="metric-title">UNIDADES DESPACHADAS</div>
+      <div class="metric-value" id="totalUnidades">0</div>
+    </div>
+  </div>
+
+  <!-- PESTAÑAS PRINCIPALES -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="cambiarPestana('ventas')"><i class="fa-solid fa-cash-register"></i> CAJA / VENTAS</button>
+    <button class="tab-btn" id="tabBtnVendedores" onclick="cambiarPestana('vendedores')"><i class="fa-solid fa-users-gear"></i> TRIPULACIÓN & METAS</button>
+    <button class="tab-btn" id="tabBtnClientes" onclick="cambiarPestana('clientes')"><i class="fa-solid fa-address-book"></i> CLIENTES & RESTOCK</button>
+    <button class="tab-btn" onclick="cambiarPestana('productos')"><i class="fa-solid fa-warehouse"></i> ALMACÉN</button>
+    <button class="tab-btn ai-tab" onclick="cambiarPestana('ia')"><i class="fa-solid fa-brain"></i> LESTER AI COPILOT</button>
+    <button class="tab-btn" onclick="cambiarPestana('ajustes')"><i class="fa-solid fa-sliders"></i> CONFIGURACIÓN</button>
+  </nav>
+
+  <!-- PESTAÑA 1: VENTAS -->
+  <div id="tab-ventas" class="tab-content active">
+    <div class="card">
+      <h3 id="tituloRegistroVenta"><i class="fa-solid fa-cart-shopping"></i> REGISTRAR TRANSACCIÓN (🍬 DULCES)</h3>
+      <div class="form-grid">
+        <div class="form-group full"><label for="vProducto">ARTÍCULO / COMBO</label><select id="vProducto"></select></div>
+        <div class="form-group"><label for="vCantidad">CANTIDAD</label><input type="number" id="vCantidad" value="1" min="1"></div>
+        
+        <div class="form-group" id="grupoUbicacionContainer">
+          <label id="labelUbicacionInput" for="vUni">UBICACIÓN / ZONA</label>
+          <input type="text" id="vUni" placeholder="Ej: JAVERIANA / ROSARIO">
         </div>
-    </header>
-
-    <!-- NAVIGATION TABS -->
-    <nav class="bg-slate-900/60 border-b border-slate-800/80 px-4 py-2">
-        <div class="max-w-7xl mx-auto flex gap-2 overflow-x-auto text-xs font-semibold">
-            <button data-tab="dashboard" class="nav-tab px-4 py-2 rounded bg-yellow-400/10 text-yellow-400 border border-yellow-400/30 transition flex items-center gap-2"><i class="fa-solid fa-chart-line"></i> Dashboard</button>
-            <button data-tab="ventas" class="nav-tab px-4 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"><p class="fa-solid fa-cash-register"></p> Caja & Ventas</button>
-            <button data-tab="tripulacion" class="nav-tab px-4 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"><i class="fa-solid fa-users"></i> Tripulación</button>
-            <button data-tab="clientes" class="nav-tab px-4 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"><i class="fa-solid fa-address-book"></i> Clientes & Ruta</button>
-            <button data-tab="almacen" class="nav-tab px-4 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"><i class="fa-solid fa-boxes-stacked"></i> Almacén</button>
-            <button data-tab="lester" class="nav-tab px-4 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"><i class="fa-solid fa-brain"></i> Lester AI</button>
-            <button data-tab="config" class="nav-tab px-4 py-2 rounded text-slate-400 hover:bg-slate-800 hover:text-white transition flex items-center gap-2"><i class="fa-solid fa-gear"></i> Ajustes</button>
+        <div class="form-group" id="grupoClienteContainer" style="display:none;">
+          <label for="vClienteSelect">CLIENTE DESTINO (RESTOCK)</label>
+          <select id="vClienteSelect"></select>
         </div>
-    </nav>
 
-    <!-- MAIN CONTAINER -->
-    <main class="max-w-7xl mx-auto p-4 md:p-6 flex-1 w-full grid gap-6">
+        <div class="form-group full" id="grupoVendedorVenta">
+          <label for="vVendedor">VENDEDOR ENCARGADO</label><select id="vVendedor"></select>
+        </div>
+      </div>
+      <button class="btn btn-success" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> CONFIRMAR TRANSACCIÓN</button>
+    </div>
 
-        <!-- TAB: DASHBOARD -->
-        <section id="tab-dashboard" class="tab-content grid gap-6">
-            <!-- Metric Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 relative overflow-hidden">
-                    <div class="absolute right-3 top-3 text-yellow-400/20 text-3xl"><i class="fa-solid fa-wallet"></i></div>
-                    <span class="text-xs text-slate-400 font-semibold">EFECTIVO TOTAL VENTAS</span>
-                    <h3 id="metric-sales" class="hud-font text-2xl font-bold text-yellow-400 mt-1">$0.00</h3>
-                    <span class="text-[10px] text-emerald-400 mt-2 block"><i class="fa-solid fa-arrow-up"></i> Actualizado en tiempo real</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 relative overflow-hidden">
-                    <div class="absolute right-3 top-3 text-emerald-400/20 text-3xl"><i class="fa-solid fa-chart-pie"></i></div>
-                    <span class="text-xs text-slate-400 font-semibold">GANANCIA NETA REAL</span>
-                    <h3 id="metric-profit" class="hud-font text-2xl font-bold text-emerald-400 mt-1">$0.00</h3>
-                    <span class="text-[10px] text-slate-500 mt-2 block">Deducidos costos y comisiones</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 relative overflow-hidden">
-                    <div class="absolute right-3 top-3 text-blue-400/20 text-3xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
-                    <span class="text-xs text-slate-400 font-semibold">COMISIONES ASIGNADAS</span>
-                    <h3 id="metric-commissions" class="hud-font text-2xl font-bold text-blue-400 mt-1">$0.00</h3>
-                    <span class="text-[10px] text-blue-400 mt-2 block">Pendientes de liquidación</span>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 relative overflow-hidden">
-                    <div class="absolute right-3 top-3 text-purple-400/20 text-3xl"><i class="fa-solid fa-box"></i></div>
-                    <span class="text-xs text-slate-400 font-semibold">UNIDADES DESPACHADAS</span>
-                    <h3 id="metric-units" class="hud-font text-2xl font-bold text-purple-400 mt-1">0</h3>
-                    <span class="text-[10px] text-purple-400 mt-2 block">Total acumulado</span>
-                </div>
-            </div>
+    <!-- PANEL DE GRÁFICAS -->
+    <div class="form-grid" style="margin-bottom: 24px;">
+      <div class="card" id="cardGraficaVendedores" style="margin: 0;"><h3><i class="fa-solid fa-chart-column"></i> RENDIMIENTO POR OPERADOR</h3><canvas id="chartVendedores" height="200"></canvas></div>
+      <div class="card" style="margin: 0;"><h3><i class="fa-solid fa-chart-pie"></i> PARTICIPACIÓN DE MERCADO</h3><canvas id="chartProductos" height="200"></canvas></div>
+    </div>
 
-            <!-- Charts Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                    <h4 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-bar text-yellow-400"></i> Rendimiento por Operador</h4>
-                    <div class="h-64"><canvas id="chartOperators"></canvas></div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                    <h4 class="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2"><i class="fa-solid fa-chart-pie text-yellow-400"></i> Participación de Productos</h4>
-                    <div class="h-64"><canvas id="chartProducts"></canvas></div>
-                </div>
-            </div>
-        </section>
+    <!-- HISTORIAL DE VENTAS -->
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> REGISTRO DE MOVIMIENTOS</h3>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="exportarExcel()"><i class="fa-solid fa-file-arrow-down"></i> EXPORTAR CSV</button>
+          <button class="btn btn-danger" onclick="limpiarHistorial()"><i class="fa-solid fa-trash-can"></i> LIMPIAR REGISTRO</button>
+        </div>
+      </div>
+      <div class="form-grid" style="background: var(--table-header); padding: 14px; border-radius: var(--radius); margin-bottom: 16px;" id="filtroVendedorContainer">
+        <div class="form-group"><label for="fVendedor">FILTRAR POR OPERADOR:</label><select id="fVendedor" onchange="renderizarVentas()"></select></div>
+        <div class="form-group"><label for="fSede">FILTRAR POR ZONA / CLIENTE:</label><input type="text" id="fSede" placeholder="Buscar zona..." oninput="renderizarVentas()"></div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead><tr id="tablaVentasHeaders"><th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>DESTINO</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th></tr></thead>
+          <tbody id="tablaVentas"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-wapp" onclick="enviarCuadreWhatsApp()"><i class="fa-brands fa-whatsapp"></i> ENVIAR REPORTE VÍA WHATSAPP</button>
+    </div>
+  </div>
 
-        <!-- TAB: VENTAS -->
-        <section id="tab-ventas" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-1 h-fit">
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-cash-register"></i> Registrar Transacción</h3>
-                <form id="form-sale" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">PRODUCTO</label>
-                        <select id="sale-product" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">CANTIDAD</label>
-                        <input type="number" id="sale-qty" min="1" value="1" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">OPERADOR</label>
-                        <select id="sale-operator" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none"></select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">CLIENTE / ZONA DESTINO</label>
-                        <input type="text" id="sale-destination" placeholder="Ej. Los Santos Golf / Franklin" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold p-3 rounded-lg transition shadow-lg text-sm uppercase">Procesar Venta</button>
-                </form>
-            </div>
+  <!-- PESTAÑA 2: VENDEDORES -->
+  <div id="tab-vendedores" class="tab-content">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 style="margin:0;"><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label for="vendNombre">NOMBRE DEL OPERADOR</label><input type="text" id="vendNombre" placeholder="Ej: MICHAEL"></div>
+        <div class="form-group"><label for="vendSede">ZONA HABITUAL</label><input type="text" id="vendSede" placeholder="Ej: JAVERIANA"></div>
+        <div class="form-group"><label for="vendMeta">META SEMANAL ($)</label><input type="number" id="vendMeta" placeholder="Ej: 100000"></div>
+        <div class="form-group"><label for="vendComision">COMISIÓN PORCENTAJE (%)</label><input type="number" id="vendComision" placeholder="Ej: 10" min="0" max="100" step="0.5"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarVendedor()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR OPERADOR</button>
+    </div>
+    
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 style="margin:0;"><i class="fa-solid fa-award"></i> CUMPLIMIENTO DE OBJETIVOS</h3>
+        <button class="btn btn-warning" onclick="liquidarTodasComisiones()"><i class="fa-solid fa-hand-holding-dollar"></i> LIQUIDAR TODAS LAS COMISIONES</button>
+      </div>
+      <div id="listaVendedores"></div>
+    </div>
+  </div>
 
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-md font-bold text-yellow-400 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left"></i> Historial de Movimientos</h3>
-                    <div class="flex gap-2">
-                        <button id="btn-export-csv" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded text-yellow-400 border border-slate-700 transition"><i class="fa-solid fa-file-csv"></i> Exportar CSV</button>
-                        <button id="btn-clear-sales" class="bg-red-500/10 hover:bg-red-500/20 text-xs px-3 py-1.5 rounded text-red-400 border border-red-500/20 transition"><i class="fa-solid fa-trash"></i> Limpiar</button>
-                    </div>
-                </div>
-                <div class="overflow-x-auto flex-1">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Fecha/Hora</th>
-                                <th class="p-3">Producto</th>
-                                <th class="p-3">Cant</th>
-                                <th class="p-3">Operador</th>
-                                <th class="p-3">Destino</th>
-                                <th class="p-3">Total</th>
-                                <th class="p-3">Comisión</th>
-                            </tr>
-                        </thead>
-                        <tbody id="sales-table-body" class="divide-y divide-slate-800/60">
-                            <!-- Inyectado por JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+  <!-- PESTAÑA: CLIENTES & RESTOCK DOMICILIO -->
+  <div id="tab-clientes" class="tab-content">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 id="tituloClienteCard" style="margin:0;"><i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK)</h3>
+        <button class="btn btn-warning" id="btnCancelarEdicionCliente" style="display:none;" onclick="cancelarEdicionCliente()">CANCELAR EDICIÓN</button>
+      </div>
+      <div class="form-grid">
+        <div class="form-group"><label for="cliNombre">NOMBRE DEL CLIENTE</label><input type="text" id="cliNombre" placeholder="Ej: DOÑA MARÍA"></div>
+        <div class="form-group"><label for="cliDireccion">DIRECCIÓN / CASA / ZONA</label><input type="text" id="cliDireccion" placeholder="Ej: CALLE 100 #15-40 (CASA AZUL)"></div>
+        <div class="form-group"><label for="cliTelefono">TELÉFONO (WHATSAPP)</label><input type="text" id="cliTelefono" placeholder="Ej: 3101234567"></div>
+        <div class="form-group"><label for="cliFrecuencia">FRECUENCIA APROX. DE COMPRA (DÍAS)</label><input type="number" id="cliFrecuencia" value="7" min="1"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarCliente()"><i class="fa-solid fa-user-plus"></i> <span id="btnTxtCliente">GUARDAR CLIENTE EN RUTA</span></button>
+    </div>
 
-        <!-- TAB: TRIPULACIÓN -->
-        <section id="tab-tripulacion" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 h-fit">
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-user-plus"></i> Registrar Operador</h3>
-                <form id="form-operator" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">NOMBRE OPERADOR</label>
-                        <input type="text" id="op-name" required placeholder="Ej. Trevor" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">ZONA HABITUAL</label>
-                        <input type="text" id="op-zone" placeholder="Ej. Sandy Shores" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">% COMISIÓN</label>
-                        <input type="number" id="op-commission" min="0" max="100" value="10" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold p-3 rounded-lg transition shadow-lg text-sm uppercase">Guardar Operador</button>
-                </form>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-md font-bold text-yellow-400 flex items-center gap-2"><i class="fa-solid fa-users-viewfinder"></i> Plantilla Activa</h3>
-                    <button id="btn-liquidate" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-xs px-3 py-1.5 rounded text-emerald-400 border border-emerald-500/20 transition"><i class="fa-solid fa-money-bill-transfer"></i> Liquidar Comisiones</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Nombre</th>
-                                <th class="p-3">Zona</th>
-                                <th class="p-3">% Comisión</th>
-                                <th class="p-3">Comisiones Acumuladas</th>
-                                <th class="p-3 text-right">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="operators-table-body" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+    <div class="card">
+      <h3><i class="fa-solid fa-route"></i> AGENDA DE CLIENTES & CONTROL DE RESTOCK</h3>
+      <div id="listaClientesRestock"></div>
+    </div>
+  </div>
 
-        <!-- TAB: CLIENTES & RUTA -->
-        <section id="tab-clientes" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 h-fit">
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-user-tag"></i> Registrar Cliente / Casa</h3>
-                <form id="form-client" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">NOMBRE CLIENTE</label>
-                        <input type="text" id="cli-name" required placeholder="Ej. Lester Crest" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">DIRECCIÓN / ZONA</label>
-                        <input type="text" id="cli-address" placeholder="Ej. El Burro Heights #402" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">TELÉFONO</label>
-                        <input type="text" id="cli-phone" placeholder="Ej. 555-0199" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold p-3 rounded-lg transition shadow-lg text-sm uppercase">Agregar Cliente</button>
-                </form>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-md font-bold text-yellow-400 flex items-center gap-2"><i class="fa-solid fa-map-location-dot"></i> Directorio y Ruta de Restock</h3>
-                    <button id="btn-copy-route" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded text-yellow-400 border border-slate-700 transition"><i class="fa-solid fa-copy"></i> Copiar Ruta WhatsApp</button>
-                </div>
-                <div class="overflow-x-auto flex-1">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Cliente</th>
-                                <th class="p-3">Dirección</th>
-                                <th class="p-3">Teléfono</th>
-                                <th class="p-3 text-right">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="clients-table-body" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+  <!-- PESTAÑA 3: INVENTARIO -->
+  <div id="tab-productos" class="tab-content">
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 id="tituloInvCard" style="margin:0;"><i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK</h3>
+        <button class="btn btn-warning" id="btnCancelarEdicionProd" style="display:none;" onclick="cancelarEdicionProducto()">CANCELAR EDICIÓN</button>
+      </div>
+      <div class="form-grid" id="formProductoContainer">
+        <div class="form-group full"><label for="pNombre">NOMBRE DEL ARTÍCULO / COMBO</label><input type="text" id="pNombre" placeholder="Ej: SNACK ESPECIAL"></div>
+        <div class="form-group"><label for="pStock">STOCK INICIAL</label><input type="number" id="pStock" placeholder="0"></div>
+        <div class="form-group"><label for="pPrecio">PRECIO DE VENTA ($)</label><input type="number" id="pPrecio" placeholder="0"></div>
+        <div class="form-group"><label for="pCosto">COSTO DE ADQUISICIÓN ($)</label><input type="number" id="pCosto" placeholder="0"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-plus"></i> <span id="btnTxtProducto">AÑADIR AL ALMACÉN</span></button>
+    </div>
+    <div class="card">
+      <h3><i class="fa-solid fa-clipboard-list"></i> INVENTARIO ACTIVO</h3>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead><tr id="tablaProductosHeader"><th>ARTÍCULO</th><th>STOCK</th><th>PRECIO</th><th>COSTO</th><th>ACCIONES RÁPIDAS</th></tr></thead>
+          <tbody id="tablaProductos"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        <!-- TAB: ALMACÉN -->
-        <section id="tab-almacen" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 h-fit">
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-box-open"></i> Nuevo Artículo Almacén</h3>
-                <form id="form-product" class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">NOMBRE ARTÍCULO</label>
-                        <input type="text" id="prod-name" required placeholder="Ej. Psicotrópico Premium" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">STOCK INICIAL</label>
-                        <input type="number" id="prod-stock" min="0" value="50" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">PRECIO DE VENTA ($)</label>
-                        <input type="number" id="prod-price" min="0" step="0.01" value="25.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">COSTO DE ADQUISICIÓN ($)</label>
-                        <input type="number" id="prod-cost" min="0" step="0.01" value="10.00" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-200 focus:border-yellow-400 outline-none">
-                    </div>
-                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold p-3 rounded-lg transition shadow-lg text-sm uppercase">Registrar Artículo</button>
-                </form>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2">
-                <div id="stock-alert" class="hidden bg-red-500/10 border border-red-500/30 text-red-400 p-3 rounded-lg text-xs mb-4 flex items-center gap-2">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <span>Hay artículos con stock crítico en el almacén (≤ 5 unidades).</span>
-                </div>
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-warehouse"></i> Inventario Actual</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-950 text-slate-400 uppercase border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Artículo</th>
-                                <th class="p-3">Stock</th>
-                                <th class="p-3">Venta</th>
-                                <th class="p-3">Costo</th>
-                                <th class="p-3 text-right">Acciones R Rápidas</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inventory-table-body" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+  <!-- PESTAÑA 4: IA COPILOT -->
+  <div id="tab-ia" class="tab-content">
+    <div class="card" style="border-left: 4px solid var(--ai-color);">
+      <h3 id="tituloIAHeader"><i class="fa-solid fa-terminal" style="color: var(--ai-color);"></i> LESTER AI COPILOT - ASISTENCIA TÁCTICA</h3>
+      <p style="font-size: 0.82rem; color: var(--text-muted);">Selecciona un protocolo analítico automatizado o ingresa una consulta directa en la terminal de procesamiento.</p>
+    </div>
 
-        <!-- TAB: LESTER AI -->
-        <section id="tab-lester" class="tab-content hidden grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 flex flex-col h-[500px]">
-                <h3 class="text-md font-bold text-yellow-400 mb-3 flex items-center gap-2"><i class="fa-solid fa-brain"></i> Protocolos Lester AI</h3>
-                <div class="flex flex-col gap-2 overflow-y-auto flex-1 pr-1 text-xs">
-                    <button onclick="runLesterProtocol('diagnostico')" class="bg-slate-800 hover:bg-slate-700 text-left p-2.5 rounded border border-slate-700 transition flex items-center justify-between"><span><i class="fa-solid fa-stethoscope text-yellow-400 mr-2"></i> Diagnóstico Financiero</span><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-                    <button onclick="runLesterProtocol('operaciones')" class="bg-slate-800 hover:bg-slate-700 text-left p-2.5 rounded border border-slate-700 transition flex items-center justify-between"><span><i class="fa-solid fa-gauge-high text-yellow-400 mr-2"></i> Ritmo de Operaciones</span><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-                    <button onclick="runLesterProtocol('comisiones')" class="bg-slate-800 hover:bg-slate-700 text-left p-2.5 rounded border border-slate-700 transition flex items-center justify-between"><span><i class="fa-solid fa-users-gear text-yellow-400 mr-2"></i> Auditoría de Comisiones</span><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-                    <button onclick="runLesterProtocol('whatsapp')" class="bg-slate-800 hover:bg-slate-700 text-left p-2.5 rounded border border-slate-700 transition flex items-center justify-between"><span><i class="fa-brands fa-whatsapp text-emerald-400 mr-2"></i> Copys Promocionales</span><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-                </div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 lg:col-span-2 flex flex-col h-[500px]">
-                <h3 class="text-md font-bold text-yellow-400 mb-3 flex items-center gap-2"><i class="fa-solid fa-terminal"></i> Terminal Táctica de Inteligencia</h3>
-                <div id="lester-output" class="bg-slate-950 border border-slate-800 rounded-lg p-4 flex-1 overflow-y-auto font-mono text-xs text-slate-300 space-y-2">
-                    <p class="text-yellow-400">> Conexión establecida con Lester Crest AI Core v1.5.</p>
-                    <p class="text-slate-500">> Selecciona un protocolo o escribe tu consulta abajo para ejecutar análisis táctico...</p>
-                </div>
-                <div class="mt-3 flex gap-2">
-                    <input type="text" id="lester-input" placeholder="Escribe un comando para Lester..." class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 focus:border-yellow-400 outline-none font-mono">
-                    <button id="btn-send-lester" class="bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold px-4 rounded-lg transition text-xs uppercase"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
-            </div>
-        </section>
+    <div class="card">
+      <div class="ai-category-title"><i class="fa-solid fa-chart-line"></i> PROTOCOLOS FINANCIEROS</div>
+      <div class="quick-ai-grid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('diagnostico_financiero')"><i class="fa-solid fa-scale-balanced"></i> Diagnóstico Financiero</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('proyecciones_metas')"><i class="fa-solid fa-bullseye"></i> Ritmo de Operaciones</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('calculadora_descuentos')"><i class="fa-solid fa-percent"></i> Evaluador de Descuentos</button>
+      </div>
 
-        <!-- TAB: CONFIGURACIÓN -->
-        <section id="tab-config" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 h-fit">
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-cloud"></i> Credenciales Firebase Cloud</h3>
-                <div class="space-y-3 text-xs">
-                    <div><label class="block text-slate-400 mb-1">API Key</label><input type="text" id="fb-apiKey" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-200 outline-none"></div>
-                    <div><label class="block text-slate-400 mb-1">Auth Domain</label><input type="text" id="fb-authDomain" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-200 outline-none"></div>
-                    <div><label class="block text-slate-400 mb-1">Project ID</label><input type="text" id="fb-projectId" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-200 outline-none"></div>
-                    <button id="btn-save-firebase" class="bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold p-2.5 rounded w-full uppercase transition">Guardar Configuración Cloud</button>
-                </div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 h-fit">
-                <h3 class="text-md font-bold text-yellow-400 mb-4 flex items-center gap-2"><i class="fa-solid fa-key"></i> Google Gemini API Key</h3>
-                <div class="space-y-3 text-xs">
-                    <div><label class="block text-slate-400 mb-1">Gemini API Key (Lester Core)</label><input type="password" id="gemini-key" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-200 outline-none"></div>
-                    <button id="btn-save-gemini" class="bg-yellow-400 hover:bg-yellow-500 text-slate-950 font-bold p-2.5 rounded w-full uppercase transition">Guardar Llave IA</button>
-                    <div class="pt-4 border-t border-slate-800">
-                        <button id="btn-factory-reset" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 p-2.5 rounded w-full uppercase transition font-bold"><i class="fa-solid fa-triangle-exclamation"></i> Reiniciar Datos de Fábrica</button>
-                    </div>
-                </div>
-            </div>
-        </section>
+      <div class="ai-category-title" id="aiCatVendedoresTitle"><i class="fa-solid fa-users"></i> GESTIÓN DE TRIPULACIÓN</div>
+      <div class="quick-ai-grid" id="aiCatVendedoresGrid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('auditoria_comisiones')"><i class="fa-solid fa-hand-holding-dollar"></i> Auditoría de Comisiones</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('ranking_vendedores')"><i class="fa-solid fa-trophy"></i> Ranking de Operadores</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('rendimiento_sedes')"><i class="fa-solid fa-building-columns"></i> Análisis por Zonas</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('guiones_venta')"><i class="fa-solid fa-comments"></i> Guiones de Abordaje</button>
+      </div>
 
-    </main>
+      <div class="ai-category-title"><i class="fa-solid fa-shield"></i> LOGÍSTICA & SEGURIDAD</div>
+      <div class="quick-ai-grid">
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('analizar_stock')"><i class="fa-solid fa-boxes-packing"></i> Diagnóstico de Reabastecimiento</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('promo_whatsapp')"><i class="fa-brands fa-whatsapp"></i> Copys Promocionales</button>
+        <button class="quick-ai-btn" onclick="ejecutarPromptAccion('detector_anomalias')"><i class="fa-solid fa-shield-cat"></i> Auditoría de Registros</button>
+      </div>
+    </div>
 
-    <!-- SCRIPT DE CONTROL CORE -->
-    <script>
-        // Estado Global de la App con Persistencia Multi-Categoría
-        let currentCategory = 'dulces';
-        let db = JSON.parse(localStorage.getItem('kosmik_db_v3')) || {
-            dulces: { products: [ {id:1, name:'Gomitas Criminales', stock:45, price:15, cost:5}, {id:2, name:'Chocolate Los Santos', stock:3, price:20, cost:8} ], sales: [], operators: [ {id:1, name:'Franklin', zone:'Vespucci', commission:10, accumulated:0}, {id:2, name:'Trevor', zone:'Sandy Shores', commission:15, accumulated:0} ], clients: [ {name:'Lester Crest', address:'El Burro Heights #402', phone:'555-0199'} ] },
-            huevos: { products: [ {id:1, name:'Cartón Huevo AA', stock:30, price:18000, cost:12000} ], sales: [], operators: [ {id:1, name:'Franklin', zone:'Centro', commission:5, accumulated:0} ], clients: [] },
-            vapes: { products: [ {id:1, name:'Vape 5000 Puffs', stock:12, price:45000, cost:20000} ], sales: [], operators: [ {id:1, name:'Franklin', zone:'Vinewood', commission:12, accumulated:0} ], clients: [] }
+    <div class="card">
+      <h3><i class="fa-solid fa-terminal"></i> TERMINAL DE CONSULTA PERSONALIZADA</h3>
+      <div class="form-group">
+        <div class="chat-input-wrapper">
+          <textarea id="aiPromptInput" placeholder="Escribe tu consulta táctica y presiona Enter..." onkeydown="manejarEnterChat(event)"></textarea>
+          <button class="btn-send-whatsapp" onclick="consultarIA()" title="Enviar consulta"><i class="fa-solid fa-arrow-up"></i></button>
+        </div>
+      </div>
+      <div class="ai-response-box" id="aiResponseBox">> SISTEMA LISTO. ESPERANDO INSTRUCCIÓN TÁCTICA...</div>
+    </div>
+  </div>
+
+  <!-- PESTAÑA 5: AJUSTES -->
+  <div id="tab-ajustes" class="tab-content">
+    <div class="card" style="border-left: 4px solid var(--gta-yellow);">
+      <h3><i class="fa-solid fa-cloud-arrow-up"></i> CONFIGURACIÓN FIREBASE CLOUD</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Conecta las credenciales corporativas para sincronización de datos en tiempo real.</p>
+      <div class="form-grid">
+        <div class="form-group"><label for="fbApiKey">Firebase API Key</label><input type="password" id="fbApiKey" placeholder="AIzaSy..."></div>
+        <div class="form-group"><label for="fbAuthDomain">Auth Domain</label><input type="text" id="fbAuthDomain" placeholder="tu-proyecto.firebaseapp.com"></div>
+        <div class="form-group"><label for="fbProjectId">Project ID</label><input type="text" id="fbProjectId" placeholder="tu-proyecto-id"></div>
+        <div class="form-group"><label for="fbStorageBucket">Storage Bucket</label><input type="text" id="fbStorageBucket" placeholder="tu-proyecto.appspot.com"></div>
+        <div class="form-group"><label for="fbMessagingSenderId">Messaging Sender ID</label><input type="text" id="fbMessagingSenderId" placeholder="123456789"></div>
+        <div class="form-group"><label for="fbAppId">App ID</label><input type="text" id="fbAppId" placeholder="1:12345:web:abcde"></div>
+      </div>
+      <button class="btn btn-primary" style="margin-top: 16px;" onclick="guardarConexionFirebase()"><i class="fa-solid fa-plug"></i> CONECTAR NUBE</button>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--ai-color);">
+      <h3><i class="fa-solid fa-key"></i> CONFIGURACIÓN GOOGLE GEMINI API</h3>
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Ingresa tu clave de API oficial para activar el motor analítico de Lester IA.</p>
+      <div class="form-group full"><label for="aiApiKey">Google Gemini API Key</label><input type="password" id="aiApiKey" placeholder="AIzaSy..."></div>
+      <button class="btn btn-ai" style="margin-top: 16px;" onclick="guardarApiKeyIA()"><i class="fa-solid fa-save"></i> GUARDAR API KEY</button>
+    </div>
+  </div>
+
+  <script>
+    let categoriaActual = 'dulces';
+    let editandoProductoId = null;
+    let editandoClienteKey = null;
+
+    let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
+    let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
+    let dbFirebase = null;
+
+    let BD_PRODUCTOS = JSON.parse(localStorage.getItem('kosmik_bd_prods')) || {
+      dulces: {
+        'c1': { nombre: 'CABLE ÁCIDO (UNIDAD)', stock: 25, precio: 1000, costo: 400 },
+        'm1': { nombre: 'MENTA FUERTE (UNIDAD)', stock: 50, precio: 500, costo: 200 }
+      },
+      huevos: {
+        'h1': { nombre: 'CARTÓN HUEVOS AA (30 UND)', stock: 12, precio: 18000, costo: 13000 }
+      },
+      vapes: {
+        'v1': { nombre: 'VAPE DESECHABLE 5000 PUFFS', stock: 10, precio: 35000, costo: 20000 }
+      }
+    };
+
+    let vendedores = JSON.parse(localStorage.getItem('cat_vends')) || {
+      'FRANKLIN': { sede: 'JAVERIANA', meta: 100000, comisionPorcentaje: 10, acumuladoComisiones: 0 },
+      'MICHAEL': { sede: 'ROSARIO', meta: 90000, comisionPorcentaje: 10, acumuladoComisiones: 0 }
+    };
+
+    let clientesRestock = JSON.parse(localStorage.getItem('kosmik_clientes')) || {
+      'DOÑA MARÍA': { direccion: 'CALLE 100 #15-40', telefono: '3101234567', frecuenciaDias: 7, ultimaCompra: new Date().toLocaleDateString() }
+    };
+
+    let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
+    let chartV = null, chartP = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        if (localStorage.getItem('theme_dark') === 'true') {
+          document.body.classList.add('dark-mode');
+        } else {
+          document.body.classList.remove('dark-mode');
+          const btnT = document.getElementById('btnTheme');
+          if(btnT) btnT.innerHTML = '<i class="fa-solid fa-circle-half-stroke"></i> HUD OSCURO';
+        }
+
+        if (firebaseConfig) {
+          if(document.getElementById('fbApiKey')) document.getElementById('fbApiKey').value = firebaseConfig.apiKey || '';
+          if(document.getElementById('fbAuthDomain')) document.getElementById('fbAuthDomain').value = firebaseConfig.authDomain || '';
+          if(document.getElementById('fbProjectId')) document.getElementById('fbProjectId').value = firebaseConfig.projectId || '';
+          if(document.getElementById('fbStorageBucket')) document.getElementById('fbStorageBucket').value = firebaseConfig.storageBucket || '';
+          if(document.getElementById('fbMessagingSenderId')) document.getElementById('fbMessagingSenderId').value = firebaseConfig.messagingSenderId || '';
+          if(document.getElementById('fbAppId')) document.getElementById('fbAppId').value = firebaseConfig.appId || '';
+          inicializarFirebaseCloud(firebaseConfig);
+        }
+
+        if (geminiApiKey && document.getElementById('aiApiKey')) {
+          document.getElementById('aiApiKey').value = geminiApiKey;
+        }
+
+        actualizarUIReferenciasCategoria();
+        renderizarVendedoresSelect();
+        renderizarClientesSelect();
+        renderizarClientesLista();
+        renderizarProductos();
+        renderizarVendedoresLista();
+        renderizarVentas();
+      } catch (err) {
+        console.error("Error en arranque:", err);
+      }
+    });
+
+    function cambiarCategoriaMaster(cat) {
+      categoriaActual = cat;
+      document.querySelectorAll('.master-cat-btn').forEach(btn => btn.classList.remove('active'));
+      if(cat === 'dulces' && document.getElementById('btnCatDulces')) document.getElementById('btnCatDulces').classList.add('active');
+      if(cat === 'huevos' && document.getElementById('btnCatHuevos')) document.getElementById('btnCatHuevos').classList.add('active');
+      if(cat === 'vapes' && document.getElementById('btnCatVapes')) document.getElementById('btnCatVapes').classList.add('active');
+
+      cancelarEdicionProducto();
+      cancelarEdicionCliente();
+      actualizarUIReferenciasCategoria();
+      renderizarProductos();
+      renderizarVentas();
+      renderizarVendedoresLista();
+      renderizarClientesLista();
+    }
+
+    function actualizarUIReferenciasCategoria() {
+      const iconos = { dulces: '🍬 DULCES', huevos: '🥚 HUEVOS', vapes: '💨 VAPES' };
+      const tituloReg = document.getElementById('tituloRegistroVenta');
+      const tituloIA = document.getElementById('tituloIAHeader');
+      if(tituloReg) tituloReg.innerHTML = `<i class="fa-solid fa-cart-shopping"></i> REGISTRAR TRANSACCIÓN (${iconos[categoriaActual]})`;
+      if(tituloIA) tituloIA.innerHTML = `<i class="fa-solid fa-terminal" style="color: var(--ai-color);"></i> LESTER AI COPILOT - ${iconos[categoriaActual]}`;
+
+      const tabVend = document.getElementById('tabBtnVendedores');
+      const tabCli = document.getElementById('tabBtnClientes');
+      const grupoVend = document.getElementById('grupoVendedorVenta');
+      const grupoUbica = document.getElementById('grupoUbicacionContainer');
+      const grupoCliente = document.getElementById('grupoClienteContainer');
+      const cardComs = document.getElementById('cardComisionesContainer');
+      const cardGrafV = document.getElementById('cardGraficaVendedores');
+      const filtroVContainer = document.getElementById('filtroVendedorContainer');
+      const aiTitleV = document.getElementById('aiCatVendedoresTitle');
+      const aiGridV = document.getElementById('aiCatVendedoresGrid');
+      const thHeaders = document.getElementById('tablaVentasHeaders');
+
+      if (categoriaActual === 'dulces') {
+        if(tabVend) tabVend.style.display = 'flex';
+        if(tabCli) tabCli.style.display = 'none';
+        if(grupoVend) grupoVend.style.display = 'flex';
+        if(grupoUbica) grupoUbica.style.display = 'flex';
+        if(grupoCliente) grupoCliente.style.display = 'none';
+        if(cardComs) cardComs.style.display = 'block';
+        if(cardGrafV) cardGrafV.style.display = 'block';
+        if(filtroVContainer) filtroVContainer.style.display = 'grid';
+        if(aiTitleV) aiTitleV.style.display = 'block';
+        if(aiGridV) aiGridV.style.display = 'grid';
+        if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>ZONA</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th>';
+      } else {
+        if(tabVend) tabVend.style.display = 'none';
+        if(tabCli) tabCli.style.display = 'flex';
+        if(grupoVend) grupoVend.style.display = 'none';
+        if(grupoUbica) grupoUbica.style.display = 'none';
+        if(grupoCliente) grupoCliente.style.display = 'flex';
+        if(cardComs) cardComs.style.display = 'none';
+        if(cardGrafV) cardGrafV.style.display = 'none';
+        if(filtroVContainer) filtroVContainer.style.display = 'none';
+        if(aiTitleV) aiTitleV.style.display = 'none';
+        if(aiGridV) aiGridV.style.display = 'none';
+        if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>CLIENTE / CASA</th><th>TOTAL VENTA</th><th>GANANCIA NETA</th>';
+        
+        const activeTab = document.querySelector('.tab-content.active');
+        if(activeTab && (activeTab.id === 'tab-vendedores')) {
+          cambiarPestana('ventas');
+        }
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('theme_dark', isDark);
+      const btnT = document.getElementById('btnTheme');
+      if(btnT) btnT.innerHTML = isDark ? '<i class="fa-solid fa-circle-half-stroke"></i> HUD CLARO' : '<i class="fa-solid fa-circle-half-stroke"></i> HUD OSCURO';
+      actualizarGraficas();
+    }
+
+    function cambiarPestana(p) {
+      if (p === 'vendedores' && categoriaActual !== 'dulces') return;
+      if (p === 'clientes' && categoriaActual === 'dulces') return;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+      const tabs = ['ventas', 'vendedores', 'clientes', 'productos', 'ia', 'ajustes'];
+      const idx = tabs.indexOf(p);
+      if(idx !== -1) {
+        const btnList = document.querySelectorAll('.tab-btn');
+        if(btnList[idx]) btnList[idx].classList.add('active');
+        const tabTarget = document.getElementById(`tab-${p}`);
+        if(tabTarget) tabTarget.classList.add('active');
+      }
+      if(p === 'ventas') actualizarGraficas();
+    }
+
+    function guardarConexionFirebase() {
+      const config = {
+        apiKey: document.getElementById('fbApiKey').value.trim(),
+        authDomain: document.getElementById('fbAuthDomain').value.trim(),
+        projectId: document.getElementById('fbProjectId').value.trim(),
+        storageBucket: document.getElementById('fbStorageBucket').value.trim(),
+        messagingSenderId: document.getElementById('fbMessagingSenderId').value.trim(),
+        appId: document.getElementById('fbAppId').value.trim()
+      };
+      if (!config.apiKey || !config.projectId) return alert('Ingresa API Key y Project ID.');
+      localStorage.setItem('kosmik_fb_config', JSON.stringify(config));
+      firebaseConfig = config;
+      inicializarFirebaseCloud(config);
+      alert('Configuración de Firebase guardada con éxito.');
+    }
+
+    function inicializarFirebaseCloud(config) {
+      try {
+        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
+          firebase.initializeApp(config);
+          dbFirebase = firebase.firestore();
+          const badge = document.getElementById('cloudStatusBadge');
+          if(badge) {
+            badge.className = 'badge-status badge-online';
+            badge.innerText = 'ONLINE';
+          }
+          sincronizarDatosCloud();
+        }
+      } catch (e) {
+        console.error("Error inicializando Firebase:", e);
+      }
+    }
+
+    function sincronizarDatosCloud() {
+      if (!dbFirebase) return;
+
+      dbFirebase.collection('kosmik_cloud').doc('inventario').onSnapshot((doc) => {
+        if (doc.exists) {
+          BD_PRODUCTOS = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarProductos();
+        }
+      });
+
+      dbFirebase.collection('kosmik_cloud').doc('ventas').onSnapshot((doc) => {
+        if (doc.exists) {
+          BD_VENTAS = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarVentas();
+        }
+      });
+
+      dbFirebase.collection('kosmik_cloud').doc('vendedores').onSnapshot((doc) => {
+        if (doc.exists) {
+          vendedores = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarVendedoresSelect();
+          renderizarVendedoresLista();
+        }
+      });
+
+      dbFirebase.collection('kosmik_cloud').doc('clientes').onSnapshot((doc) => {
+        if (doc.exists) {
+          clientesRestock = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarClientesSelect();
+          renderizarClientesLista();
+        }
+      });
+    }
+
+    async function subirDatosCloud() {
+      if (!dbFirebase) return;
+      try {
+        await dbFirebase.collection('kosmik_cloud').doc('inventario').set(BD_PRODUCTOS);
+        await dbFirebase.collection('kosmik_cloud').doc('ventas').set(BD_VENTAS);
+        await dbFirebase.collection('kosmik_cloud').doc('vendedores').set(vendedores);
+        await dbFirebase.collection('kosmik_cloud').doc('clientes').set(clientesRestock);
+      } catch (e) {
+        console.error("Error subiendo datos a la nube:", e);
+      }
+    }
+
+    function guardarApiKeyIA() {
+      const key = document.getElementById('aiApiKey').value.trim();
+      if(!key) return alert('Ingresa una API Key válida.');
+      localStorage.setItem('kosmik_ai_key', key);
+      geminiApiKey = key;
+      alert('API Key guardada correctamente.');
+    }
+
+    function guardarLocalStorageLocalOnly() {
+      localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
+      localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+      localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
+      localStorage.setItem('kosmik_clientes', JSON.stringify(clientesRestock));
+    }
+
+    function guardarLocalStorage() {
+      guardarLocalStorageLocalOnly();
+      subirDatosCloud();
+    }
+
+    function renderizarClientesSelect() {
+      const selC = document.getElementById('vClienteSelect');
+      if(!selC) return;
+      selC.innerHTML = '<option value="">-- SELECCIONAR CLIENTE / CASA --</option>';
+      Object.keys(clientesRestock).forEach(nombre => {
+        const c = clientesRestock[nombre];
+        selC.innerHTML += `<option value="${nombre}">${nombre} [${c.direccion}]</option>`;
+      });
+    }
+
+    function prepararEdicionCliente(nombre) {
+      const c = clientesRestock[nombre];
+      if(!c) return;
+      editandoClienteKey = nombre;
+      document.getElementById('cliNombre').value = nombre;
+      document.getElementById('cliDireccion').value = c.direccion;
+      document.getElementById('cliTelefono').value = c.telefono;
+      document.getElementById('cliFrecuencia').value = c.frecuenciaDias;
+
+      document.getElementById('tituloClienteCard').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> EDITAR CLIENTE / CASA`;
+      document.getElementById('btnTxtCliente').innerText = 'ACTUALIZAR CLIENTE';
+      document.getElementById('btnCancelarEdicionCliente').style.display = 'block';
+    }
+
+    function cancelarEdicionCliente() {
+      editandoClienteKey = null;
+      document.getElementById('cliNombre').value = '';
+      document.getElementById('cliDireccion').value = '';
+      document.getElementById('cliTelefono').value = '';
+      document.getElementById('cliFrecuencia').value = '7';
+
+      document.getElementById('tituloClienteCard').innerHTML = `<i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK)`;
+      document.getElementById('btnTxtCliente').innerText = 'GUARDAR CLIENTE EN RUTA';
+      document.getElementById('btnCancelarEdicionCliente').style.display = 'none';
+    }
+
+    function guardarCliente() {
+      const nombre = document.getElementById('cliNombre').value.trim().toUpperCase();
+      const direccion = document.getElementById('cliDireccion').value.trim().toUpperCase();
+      const telefono = document.getElementById('cliTelefono').value.trim();
+      const frecuenciaDias = parseInt(document.getElementById('cliFrecuencia').value) || 7;
+
+      if(!nombre || !direccion) {
+        alert('Ingresa el nombre y la dirección del cliente.');
+        return;
+      }
+
+      if (editandoClienteKey) {
+        if (editandoClienteKey !== nombre) {
+          delete clientesRestock[editandoClienteKey];
+        }
+        clientesRestock[nombre] = {
+          direccion,
+          telefono,
+          frecuenciaDias,
+          ultimaCompra: clientesRestock[editandoClienteKey]?.ultimaCompra || new Date().toLocaleDateString()
         };
+        alert('¡Cliente actualizado con éxito!');
+        cancelarEdicionCliente();
+      } else {
+        clientesRestock[nombre] = {
+          direccion,
+          telefono,
+          frecuenciaDias,
+          ultimaCompra: new Date().toLocaleDateString()
+        };
+        alert('¡Cliente registrado en la ruta de restock!');
+        document.getElementById('cliNombre').value = '';
+        document.getElementById('cliDireccion').value = '';
+        document.getElementById('cliTelefono').value = '';
+      }
 
-        let chartOperatorsInstance = null;
-        let chartProductsInstance = null;
+      guardarLocalStorage();
+      renderizarClientesSelect();
+      renderizarClientesLista();
+    }
 
-        function saveDB() {
-            localStorage.setItem('kosmik_db_v3', JSON.stringify(db));
+    function eliminarCliente(nombre) {
+      if(confirm(`¿Eliminar a ${nombre} de la ruta de restock?`)) {
+        delete clientesRestock[nombre];
+        guardarLocalStorage();
+        renderizarClientesSelect();
+        renderizarClientesLista();
+      }
+    }
+
+    function renderizarClientesLista() {
+      const container = document.getElementById('listaClientesRestock');
+      if(!container) return;
+      container.innerHTML = '';
+
+      Object.keys(clientesRestock).forEach(nombre => {
+        const c = clientesRestock[nombre];
+        container.innerHTML += `
+          <div class="client-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="font-size: 0.95rem; color: var(--gta-yellow);">${nombre}</strong> 
+                <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">[DIR: ${c.direccion}]</span>
+              </div>
+              <div style="font-weight: 700; font-size: 0.8rem; color: var(--success);">
+                ÚLTIMO RESTOCK: ${c.ultimaCompra} (CADA ${c.frecuenciaDias} DÍAS)
+              </div>
+            </div>
+            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 0.75rem; color: var(--text-muted);">TEL: ${c.telefono || 'N/A'}</span>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> RESTOCK WAPP</button>
+                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="prepararEdicionCliente('${nombre}')"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="eliminarCliente('${nombre}')"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function enviarMensajeRestockWhatsApp(nombre) {
+      const c = clientesRestock[nombre];
+      if(!c) return;
+      let mensaje = `¡Hola ${nombre}! 👋 Te saluda Kosmik Enterprise. Notamos que ya es tiempo de hacerte un nuevo *restock* en casa (${c.direccion}). ¿Te enviamos de una vez tu pedido habitual de huevos/vapes? 🥚💨`;
+      let url = `https://api.whatsapp.com/send?phone=${c.telefono}&text=${encodeURIComponent(mensaje)}`;
+      window.open(url, '_blank');
+    }
+
+    function renderizarProductos() {
+      const selectProd = document.getElementById('vProducto');
+      const tablaProds = document.getElementById('tablaProductos');
+      const bannerAlerta = document.getElementById('bannerAlerta');
+      const listaAlerta = document.getElementById('listaAlertaStock');
+      if(!selectProd || !tablaProds) return;
+
+      selectProd.innerHTML = '';
+      tablaProds.innerHTML = '';
+      let alertasHTML = '';
+      let hayCriticos = false;
+
+      const prodsCat = BD_PRODUCTOS[categoriaActual] || {};
+      Object.keys(prodsCat).forEach(id => {
+        const p = prodsCat[id];
+        selectProd.innerHTML += `<option value="${id}">${p.nombre} (STOCK: ${p.stock}) - $${p.precio.toLocaleString()}</option>`;
+        
+        let badgeStock = p.stock <= 5 ? `<span class="badge-status badge-offline" style="margin-left: 8px;">CRÍTICO (${p.stock})</span>` : p.stock;
+        tablaProds.innerHTML += `<tr>
+          <td><strong>${p.nombre}</strong></td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span>${badgeStock}</span>
+              <button class="btn btn-stock" onclick="ajustarStock('${id}', -1)">-</button>
+              <button class="btn btn-stock" onclick="ajustarStock('${id}', 1)">+</button>
+            </div>
+          </td>
+          <td>$${p.precio.toLocaleString()}</td>
+          <td>$${p.costo.toLocaleString()}</td>
+          <td>
+            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.65rem;" onclick="prepararEdicionProducto('${id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.65rem;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        </tr>`;
+
+        if (p.stock <= 5) {
+          hayCriticos = true;
+          alertasHTML += `<div>• <strong>${p.nombre}</strong> (${categoriaActual.toUpperCase()}) tiene stock crítico: <strong>${p.stock}</strong> unds.</div>`;
         }
+      });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initNavigation();
-            initMasterCategory();
-            initForms();
-            renderAll();
+      if (hayCriticos) {
+        bannerAlerta.style.display = 'block';
+        listaAlerta.innerHTML = alertasHTML;
+      } else {
+        bannerAlerta.style.display = 'none';
+      }
+    }
+
+    function ajustarStock(id, cambio) {
+      const prod = BD_PRODUCTOS[categoriaActual][id];
+      if (prod) {
+        prod.stock = Math.max(0, prod.stock + cambio);
+        guardarLocalStorage();
+        renderizarProductos();
+      }
+    }
+
+    function prepararEdicionProducto(id) {
+      const prod = BD_PRODUCTOS[categoriaActual][id];
+      if (!prod) return;
+      editandoProductoId = id;
+      document.getElementById('pNombre').value = prod.nombre;
+      document.getElementById('pStock').value = prod.stock;
+      document.getElementById('pPrecio').value = prod.precio;
+      document.getElementById('pCosto').value = prod.costo;
+
+      document.getElementById('tituloInvCard').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> EDITAR ARTÍCULO`;
+      document.getElementById('btnTxtProducto').innerText = 'ACTUALIZAR ARTÍCULO';
+      document.getElementById('btnCancelarEdicionProd').style.display = 'block';
+    }
+
+    function cancelarEdicionProducto() {
+      editandoProductoId = null;
+      document.getElementById('pNombre').value = '';
+      document.getElementById('pStock').value = '';
+      document.getElementById('pPrecio').value = '';
+      document.getElementById('pCosto').value = '';
+
+      document.getElementById('tituloInvCard').innerHTML = `<i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK`;
+      document.getElementById('btnTxtProducto').innerText = 'AÑADIR AL ALMACÉN';
+      document.getElementById('btnCancelarEdicionProd').style.display = 'none';
+    }
+
+    function guardarProducto() {
+      const nombre = document.getElementById('pNombre').value.trim();
+      const stock = parseInt(document.getElementById('pStock').value);
+      const precio = parseFloat(document.getElementById('pPrecio').value);
+      const costo = parseFloat(document.getElementById('pCosto').value);
+
+      if(!nombre || isNaN(stock) || isNaN(precio) || isNaN(costo)) {
+        alert('Por favor completa todos los campos correctamente.');
+        return;
+      }
+
+      if (editandoProductoId) {
+        BD_PRODUCTOS[categoriaActual][editandoProductoId] = { nombre, stock, precio, costo };
+        alert('¡Artículo actualizado con éxito!');
+        cancelarEdicionProducto();
+      } else {
+        const id = 'prod_' + Date.now();
+        BD_PRODUCTOS[categoriaActual][id] = { nombre, stock, precio, costo };
+        alert('¡Artículo añadido al almacén!');
+        document.getElementById('pNombre').value = '';
+        document.getElementById('pStock').value = '';
+        document.getElementById('pPrecio').value = '';
+        document.getElementById('pCosto').value = '';
+      }
+
+      guardarLocalStorage();
+      renderizarProductos();
+    }
+
+    function eliminarProducto(id) {
+      if(confirm('¿Eliminar este artículo del almacén?')) {
+        delete BD_PRODUCTOS[categoriaActual][id];
+        guardarLocalStorage();
+        renderizarProductos();
+      }
+    }
+
+    function renderizarVendedoresSelect() {
+      const selV = document.getElementById('vVendedor');
+      const selFiltro = document.getElementById('fVendedor');
+      if(!selV || !selFiltro) return;
+
+      selV.innerHTML = '';
+      selFiltro.innerHTML = '<option value="">-- TODOS LOS OPERADORES --</option>';
+
+      Object.keys(vendedores).forEach(nombre => {
+        selV.innerHTML += `<option value="${nombre}">${nombre} (${vendedores[nombre].sede})</option>`;
+        selFiltro.innerHTML += `<option value="${nombre}">${nombre}</option>`;
+      });
+    }
+
+    function guardarVendedor() {
+      const nombre = document.getElementById('vendNombre').value.trim();
+      const sede = document.getElementById('vendSede').value.trim();
+      const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
+      const comisionPorcentaje = parseFloat(document.getElementById('vendComision').value) || 10;
+
+      if(!nombre || !sede) {
+        alert('Ingresa al menos el nombre y la zona del operador.');
+        return;
+      }
+
+      if(!vendedores[nombre]) {
+        vendedores[nombre] = { sede, meta, comisionPorcentaje, acumuladoComisiones: 0 };
+      } else {
+        vendedores[nombre].sede = sede;
+        vendedores[nombre].meta = meta;
+        vendedores[nombre].comisionPorcentaje = comisionPorcentaje;
+      }
+
+      guardarLocalStorage();
+      renderizarVendedoresSelect();
+      renderizarVendedoresLista();
+
+      document.getElementById('vendNombre').value = '';
+      document.getElementById('vendSede').value = '';
+      document.getElementById('vendMeta').value = '';
+      document.getElementById('vendComision').value = '';
+      alert('Operador guardado correctamente.');
+    }
+
+    function liquidarComisionSocio(nombre) {
+      if (confirm(`¿Liquidar y vaciar las comisiones acumuladas de ${nombre}?`)) {
+        if (vendedores[nombre]) {
+          vendedores[nombre].acumuladoComisiones = 0;
+          guardarLocalStorage();
+          renderizarVendedoresLista();
+          alert(`Comisión de ${nombre} liquidada con éxito.`);
+        }
+      }
+    }
+
+    function liquidarTodasComisiones() {
+      if (confirm('¿Estás seguro de liquidar y vaciar las comisiones de TODOS los operadores?')) {
+        Object.keys(vendedores).forEach(nombre => {
+          vendedores[nombre].acumuladoComisiones = 0;
         });
+        guardarLocalStorage();
+        renderizarVendedoresLista();
+        alert('Todas las comisiones han sido liquidadas.');
+      }
+    }
 
-        function initNavigation() {
-            const tabs = document.querySelectorAll('.nav-tab');
-            const contents = document.querySelectorAll('.tab-content');
+    function renderizarVendedoresLista() {
+      const container = document.getElementById('listaVendedores');
+      if(!container) return;
+      container.innerHTML = '';
 
-            tabs.forEach(tab => {
-                tab.addEventListener('click', () => {
-                    tabs.forEach(t => {
-                        t.classList.remove('bg-yellow-400/10', 'text-yellow-400', 'border', 'border-yellow-400/30');
-                        t.classList.add('text-slate-400', 'hover:bg-slate-800', 'hover:text-white');
-                    });
-                    tab.classList.add('bg-yellow-400/10', 'text-yellow-400', 'border', 'border-yellow-400/30');
-                    tab.classList.remove('text-slate-400', 'hover:bg-slate-800', 'hover:text-white');
+      Object.keys(vendedores).forEach(nombre => {
+        const v = vendedores[nombre];
+        const ventasVendedor = BD_VENTAS.dulces.filter(tx => tx.vendedor === nombre);
+        const totalVendidoV = ventasVendedor.reduce((acc, curr) => acc + curr.total, 0);
+        const porcentajeProgreso = v.meta > 0 ? Math.min(100, (totalVendidoV / v.meta) * 100).toFixed(1) : 0;
 
-                    const target = tab.getAttribute('data-tab');
-                    contents.forEach(c => {
-                        c.classList.add('hidden');
-                        if(c.id === `tab-${target}`) c.classList.remove('hidden');
-                    });
-                    if(target === 'dashboard') updateCharts();
-                });
-            });
+        container.innerHTML += `
+          <div class="seller-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <strong style="font-size: 0.95rem; color: var(--gta-yellow);">${nombre}</strong> 
+                <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">[ZONA: ${v.sede}]</span>
+              </div>
+              <div style="font-weight: 800; font-size: 0.85rem;">
+                VENTAS: $${totalVendidoV.toLocaleString()} / META: $${v.meta.toLocaleString()} (${porcentajeProgreso}%)
+              </div>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width: ${porcentajeProgreso}%;"></div>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <span>COMISIÓN: ${v.comisionPorcentaje}% | <strong style="color: var(--warning);">ACUMULADO: $${v.acumuladoComisiones.toLocaleString()}</strong></span>
+              <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="liquidarComisionSocio('${nombre}')"><i class="fa-solid fa-check"></i> LIQUIDAR PAGO</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function registrarVenta() {
+      const prodId = document.getElementById('vProducto').value;
+      const cantidad = parseInt(document.getElementById('vCantidad').value);
+      
+      let destino = 'PRINCIPAL';
+      if(categoriaActual === 'dulces') {
+        destino = document.getElementById('vUni').value.trim() || 'PRINCIPAL';
+      } else {
+        destino = document.getElementById('vClienteSelect').value;
+        if(!destino) {
+          alert('Selecciona un cliente destino para el restock.');
+          return;
         }
-
-        function initMasterCategory() {
-            const catBtns = document.querySelectorAll('.cat-btn');
-            catBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    catBtns.forEach(b => {
-                        b.classList.remove('bg-yellow-400', 'text-slate-950', 'shadow');
-                        b.classList.add('text-slate-400', 'hover:text-white');
-                    });
-                    btn.classList.add('bg-yellow-400', 'text-slate-950', 'shadow');
-                    btn.classList.remove('text-slate-400', 'hover:text-white');
-
-                    currentCategory = btn.getAttribute('data-cat');
-                    renderAll();
-                });
-            });
+        if(clientesRestock[destino]) {
+          clientesRestock[destino].ultimaCompra = new Date().toLocaleDateString();
         }
+      }
 
-        function renderAll() {
-            renderMetrics();
-            renderInventory();
-            renderSalesDropdowns();
-            renderSalesTable();
-            renderOperatorsTable();
-            renderClientsTable();
-            updateCharts();
+      const vendedor = categoriaActual === 'dulces' ? document.getElementById('vVendedor').value : 'DIRECTO';
+
+      if(!prodId || isNaN(cantidad) || cantidad <= 0) {
+        alert('Selecciona un producto y cantidad válida.');
+        return;
+      }
+
+      const productoObj = BD_PRODUCTOS[categoriaActual][prodId];
+      if(!productoObj || productoObj.stock < cantidad) {
+        alert('Stock insuficiente en el almacén.');
+        return;
+      }
+
+      productoObj.stock -= cantidad;
+      const totalVenta = productoObj.precio * cantidad;
+      const costoTotal = productoObj.costo * cantidad;
+      const gananciaBruta = totalVenta - costoTotal;
+
+      let comisionMonto = 0;
+      if(categoriaActual === 'dulces' && vendedor && vendedores[vendedor]) {
+        const porcentaje = vendedores[vendedor].comisionPorcentaje || 0;
+        comisionMonto = (totalVenta * porcentaje) / 100;
+        vendedores[vendedor].acumuladoComisiones += comisionMonto;
+      }
+
+      const gananciaNeta = gananciaBruta - comisionMonto;
+
+      const nuevaTx = {
+        id: 'tx_' + Date.now(),
+        fecha: new Date().toLocaleString(),
+        producto: productoObj.nombre,
+        cantidad,
+        vendedor: vendedor || 'DIRECTO',
+        sede: destino,
+        total: totalVenta,
+        comision: comisionMonto,
+        ganancia: gananciaNeta
+      };
+
+      BD_VENTAS[categoriaActual].unshift(nuevaTx);
+      guardarLocalStorage();
+      renderizarProductos();
+      renderizarVentas();
+      renderizarVendedoresLista();
+      renderizarClientesLista();
+
+      document.getElementById('vCantidad').value = '1';
+      if(document.getElementById('vUni')) document.getElementById('vUni').value = '';
+      alert(`¡TRANSACCIÓN EXITOSA!\nTOTAL: $${totalVenta.toLocaleString()}`);
+    }
+
+    function renderizarVentas() {
+      const tbody = document.getElementById('tablaVentas');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+
+      let ventasFiltradas = BD_VENTAS[categoriaActual] || [];
+      
+      if(categoriaActual === 'dulces') {
+        const filtroV = document.getElementById('fVendedor').value;
+        const filtroS = document.getElementById('fSede').value.toLowerCase();
+        
+        if(filtroV) ventasFiltradas = ventasFiltradas.filter(tx => tx.vendedor === filtroV);
+        if(filtroS) ventasFiltradas = ventasFiltradas.filter(tx => tx.sede.toLowerCase().includes(filtroS));
+      }
+
+      let totalV = 0, totalG = 0, totalC = 0, totalU = 0;
+
+      ventasFiltradas.forEach(tx => {
+        totalV += tx.total;
+        totalG += tx.ganancia;
+        totalC += tx.comision || 0;
+        totalU += tx.cantidad;
+
+        if(categoriaActual === 'dulces') {
+          tbody.innerHTML += `<tr>
+            <td>${tx.fecha}</td>
+            <td><strong>${tx.producto}</strong></td>
+            <td>${tx.cantidad}</td>
+            <td>${tx.vendedor}</td>
+            <td>${tx.sede}</td>
+            <td style="font-weight: 800;">$${tx.total.toLocaleString()}</td>
+            <td style="color: var(--warning);">$${(tx.comision || 0).toLocaleString()}</td>
+            <td style="color: var(--success); font-weight: 800;">$${tx.ganancia.toLocaleString()}</td>
+          </tr>`;
+        } else {
+          tbody.innerHTML += `<tr>
+            <td>${tx.fecha}</td>
+            <td><strong>${tx.producto}</strong></td>
+            <td>${tx.cantidad}</td>
+            <td>${tx.sede}</td>
+            <td style="font-weight: 800;">$${tx.total.toLocaleString()}</td>
+            <td style="color: var(--success); font-weight: 800;">$${tx.ganancia.toLocaleString()}</td>
+          </tr>`;
         }
+      });
 
-        function renderMetrics() {
-            let catData = db[currentCategory];
-            let totalSales = catData.sales.reduce((acc, s) => acc + s.total, 0);
-            let totalCommissions = catData.operators.reduce((acc, o) => acc + o.accumulated, 0);
-            let totalProfit = catData.sales.reduce((acc, s) => {
-                let prod = catData.products.find(p => p.name === s.productName);
-                let cost = prod ? prod.cost : 0;
-                return acc + ((s.priceUnit - cost) * s.qty) - s.commissionVal;
-            }, 0);
-            let totalUnits = catData.sales.reduce((acc, s) => acc + s.qty, 0);
+      document.getElementById('totalVentas').innerText = '$' + totalV.toLocaleString();
+      document.getElementById('totalGanancias').innerText = '$' + totalG.toLocaleString();
+      document.getElementById('totalComisiones').innerText = '$' + totalC.toLocaleString();
+      document.getElementById('totalUnidades').innerText = totalU.toLocaleString();
 
-            document.getElementById('metric-sales').innerText = `$${totalSales.toLocaleString()}`;
-            document.getElementById('metric-profit').innerText = `$${totalProfit.toLocaleString()}`;
-            document.getElementById('metric-commissions').innerText = `$${totalCommissions.toLocaleString()}`;
-            document.getElementById('metric-units').innerText = totalUnits;
+      actualizarGraficas();
+    }
+
+    function limpiarHistorial() {
+      if(confirm('¿Eliminar todos los registros de esta categoría?')) {
+        BD_VENTAS[categoriaActual] = [];
+        guardarLocalStorage();
+        renderizarVentas();
+      }
+    }
+
+    function exportarExcel() {
+      const ventas = BD_VENTAS[categoriaActual] || [];
+      if(ventas.length === 0) return alert('No hay registros para exportar.');
+      
+      let csv = 'FECHA,PRODUCTO,CANTIDAD,OPERADOR,DESTINO,TOTAL,COMISION,GANANCIA\n';
+      ventas.forEach(v => {
+        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor || 'DIRECTO'}","${v.sede}",${v.total},${v.comision || 0},${v.ganancia}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', `kosmik_hud_${categoriaActual}.csv`);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function enviarCuadreWhatsApp() {
+      const ventas = BD_VENTAS[categoriaActual] || [];
+      const totalV = ventas.reduce((acc, curr) => acc + curr.total, 0);
+      const totalG = ventas.reduce((acc, curr) => acc + curr.ganancia, 0);
+      const operador = document.getElementById('vUsuario').value || 'OPERADOR';
+
+      let mensaje = `*REPORTE TÁCTICO - KOSMIK ENTERPRISE* 🎮\n`;
+      mensaje += `• CATEGORÍA: ${categoriaActual.toUpperCase()}\n`;
+      mensaje += `• OPERADOR: ${operador}\n`;
+      mensaje += `• TOTAL VENTAS: $${totalV.toLocaleString()}\n`;
+      mensaje += `• GANANCIA NETA: $${totalG.toLocaleString()}\n`;
+      mensaje += `• TRANSACCIONES: ${ventas.length}\n`;
+
+      const urlWapp = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
+      window.open(urlWapp, '_blank');
+    }
+
+    function actualizarGraficas() {
+      const ctxV = document.getElementById('chartVendedores');
+      const ctxP = document.getElementById('chartProductos');
+      if(!ctxV || !ctxP) return;
+
+      const ventas = BD_VENTAS[categoriaActual] || [];
+
+      const ventasPorVendedor = {};
+      ventas.forEach(tx => {
+        const v = tx.vendedor || 'DIRECTO';
+        ventasPorVendedor[v] = (ventasPorVendedor[v] || 0) + tx.total;
+      });
+
+      if(chartV) chartV.destroy();
+      chartV = new Chart(ctxV, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(ventasPorVendedor),
+          datasets: [{
+            label: 'VENTAS ($)',
+            data: Object.values(ventasPorVendedor),
+            backgroundColor: '#facc15',
+            borderRadius: 4
+          }]
+        },
+        options: { 
+          responsive: true, 
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#a1a1aa', font: { family: 'Inter', size: 10 } } },
+            y: { ticks: { color: '#a1a1aa', font: { family: 'Inter', size: 10 } } }
+          }
         }
+      });
 
-        function renderInventory() {
-            const tbody = document.getElementById('inventory-table-body');
-            tbody.innerHTML = '';
-            let hasCritical = false;
+      const ventasPorProducto = {};
+      ventas.forEach(tx => {
+        ventasPorProducto[tx.producto] = (ventasPorProducto[tx.producto] || 0) + tx.cantidad;
+      });
 
-            db[currentCategory].products.forEach(p => {
-                if(p.stock <= 5) hasCritical = true;
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-800/40 hover:bg-slate-800/20">
-                        <td class="p-3 font-semibold text-slate-200">${p.name}</td>
-                        <td class="p-3 ${p.stock <= 5 ? 'text-red-400 font-bold' : 'text-slate-300'}">${p.stock} un.</td>
-                        <td class="p-3 text-yellow-400">$${p.price.toLocaleString()}</td>
-                        <td class="p-3 text-slate-400">$${p.cost.toLocaleString()}</td>
-                        <td class="p-3 text-right space-x-1">
-                            <button onclick="adjustStock(${p.id}, 1)" class="bg-slate-800 hover:bg-slate-700 text-yellow-400 px-2 py-1 rounded">+</button>
-                            <button onclick="adjustStock(${p.id}, -1)" class="bg-slate-800 hover:bg-slate-700 text-red-400 px-2 py-1 rounded">-</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            const alertBox = document.getElementById('stock-alert');
-            if(hasCritical) alertBox.classList.remove('hidden');
-            else alertBox.classList.add('hidden');
-        }
+      if(chartP) chartP.destroy();
+      chartP = new Chart(ctxP, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(ventasPorProducto),
+          datasets: [{
+            data: Object.values(ventasPorProducto),
+            backgroundColor: ['#facc15', '#22c55e', '#f59e0b', '#ef4444', '#a855f7']
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
 
-        function adjustStock(id, amount) {
-            let prod = db[currentCategory].products.find(p => p.id === id);
-            if(prod) {
-                prod.stock = Math.max(0, prod.stock + amount);
-                saveDB();
-                renderInventory();
-            }
-        }
+    async function consultarIA() {
+      const input = document.getElementById('aiPromptInput');
+      const caja = document.getElementById('aiResponseBox');
+      const prompt = input.value.trim();
+      if(!prompt) return alert('Escribe una consulta táctica.');
 
-        function renderSalesDropdowns() {
-            const prodSelect = document.getElementById('sale-product');
-            const opSelect = document.getElementById('sale-operator');
-            prodSelect.innerHTML = '';
-            opSelect.innerHTML = '';
+      caja.innerHTML = `> CONECTANDO CON LESTER AI...\n> ANALIZANDO DATOS DE ${categoriaActual.toUpperCase()}...`;
 
-            db[currentCategory].products.forEach(p => {
-                prodSelect.innerHTML += `<option value="${p.id}">${p.name} (Stock: ${p.stock} | $${p.price})</option>`;
-            });
+      if(!geminiApiKey) {
+        caja.innerHTML = `> [MODO SIMULACIÓN LESTER AI]\n> ANÁLISIS DE LA OPERACIÓN:\n- El flujo de caja es estable.\n- Revisa el almacén para evitar quiebres en artículos clave.\n- Mantén la presión en las zonas de alta conversión.`;
+        return;
+      }
 
-            db[currentCategory].operators.forEach(o => {
-                opSelect.innerHTML += `<option value="${o.name}">${o.name} (${o.zone})</option>`;
-            });
-        }
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Actúa como Lester Crest de GTA V, un estratega criminal y financiero analítico y directo. Responde de forma ejecutiva en español y estilo táctico a la consulta sobre el negocio de ${categoriaActual}: ${prompt}` }] }]
+          })
+        });
+        const data = await response.json();
+        const textoRespuesta = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar respuesta.';
+        caja.innerText = textoRespuesta;
+      } catch (err) {
+        caja.innerText = '> ERROR CRÍTICO DE CONEXIÓN CON LA API.';
+      }
+    }
 
-        function renderSalesTable() {
-            const tbody = document.getElementById('sales-table-body');
-            tbody.innerHTML = '';
-            db[currentCategory].sales.slice().reverse().forEach(s => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-800/40 hover:bg-slate-800/20">
-                        <td class="p-3 text-slate-400">${s.date}</td>
-                        <td class="p-3 font-semibold text-slate-200">${s.productName}</td>
-                        <td class="p-3 text-slate-300">${s.qty}</td>
-                        <td class="p-3 text-yellow-400">${s.operator}</td>
-                        <td class="p-3 text-slate-300">${s.destination}</td>
-                        <td class="p-3 text-emerald-400 font-bold">$${s.total.toLocaleString()}</td>
-                        <td class="p-3 text-blue-400">$${s.commissionVal.toLocaleString()}</td>
-                    </tr>
-                `;
-            });
-        }
+    function ejecutarPromptAccion(tipo) {
+      const inputsAccion = {
+        'diagnostico_financiero': 'Haz un diagnóstico financiero de ventas, costos y márgenes actuales.',
+        'proyecciones_metas': '¿Cómo va el cumplimiento de metas de los operadores?',
+        'calculadora_descuentos': '¿Es viable un descuento del 10% por volumen en artículos principales?',
+        'auditoria_comisiones': 'Realiza una auditoría de las comisiones acumuladas por los operadores.',
+        'ranking_vendedores': 'Muéstrame un ranking analítico del rendimiento de cada operador.',
+        'rendimiento_sedes': 'Analiza qué zonas presentan mejor desempeño comercial.',
+        'guiones_venta': 'Genera guiones de abordaje táctico para los clientes en campo.',
+        'analizar_stock': 'Analiza el almacén y dame alertas de reabastecimiento urgente.',
+        'promo_whatsapp': 'Redacta copys persuasivos para promocionar combos.',
+        'detector_anomalias': 'Busca anomalías o inconsistencias en los registros.'
+      };
 
-        function renderOperatorsTable() {
-            const tbody = document.getElementById('operators-table-body');
-            tbody.innerHTML = '';
-            db[currentCategory].operators.forEach(o => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-800/40 hover:bg-slate-800/20">
-                        <td class="p-3 font-semibold text-slate-200">${o.name}</td>
-                        <td class="p-3 text-slate-400">${o.zone}</td>
-                        <td class="p-3 text-yellow-400">${o.commission}%</td>
-                        <td class="p-3 text-blue-400 font-bold">$${o.accumulated.toLocaleString()}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="deleteOperator('${o.name}')" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
+      document.getElementById('aiPromptInput').value = inputsAccion[tipo] || '';
+      consultarIA();
+    }
 
-        function renderClientsTable() {
-            const tbody = document.getElementById('clients-table-body');
-            tbody.innerHTML = '';
-            db[currentCategory].clients.forEach((c, idx) => {
-                tbody.innerHTML += `
-                    <tr class="border-b border-slate-800/40 hover:bg-slate-800/20">
-                        <td class="p-3 font-semibold text-slate-200">${c.name}</td>
-                        <td class="p-3 text-slate-400">${c.address}</td>
-                        <td class="p-3 text-slate-300">${c.phone}</td>
-                        <td class="p-3 text-right">
-                            <button onclick="deleteClient(${idx})" class="text-red-400 hover:text-red-300"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        function initForms() {
-            document.getElementById('form-sale').addEventListener('submit', (e) => {
-                e.preventDefault();
-                let prodId = parseInt(document.getElementById('sale-product').value);
-                let qty = parseInt(document.getElementById('sale-qty').value);
-                let opName = document.getElementById('sale-operator').value;
-                let destination = document.getElementById('sale-destination').value || 'General';
-
-                let prod = db[currentCategory].products.find(p => p.id === prodId);
-                if(!prod || prod.stock < qty) {
-                    alert('Stock insuficiente en almacén.');
-                    return;
-                }
-
-                prod.stock -= qty;
-                let total = prod.price * qty;
-                let op = db[currentCategory].operators.find(o => o.name === opName);
-                let commVal = op ? (total * (op.commission / 100)) : 0;
-                if(op) op.accumulated += commVal;
-
-                db[currentCategory].sales.push({
-                    date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                    productName: prod.name,
-                    qty,
-                    priceUnit: prod.price,
-                    operator: opName,
-                    destination,
-                    total,
-                    commissionVal: commVal
-                });
-
-                saveDB();
-                renderAll();
-                e.target.reset();
-            });
-
-            document.getElementById('form-operator').addEventListener('submit', (e) => {
-                e.preventDefault();
-                let name = document.getElementById('op-name').value;
-                let zone = document.getElementById('op-zone').value;
-                let commission = parseFloat(document.getElementById('op-commission').value);
-
-                db[currentCategory].operators.push({ id: Date.now(), name, zone, commission, accumulated: 0 });
-                saveDB();
-                renderAll();
-                e.target.reset();
-            });
-
-            document.getElementById('form-client').addEventListener('submit', (e) => {
-                e.preventDefault();
-                let name = document.getElementById('cli-name').value;
-                let address = document.getElementById('cli-address').value;
-                let phone = document.getElementById('cli-phone').value;
-
-                db[currentCategory].clients.push({ name, address, phone });
-                saveDB();
-                renderAll();
-                e.target.reset();
-            });
-
-            document.getElementById('form-product').addEventListener('submit', (e) => {
-                e.preventDefault();
-                let name = document.getElementById('prod-name').value;
-                let stock = parseInt(document.getElementById('prod-stock').value);
-                let price = parseFloat(document.getElementById('prod-price').value);
-                let cost = parseFloat(document.getElementById('prod-cost').value);
-
-                db[currentCategory].products.push({ id: Date.now(), name, stock, price, cost });
-                saveDB();
-                renderAll();
-                e.target.reset();
-            });
-
-            document.getElementById('btn-clear-sales').addEventListener('click', () => {
-                if(confirm('¿Vaciar historial de transacciones de esta categoría?')) {
-                    db[currentCategory].sales = [];
-                    saveDB();
-                    renderAll();
-                }
-            });
-
-            document.getElementById('btn-liquidate').addEventListener('click', () => {
-                if(confirm('¿Liquidar todas las comisiones de la tripulación?')) {
-                    db[currentCategory].operators.forEach(o => o.accumulated = 0);
-                    saveDB();
-                    renderAll();
-                }
-            });
-
-            document.getElementById('btn-factory-reset').addEventListener('click', () => {
-                if(confirm('¿Restablecer de fábrica todos los datos? Se perderá la información actual.')) {
-                    localStorage.removeItem('kosmik_db_v3');
-                    location.reload();
-                }
-            });
-        }
-
-        function deleteOperator(name) {
-            db[currentCategory].operators = db[currentCategory].operators.filter(o => o.name !== name);
-            saveDB();
-            renderAll();
-        }
-
-        function deleteClient(idx) {
-            db[currentCategory].clients.splice(idx, 1);
-            saveDB();
-            renderAll();
-        }
-
-        function updateCharts() {
-            let catData = db[currentCategory];
-            
-            // Operadores Chart
-            let opNames = catData.operators.map(o => o.name);
-            let opSales = opNames.map(name => catData.sales.filter(s => s.operator === name).reduce((acc, s) => acc + s.total, 0));
-
-            const ctxOp = document.getElementById('chartOperators').getContext('2d');
-            if(chartOperatorsInstance) chartOperatorsInstance.destroy();
-            chartOperatorsInstance = new Chart(ctxOp, {
-                type: 'bar',
-                data: {
-                    labels: opNames,
-                    datasets: [{ label: 'Ventas ($)', data: opSales, backgroundColor: '#facc15' }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-            });
-
-            // Productos Chart
-            let prodNames = catData.products.map(p => p.name);
-            let prodUnits = prodNames.map(name => catData.sales.filter(s => s.productName === name).reduce((acc, s) => acc + s.qty, 0));
-
-            const ctxProd = document.getElementById('chartProducts').getContext('2d');
-            if(chartProductsInstance) chartProductsInstance.destroy();
-            chartProductsInstance = new Chart(ctxProd, {
-                type: 'doughnut',
-                data: {
-                    labels: prodNames,
-                    datasets: [{ data: prodUnits, backgroundColor: ['#facc15', '#3b82f6', '#10b981', '#ec4899', '#8b5cf6'] }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
-
-        function runLesterProtocol(type) {
-            const output = document.getElementById('lester-output');
-            let text = '';
-            if(type === 'diagnostico') {
-                text = `> [LESTER AI DIAGNÓSTICO]: Analizando categoría activa (${currentCategory}). Flujo de caja estable. Se recomienda auditar el stock crítico de artículos con menor rotación.`;
-            } else if(type === 'operaciones') {
-                text = `> [LESTER AI RITMO]: Las operaciones en Los Santos operan al 88 de eficiencia. Ninguna anomalía detectada en los puntos de despacho de la tripulación.`;
-            } else if(type === 'comisiones') {
-                text = `> [LESTER AI COMISIONES]: Cálculo de comisiones verificado. Revisa la pestaña Tripulación para proceder con las liquidaciones pendientes.`;
-            } else if(type === 'whatsapp') {
-                text = `> [LESTER AI COPY]: "¡Atención Los Santos! Nuevos suministros premium disponibles en ${currentCategory.toUpperCase()}. Entregas rápidas y discretas. Contacta a tu operador de confianza."`;
-            }
-            output.innerHTML += `<p class="text-emerald-400 mt-2">${text}</p>`;
-            output.scrollTop = output.scrollHeight;
-        }
-    </script>
+    function manejarEnterChat(e) {
+      if(e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        consultarIA();
+      }
+    }
+  </script>
 </body>
 </html>
