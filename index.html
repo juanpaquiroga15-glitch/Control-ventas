@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kosmik Enterprise - GTA V HUD Edition</title>
+  <title>Kosmik Enterprise - GTA V Cloud HUD Edition</title>
   
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -59,7 +59,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.03em; }
     body { background-color: var(--bg); color: var(--text-main); max-width: 1280px; margin: 0 auto; padding: 24px; transition: background-color 0.25s, color 0.25s; }
 
-    /* Estilo HUD de Pausa GTA V */
     .header-nav { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 18px 28px; border-radius: var(--radius); border-left: 6px solid var(--gta-yellow); border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 24px; box-shadow: var(--shadow); }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 900; font-size: 1.3rem; color: var(--gta-yellow); }
     .user-badge { display: flex; align-items: center; gap: 10px; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
@@ -99,14 +98,15 @@
     .chat-input-wrapper textarea { width: 100%; padding-right: 55px; resize: none; height: 75px; }
     .btn-send-whatsapp { position: absolute; right: 10px; bottom: 12px; background: var(--ai-color); color: white; border: none; width: 38px; height: 38px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
 
-    .btn { padding: 12px 18px; border-radius: var(--radius); border: none; font-weight: 800; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-transform: uppercase; }
+    .btn { padding: 10px 16px; border-radius: var(--radius); border: none; font-weight: 800; font-size: 0.78rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase; }
     .btn-primary { background: var(--gta-yellow); color: #000; }
     .btn-primary:hover { background: var(--gta-yellow-hover); }
     .btn-success { background: var(--success); color: white; }
     .btn-ai { background: var(--ai-color); color: white; }
     .btn-danger { background: var(--danger); color: white; }
     .btn-warning { background: var(--warning); color: #000; font-weight: 900; }
-    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 900; }
+    .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 900; padding: 12px; font-size: 0.85rem; }
+    .btn-stock { background: #27272a; color: var(--gta-yellow); border: 1px solid var(--border); padding: 4px 8px; font-weight: 900; }
 
     table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.8rem; }
@@ -205,7 +205,7 @@
           <label for="vVendedor">VENDEDOR ENCARGADO</label><select id="vVendedor"></select>
         </div>
       </div>
-      <button class="btn btn-success" style="width: 100%; margin-top: 16px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> CONFIRMAR TRANSACCIÓN</button>
+      <button class="btn btn-success" style="width: 100%; margin-top: 16px; padding: 12px;" onclick="registrarVenta()"><i class="fa-solid fa-check"></i> CONFIRMAR TRANSACCIÓN</button>
     </div>
 
     <!-- PANEL DE GRÁFICAS -->
@@ -240,7 +240,10 @@
   <!-- PESTAÑA 2: VENDEDORES -->
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
-      <h3><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 id="tituloVendedorCard" style="margin:0;"><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
+        <button class="btn btn-warning" id="btnCancelarEdicion" style="display:none;" onclick="cancelarEdicionVendedor()">CANCELAR EDICIÓN</button>
+      </div>
       <div class="form-grid">
         <div class="form-group"><label for="vendNombre">NOMBRE DEL OPERADOR</label><input type="text" id="vendNombre" placeholder="Ej: MICHAEL"></div>
         <div class="form-group"><label for="vendSede">ZONA HABITUAL</label><input type="text" id="vendSede" placeholder="Ej: JAVERIANA"></div>
@@ -249,26 +252,36 @@
       </div>
       <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarVendedor()"><i class="fa-solid fa-floppy-disk"></i> GUARDAR OPERADOR</button>
     </div>
-    <div class="card"><h3><i class="fa-solid fa-award"></i> CUMPLIMIENTO DE OBJETIVOS</h3><div id="listaVendedores"></div></div>
+    
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 style="margin:0;"><i class="fa-solid fa-award"></i> CUMPLIMIENTO DE OBJETIVOS</h3>
+        <button class="btn btn-warning" onclick="liquidarTodasComisiones()"><i class="fa-solid fa-hand-holding-dollar"></i> LIQUIDAR TODAS LAS COMISIONES</button>
+      </div>
+      <div id="listaVendedores"></div>
+    </div>
   </div>
 
   <!-- PESTAÑA 3: INVENTARIO -->
   <div id="tab-productos" class="tab-content">
     <div class="card">
-      <h3 id="tituloInvCard"><i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 id="tituloInvCard" style="margin:0;"><i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK</h3>
+        <button class="btn btn-warning" id="btnCancelarEdicionProd" style="display:none;" onclick="cancelarEdicionProducto()">CANCELAR EDICIÓN</button>
+      </div>
       <div class="form-grid" id="formProductoContainer">
         <div class="form-group full"><label for="pNombre">NOMBRE DEL ARTÍCULO / COMBO</label><input type="text" id="pNombre" placeholder="Ej: SNACK ESPECIAL"></div>
         <div class="form-group"><label for="pStock">STOCK INICIAL</label><input type="number" id="pStock" placeholder="0"></div>
         <div class="form-group"><label for="pPrecio">PRECIO DE VENTA ($)</label><input type="number" id="pPrecio" placeholder="0"></div>
         <div class="form-group"><label for="pCosto">COSTO DE ADQUISICIÓN ($)</label><input type="number" id="pCosto" placeholder="0"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-plus"></i> AÑADIR AL ALMACÉN</button>
+      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarProducto()"><i class="fa-solid fa-plus"></i> <span id="btnTxtProducto">AÑADIR AL ALMACÉN</span></button>
     </div>
     <div class="card">
       <h3><i class="fa-solid fa-clipboard-list"></i> INVENTARIO ACTIVO</h3>
       <div style="overflow-x: auto;">
         <table>
-          <thead><tr id="tablaProductosHeader"><th>ARTÍCULO</th><th>STOCK</th><th>PRECIO</th><th>COSTO</th><th>ACCIONES</th></tr></thead>
+          <thead><tr id="tablaProductosHeader"><th>ARTÍCULO</th><th>STOCK</th><th>PRECIO</th><th>COSTO</th><th>ACCIONES RÁPIDAS</th></tr></thead>
           <tbody id="tablaProductos"></tbody>
         </table>
       </div>
@@ -344,6 +357,7 @@
 
   <script>
     let categoriaActual = 'dulces';
+    let editandoProductoId = null;
 
     let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
@@ -411,6 +425,7 @@
       if(cat === 'huevos' && document.getElementById('btnCatHuevos')) document.getElementById('btnCatHuevos').classList.add('active');
       if(cat === 'vapes' && document.getElementById('btnCatVapes')) document.getElementById('btnCatVapes').classList.add('active');
 
+      cancelarEdicionProducto();
       actualizarUIReferenciasCategoria();
       renderizarProductos();
       renderizarVentas();
@@ -509,9 +524,54 @@
             badge.className = 'badge-status badge-online';
             badge.innerText = 'ONLINE';
           }
+          sincronizarDatosCloud();
         }
       } catch (e) {
         console.error("Error inicializando Firebase:", e);
+      }
+    }
+
+    // HOOKS DE SINCRONIZACIÓN EN TIEMPO REAL (FIREBASE CLOUD)
+    function sincronizarDatosCloud() {
+      if (!dbFirebase) return;
+
+      // Sincronizar Inventario
+      dbFirebase.collection('kosmik_cloud').doc('inventario').onSnapshot((doc) => {
+        if (doc.exists) {
+          BD_PRODUCTOS = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarProductos();
+        }
+      }, (err) => console.error("Error sincronizando inventario cloud:", err));
+
+      // Sincronizar Ventas
+      dbFirebase.collection('kosmik_cloud').doc('ventas').onSnapshot((doc) => {
+        if (doc.exists) {
+          BD_VENTAS = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarVentas();
+        }
+      }, (err) => console.error("Error sincronizando ventas cloud:", err));
+
+      // Sincronizar Vendedores
+      dbFirebase.collection('kosmik_cloud').doc('vendedores').onSnapshot((doc) => {
+        if (doc.exists) {
+          vendedores = doc.data();
+          guardarLocalStorageLocalOnly();
+          renderizarVendedoresSelect();
+          renderizarVendedoresLista();
+        }
+      }, (err) => console.error("Error sincronizando vendedores cloud:", err));
+    }
+
+    async function subirDatosCloud() {
+      if (!dbFirebase) return;
+      try {
+        await dbFirebase.collection('kosmik_cloud').doc('inventario').set(BD_PRODUCTOS);
+        await dbFirebase.collection('kosmik_cloud').doc('ventas').set(BD_VENTAS);
+        await dbFirebase.collection('kosmik_cloud').doc('vendedores').set(vendedores);
+      } catch (e) {
+        console.error("Error subiendo datos a la nube:", e);
       }
     }
 
@@ -523,10 +583,15 @@
       alert('API Key guardada correctamente.');
     }
 
-    function guardarLocalStorage() {
+    function guardarLocalStorageLocalOnly() {
       localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
       localStorage.setItem('cat_vends', JSON.stringify(vendedores));
       localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
+    }
+
+    function guardarLocalStorage() {
+      guardarLocalStorageLocalOnly();
+      subirDatosCloud();
     }
 
     function renderizarProductos() {
@@ -549,10 +614,19 @@
         let badgeStock = p.stock <= 5 ? `<span class="badge-status badge-offline" style="margin-left: 8px;">CRÍTICO (${p.stock})</span>` : p.stock;
         tablaProds.innerHTML += `<tr>
           <td><strong>${p.nombre}</strong></td>
-          <td>${badgeStock}</td>
+          <td>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span>${badgeStock}</span>
+              <button class="btn btn-stock" onclick="ajustarStock('${id}', -1)">-</button>
+              <button class="btn btn-stock" onclick="ajustarStock('${id}', 1)">+</button>
+            </div>
+          </td>
           <td>$${p.precio.toLocaleString()}</td>
           <td>$${p.costo.toLocaleString()}</td>
-          <td><button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.7rem;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td>
+          <td>
+            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.65rem;" onclick="prepararEdicionProducto('${id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.65rem;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
         </tr>`;
 
         if (p.stock <= 5) {
@@ -569,6 +643,41 @@
       }
     }
 
+    function ajustarStock(id, cambio) {
+      const prod = BD_PRODUCTOS[categoriaActual][id];
+      if (prod) {
+        prod.stock = Math.max(0, prod.stock + cambio);
+        guardarLocalStorage();
+        renderizarProductos();
+      }
+    }
+
+    function prepararEdicionProducto(id) {
+      const prod = BD_PRODUCTOS[categoriaActual][id];
+      if (!prod) return;
+      editandoProductoId = id;
+      document.getElementById('pNombre').value = prod.nombre;
+      document.getElementById('pStock').value = prod.stock;
+      document.getElementById('pPrecio').value = prod.precio;
+      document.getElementById('pCosto').value = prod.costo;
+
+      document.getElementById('tituloInvCard').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> EDITAR ARTÍCULO`;
+      document.getElementById('btnTxtProducto').innerText = 'ACTUALIZAR ARTÍCULO';
+      document.getElementById('btnCancelarEdicionProd').style.display = 'block';
+    }
+
+    function cancelarEdicionProducto() {
+      editandoProductoId = null;
+      document.getElementById('pNombre').value = '';
+      document.getElementById('pStock').value = '';
+      document.getElementById('pPrecio').value = '';
+      document.getElementById('pCosto').value = '';
+
+      document.getElementById('tituloInvCard').innerHTML = `<i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK`;
+      document.getElementById('btnTxtProducto').innerText = 'AÑADIR AL ALMACÉN';
+      document.getElementById('btnCancelarEdicionProd').style.display = 'none';
+    }
+
     function guardarProducto() {
       const nombre = document.getElementById('pNombre').value.trim();
       const stock = parseInt(document.getElementById('pStock').value);
@@ -576,20 +685,26 @@
       const costo = parseFloat(document.getElementById('pCosto').value);
 
       if(!nombre || isNaN(stock) || isNaN(precio) || isNaN(costo)) {
-        alert('Por favor completa todos los campos del producto correctamente.');
+        alert('Por favor completa todos los campos correctamente.');
         return;
       }
 
-      const id = 'prod_' + Date.now();
-      BD_PRODUCTOS[categoriaActual][id] = { nombre, stock, precio, costo };
+      if (editandoProductoId) {
+        BD_PRODUCTOS[categoriaActual][editandoProductoId] = { nombre, stock, precio, costo };
+        alert('¡Artículo actualizado con éxito!');
+        cancelarEdicionProducto();
+      } else {
+        const id = 'prod_' + Date.now();
+        BD_PRODUCTOS[categoriaActual][id] = { nombre, stock, precio, costo };
+        alert('¡Artículo añadido al almacén!');
+        document.getElementById('pNombre').value = '';
+        document.getElementById('pStock').value = '';
+        document.getElementById('pPrecio').value = '';
+        document.getElementById('pCosto').value = '';
+      }
+
       guardarLocalStorage();
       renderizarProductos();
-
-      document.getElementById('pNombre').value = '';
-      document.getElementById('pStock').value = '';
-      document.getElementById('pPrecio').value = '';
-      document.getElementById('pCosto').value = '';
-      alert('Artículo guardado exitosamente.');
     }
 
     function eliminarProducto(id) {
@@ -644,6 +759,28 @@
       alert('Operador guardado correctamente.');
     }
 
+    function liquidarComisionSocio(nombre) {
+      if (confirm(`¿Liquidar y vaciar las comisiones acumuladas de ${nombre}?`)) {
+        if (vendedores[nombre]) {
+          vendedores[nombre].acumuladoComisiones = 0;
+          guardarLocalStorage();
+          renderizarVendedoresLista();
+          alert(`Comisión de ${nombre} liquidada con éxito.`);
+        }
+      }
+    }
+
+    function liquidarTodasComisiones() {
+      if (confirm('¿Estás seguro de liquidar y vaciar las comisiones de TODOS los operadores?')) {
+        Object.keys(vendedores).forEach(nombre => {
+          vendedores[nombre].acumuladoComisiones = 0;
+        });
+        guardarLocalStorage();
+        renderizarVendedoresLista();
+        alert('Todas las comisiones han sido liquidadas.');
+      }
+    }
+
     function renderizarVendedoresLista() {
       const container = document.getElementById('listaVendedores');
       if(!container) return;
@@ -669,9 +806,9 @@
             <div class="progress-bar-bg">
               <div class="progress-bar-fill" style="width: ${porcentajeProgreso}%;"></div>
             </div>
-            <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between;">
-              <span>COMISIÓN: ${v.comisionPorcentaje}%</span>
-              <span style="color: var(--warning); font-weight: 800;">ACUMULADO: $${v.acumuladoComisiones.toLocaleString()}</span>
+            <div style="margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <span>COMISIÓN: ${v.comisionPorcentaje}% | <strong style="color: var(--warning);">ACUMULADO: $${v.acumuladoComisiones.toLocaleString()}</strong></span>
+              <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="liquidarComisionSocio('${nombre}')"><i class="fa-solid fa-check"></i> LIQUIDAR PAGO</button>
             </div>
           </div>
         `;
