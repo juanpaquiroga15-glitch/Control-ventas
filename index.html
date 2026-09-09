@@ -697,6 +697,18 @@
       alert('Producto guardado exitosamente en el inventario corporativo.');
     }
 
+    function cambiarStock(id, cantidadCambio) {
+      const prodsActuales = BD_PRODUCTOS[categoriaActual] || {};
+      if (!prodsActuales[id]) return;
+
+      prodsActuales[id].stock += cantidadCambio;
+      if (prodsActuales[id].stock < 0) prodsActuales[id].stock = 0; // Evita stock negativo
+
+      localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
+      sincronizarHaciaCloud();
+      renderizarProductos();
+    }
+
     function eliminarProducto(id) {
       if (confirm('¿Estás seguro de eliminar este producto del inventario?')) {
         delete BD_PRODUCTOS[categoriaActual][id];
@@ -724,7 +736,23 @@
         sel.innerHTML += `<option value="${id}">${p.nombre} - $${p.precio.toLocaleString()} [Stock: ${p.stock}]</option>`;
         
         const comText = categoriaActual === 'dulces' ? '25% (Automático)' : 'N/A (Sin Vendedor)';
-        tbody.innerHTML += `<tr><td>${p.nombre}</td><td>${p.stock} unid.</td><td>$${p.precio.toLocaleString()}</td><td>$${p.costo.toLocaleString()}</td><td>${comText}</td><td><button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button></td></tr>`;
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.nombre}</td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn btn-danger" style="padding: 2px 8px; font-size: 0.8rem;" onclick="cambiarStock('${id}', -1)" title="Restar 1 unidad">-</button>
+                <strong style="min-width: 30px; text-align: center;">${p.stock}</strong>
+                <button class="btn btn-success" style="padding: 2px 8px; font-size: 0.8rem;" onclick="cambiarStock('${id}', 1)" title="Sumar 1 unidad">+</button>
+              </div>
+            </td>
+            <td>$${p.precio.toLocaleString()}</td>
+            <td>$${p.costo.toLocaleString()}</td>
+            <td>${comText}</td>
+            <td>
+              <button class="btn btn-danger" style="padding:5px 10px;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button>
+            </td>
+          </tr>`;
       });
 
       if (banner && listaA) {
@@ -988,7 +1016,6 @@
 
       box.innerText = "🤖 Consultando con Google Gemini...";
       try {
-        // ACTUALIZADO CON LA SERIE 3 ESTABLE (gemini-3.7-flash)
         const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${geminiApiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
