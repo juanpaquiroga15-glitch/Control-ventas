@@ -202,7 +202,6 @@
         <div class="form-group full"><label for="vProducto">ARTÍCULO / COMBO</label><select id="vProducto"></select></div>
         <div class="form-group"><label for="vCantidad">CANTIDAD</label><input type="number" id="vCantidad" value="1" min="1"></div>
         
-        <!-- Campo dinámico: Ubicación (para dulces) o Cliente/Casa (para huevos y vapes) -->
         <div class="form-group" id="grupoUbicacionContainer">
           <label id="labelUbicacionInput" for="vUni">UBICACIÓN / ZONA</label>
           <input type="text" id="vUni" placeholder="Ej: JAVERIANA / ROSARIO">
@@ -272,17 +271,20 @@
     </div>
   </div>
 
-  <!-- PESTAÑA NUEVA: CLIENTES & RESTOCK DOMICILIO -->
+  <!-- PESTAÑA: CLIENTES & RESTOCK DOMICILIO -->
   <div id="tab-clientes" class="tab-content">
     <div class="card">
-      <h3><i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK DE HUEVOS Y VAPES)</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 id="tituloClienteCard" style="margin:0;"><i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK)</h3>
+        <button class="btn btn-warning" id="btnCancelarEdicionCliente" style="display:none;" onclick="cancelarEdicionCliente()">CANCELAR EDICIÓN</button>
+      </div>
       <div class="form-grid">
         <div class="form-group"><label for="cliNombre">NOMBRE DEL CLIENTE</label><input type="text" id="cliNombre" placeholder="Ej: DOÑA MARÍA"></div>
         <div class="form-group"><label for="cliDireccion">DIRECCIÓN / CASA / ZONA</label><input type="text" id="cliDireccion" placeholder="Ej: CALLE 100 #15-40 (CASA AZUL)"></div>
         <div class="form-group"><label for="cliTelefono">TELÉFONO (WHATSAPP)</label><input type="text" id="cliTelefono" placeholder="Ej: 3101234567"></div>
         <div class="form-group"><label for="cliFrecuencia">FRECUENCIA APROX. DE COMPRA (DÍAS)</label><input type="number" id="cliFrecuencia" value="7" min="1"></div>
       </div>
-      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarCliente()"><i class="fa-solid fa-user-plus"></i> GUARDAR CLIENTE EN RUTA</button>
+      <button class="btn btn-primary" style="margin-top: 16px; width: 100%;" onclick="guardarCliente()"><i class="fa-solid fa-user-plus"></i> <span id="btnTxtCliente">GUARDAR CLIENTE EN RUTA</span></button>
     </div>
 
     <div class="card">
@@ -387,6 +389,7 @@
   <script>
     let categoriaActual = 'dulces';
     let editandoProductoId = null;
+    let editandoClienteKey = null;
 
     let firebaseConfig = JSON.parse(localStorage.getItem('kosmik_fb_config')) || null;
     let geminiApiKey = localStorage.getItem('kosmik_ai_key') || '';
@@ -461,6 +464,7 @@
       if(cat === 'vapes' && document.getElementById('btnCatVapes')) document.getElementById('btnCatVapes').classList.add('active');
 
       cancelarEdicionProducto();
+      cancelarEdicionCliente();
       actualizarUIReferenciasCategoria();
       renderizarProductos();
       renderizarVentas();
@@ -500,7 +504,6 @@
         if(aiGridV) aiGridV.style.display = 'grid';
         if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>ZONA</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th>';
       } else {
-        // Para Huevos y Vapes activamos la gestión de clientes/casas para restock
         if(tabVend) tabVend.style.display = 'none';
         if(tabCli) tabCli.style.display = 'flex';
         if(grupoVend) grupoVend.style.display = 'none';
@@ -658,6 +661,32 @@
       });
     }
 
+    function prepararEdicionCliente(nombre) {
+      const c = clientesRestock[nombre];
+      if(!c) return;
+      editandoClienteKey = nombre;
+      document.getElementById('cliNombre').value = nombre;
+      document.getElementById('cliDireccion').value = c.direccion;
+      document.getElementById('cliTelefono').value = c.telefono;
+      document.getElementById('cliFrecuencia').value = c.frecuenciaDias;
+
+      document.getElementById('tituloClienteCard').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> EDITAR CLIENTE / CASA`;
+      document.getElementById('btnTxtCliente').innerText = 'ACTUALIZAR CLIENTE';
+      document.getElementById('btnCancelarEdicionCliente').style.display = 'block';
+    }
+
+    function cancelarEdicionCliente() {
+      editandoClienteKey = null;
+      document.getElementById('cliNombre').value = '';
+      document.getElementById('cliDireccion').value = '';
+      document.getElementById('cliTelefono').value = '';
+      document.getElementById('cliFrecuencia').value = '7';
+
+      document.getElementById('tituloClienteCard').innerHTML = `<i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK)`;
+      document.getElementById('btnTxtCliente').innerText = 'GUARDAR CLIENTE EN RUTA';
+      document.getElementById('btnCancelarEdicionCliente').style.display = 'none';
+    }
+
     function guardarCliente() {
       const nombre = document.getElementById('cliNombre').value.trim().toUpperCase();
       const direccion = document.getElementById('cliDireccion').value.trim().toUpperCase();
@@ -669,21 +698,43 @@
         return;
       }
 
-      clientesRestock[nombre] = {
-        direccion,
-        telefono,
-        frecuenciaDias,
-        ultimaCompra: new Date().toLocaleDateString()
-      };
+      if (editandoClienteKey) {
+        if (editandoClienteKey !== nombre) {
+          delete clientesRestock[editandoClienteKey];
+        }
+        clientesRestock[nombre] = {
+          direccion,
+          telefono,
+          frecuenciaDias,
+          ultimaCompra: clientesRestock[editandoClienteKey]?.ultimaCompra || new Date().toLocaleDateString()
+        };
+        alert('¡Cliente actualizado con éxito!');
+        cancelarEdicionCliente();
+      } else {
+        clientesRestock[nombre] = {
+          direccion,
+          telefono,
+          frecuenciaDias,
+          ultimaCompra: new Date().toLocaleDateString()
+        };
+        alert('¡Cliente registrado en la ruta de restock!');
+        document.getElementById('cliNombre').value = '';
+        document.getElementById('cliDireccion').value = '';
+        document.getElementById('cliTelefono').value = '';
+      }
 
       guardarLocalStorage();
       renderizarClientesSelect();
       renderizarClientesLista();
+    }
 
-      document.getElementById('cliNombre').value = '';
-      document.getElementById('cliDireccion').value = '';
-      document.getElementById('cliTelefono').value = '';
-      alert('¡Cliente registrado en la ruta de restock!');
+    function eliminarCliente(nombre) {
+      if(confirm(`¿Eliminar a ${nombre} de la ruta de restock?`)) {
+        delete clientesRestock[nombre];
+        guardarLocalStorage();
+        renderizarClientesSelect();
+        renderizarClientesLista();
+      }
     }
 
     function renderizarClientesLista() {
@@ -706,7 +757,11 @@
             </div>
             <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
               <span style="font-size: 0.75rem; color: var(--text-muted);">TEL: ${c.telefono || 'N/A'}</span>
-              <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> AVISAR RESTOCK WHATSAPP</button>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> RESTOCK WAPP</button>
+                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="prepararEdicionCliente('${nombre}')"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="eliminarCliente('${nombre}')"><i class="fa-solid fa-trash"></i></button>
+              </div>
             </div>
           </div>
         `;
@@ -955,7 +1010,6 @@
           alert('Selecciona un cliente destino para el restock.');
           return;
         }
-        // Actualizar la última fecha de compra del cliente
         if(clientesRestock[destino]) {
           clientesRestock[destino].ultimaCompra = new Date().toLocaleDateString();
         }
