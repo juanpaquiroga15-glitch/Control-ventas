@@ -107,7 +107,6 @@
     .btn-warning { background: var(--warning); color: #000; font-weight: 900; }
     .btn-wapp { background: var(--whatsapp); color: white; width: 100%; margin-top: 18px; font-weight: 900; padding: 12px; font-size: 0.85rem; }
     .btn-stock { background: #27272a; color: var(--gta-yellow); border: 1px solid var(--border); padding: 4px 8px; font-weight: 900; }
-    .btn-gps { background: #3b82f6; color: white; }
 
     table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 12px; }
     th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; font-size: 0.8rem; }
@@ -115,16 +114,13 @@
 
     .seller-card, .client-card { border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); margin-bottom: 12px; background: var(--table-header); border-left: 3px solid var(--gta-yellow); }
     .client-card.vencido { border-left-color: var(--danger); background: #1c1010; }
-    .progress-bar-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
-    .progress-bar-fill { background: var(--success); height: 100%; width: 0%; border-radius: 4px; }
-
+    
     .ai-category-title { font-size: 0.75rem; font-weight: 900; text-transform: uppercase; color: var(--ai-color); margin: 18px 0 10px 0; border-left: 3px solid var(--ai-color); padding-left: 8px; }
     .quick-ai-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin-bottom: 18px; }
     .quick-ai-btn { background: var(--card-bg); border: 1px solid rgba(168, 85, 247, 0.3); color: var(--text-main); padding: 10px 14px; border-radius: var(--radius); font-size: 0.78rem; font-weight: 700; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 8px; }
     .ai-response-box { background: var(--table-header); border-left: 4px solid var(--ai-color); padding: 18px; border-radius: var(--radius); margin-top: 16px; line-height: 1.6; font-size: 0.88rem; white-space: pre-wrap; font-family: monospace; }
 
     .alert-banner { background-color: #1c150c; color: #fde68a; border: 1px solid #78350f; border-left: 6px solid var(--warning); padding: 14px 18px; border-radius: var(--radius); margin-bottom: 24px; display: none; }
-
     .badge-status { display: inline-block; padding: 4px 8px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; }
     .badge-offline { background: #7f1d1d; color: #fca5a5; }
     .badge-online { background: #064e3b; color: #6ee7b7; }
@@ -253,9 +249,7 @@
   <!-- PESTAÑA 2: VENDEDORES -->
   <div id="tab-vendedores" class="tab-content">
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-        <h3 style="margin:0;"><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
-      </div>
+      <h3 style="margin:0; margin-bottom: 18px;"><i class="fa-solid fa-user-plus"></i> REGISTRAR / EDITAR OPERADOR</h3>
       <div class="form-grid">
         <div class="form-group"><label for="vendNombre">NOMBRE DEL OPERADOR</label><input type="text" id="vendNombre" placeholder="Ej: MICHAEL"></div>
         <div class="form-group"><label for="vendSede">ZONA HABITUAL</label><input type="text" id="vendSede" placeholder="Ej: JAVERIANA"></div>
@@ -433,7 +427,8 @@
     };
 
     let BD_VENTAS = JSON.parse(localStorage.getItem('kosmik_bd_vnts')) || { dulces: [], huevos: [], vapes: [] };
-    let chartV = null, chartP = null;
+    let chartVendedoresInstancia = null;
+    let chartProductosInstancia = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       try {
@@ -468,7 +463,7 @@
         renderizarVentas();
         renderizarBalanceGeneral();
       } catch (err) {
-        console.error("Error en arranque:", err);
+        console.error("Error en arranque detallado:", err);
       }
     });
 
@@ -478,91 +473,564 @@
       if(cat === 'dulces' && document.getElementById('btnCatDulces')) document.getElementById('btnCatDulces').classList.add('active');
       if(cat === 'huevos' && document.getElementById('btnCatHuevos')) document.getElementById('btnCatHuevos').classList.add('active');
       if(cat === 'vapes' && document.getElementById('btnCatVapes')) document.getElementById('btnCatVapes').classList.add('active');
-
-      cancelarEdicionProducto();
-      cancelarEdicionCliente();
       actualizarUIReferenciasCategoria();
       renderizarProductos();
       renderizarVentas();
-      renderizarVendedoresLista();
-      renderizarClientesLista();
     }
 
     function actualizarUIReferenciasCategoria() {
-      const iconos = { dulces: '🍬 DULCES', huevos: '🥚 HUEVOS', vapes: '💨 VAPES' };
-      const tituloReg = document.getElementById('tituloRegistroVenta');
-      const tituloIA = document.getElementById('tituloIAHeader');
-      if(tituloReg) tituloReg.innerHTML = `<i class="fa-solid fa-cart-shopping"></i> REGISTRAR TRANSACCIÓN (${iconos[categoriaActual]})`;
-      if(tituloIA) tituloIA.innerHTML = `<i class="fa-solid fa-terminal" style="color: var(--ai-color);"></i> LESTER AI COPILOT - ${iconos[categoriaActual]}`;
-
-      const tabVend = document.getElementById('tabBtnVendedores');
-      const tabCli = document.getElementById('tabBtnClientes');
-      const grupoVend = document.getElementById('grupoVendedorVenta');
-      const grupoUbica = document.getElementById('grupoUbicacionContainer');
-      const grupoCliente = document.getElementById('grupoClienteContainer');
+      const titReg = document.getElementById('tituloRegistroVenta');
+      if(titReg) {
+        if(categoriaActual === 'dulces') titReg.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> REGISTRAR TRANSACCIÓN (🍬 DULCES)';
+        if(categoriaActual === 'huevos') titReg.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> REGISTRAR TRANSACCIÓN (🥚 HUEVOS)';
+        if(categoriaActual === 'vapes') titReg.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> REGISTRAR TRANSACCIÓN (💨 VAPES)';
+      }
+      const btnVendedoresTab = document.getElementById('tabBtnVendedores');
       const cardComs = document.getElementById('cardComisionesContainer');
-      const cardGrafV = document.getElementById('cardGraficaVendedores');
-      const filtroVContainer = document.getElementById('filtroVendedorContainer');
-      const aiTitleV = document.getElementById('aiCatVendedoresTitle');
-      const aiGridV = document.getElementById('aiCatVendedoresGrid');
-      const thHeaders = document.getElementById('tablaVentasHeaders');
+      const aiVendsTitle = document.getElementById('aiCatVendedoresTitle');
+      const aiVendsGrid = document.getElementById('aiCatVendedoresGrid');
+      const filtroVendedoresDiv = document.getElementById('filtroVendedorContainer');
+      const cardGrafVends = document.getElementById('cardGraficaVendedores');
+      const grupoVendVenta = document.getElementById('grupoVendedorVenta');
+      const grupoCliContainer = document.getElementById('grupoClienteContainer');
+      const grupoUniContainer = document.getElementById('grupoUbicacionContainer');
 
-      if (categoriaActual === 'dulces') {
-        if(tabVend) tabVend.style.display = 'flex';
-        if(tabCli) tabCli.style.display = 'none';
-        if(grupoVend) grupoVend.style.display = 'flex';
-        if(grupoUbica) grupoUbica.style.display = 'flex';
-        if(grupoCliente) grupoCliente.style.display = 'none';
-        if(cardComs) cardComs.style.display = 'block';
-        if(cardGrafV) cardGrafV.style.display = 'block';
-        if(filtroVContainer) filtroVContainer.style.display = 'grid';
-        if(aiTitleV) aiTitleV.style.display = 'block';
-        if(aiGridV) aiGridV.style.display = 'grid';
-        if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>OPERADOR</th><th>ZONA</th><th>TOTAL VENTA</th><th>COMISIÓN</th><th>GANANCIA NETA</th>';
-      } else {
-        if(tabVend) tabVend.style.display = 'none';
-        if(tabCli) tabCli.style.display = 'flex';
-        if(grupoVend) grupoVend.style.display = 'none';
-        if(grupoUbica) grupoUbica.style.display = 'none';
-        if(grupoCliente) grupoCliente.style.display = 'flex';
+      if(categoriaActual === 'huevos') {
+        if(btnVendedoresTab) btnVendedoresTab.style.display = 'none';
         if(cardComs) cardComs.style.display = 'none';
-        if(cardGrafV) cardGrafV.style.display = 'none';
-        if(filtroVContainer) filtroVContainer.style.display = 'none';
-        if(aiTitleV) aiTitleV.style.display = 'none';
-        if(aiGridV) aiGridV.style.display = 'none';
-        if(thHeaders) thHeaders.innerHTML = '<th>FECHA / HORA</th><th>PRODUCTO</th><th>CANT</th><th>CLIENTE / CASA</th><th>TOTAL VENTA</th><th>GANANCIA NETA</th>';
-        
-        const activeTab = document.querySelector('.tab-content.active');
-        if(activeTab && (activeTab.id === 'tab-vendedores')) {
-          cambiarPestana('ventas');
-        }
+        if(aiVendsTitle) aiVendsTitle.style.display = 'none';
+        if(aiVendsGrid) aiVendsGrid.style.display = 'none';
+        if(filtroVendedoresDiv) filtroVendedoresDiv.style.display = 'none';
+        if(cardGrafVends) cardGrafVends.style.display = 'none';
+        if(grupoVendVenta) grupoVendVenta.style.display = 'none';
+        if(grupoCliContainer) grupoCliContainer.style.display = 'block';
+        if(grupoUniContainer) grupoUniContainer.style.display = 'none';
+      } else {
+        if(btnVendedoresTab) btnVendedoresTab.style.display = 'flex';
+        if(cardComs) cardComs.style.display = 'block';
+        if(aiVendsTitle) aiVendsTitle.style.display = 'block';
+        if(aiVendsGrid) aiVendsGrid.style.display = 'grid';
+        if(filtroVendedoresDiv) filtroVendedoresDiv.style.display = 'grid';
+        if(cardGrafVends) cardGrafVends.style.display = 'block';
+        if(grupoVendVenta) grupoVendVenta.style.display = 'block';
+        if(grupoCliContainer) grupoCliContainer.style.display = 'none';
+        if(grupoUniContainer) grupoUniContainer.style.display = 'block';
+      }
+      renderizarProductosSelectVenta();
+      verificarStockCriticoGlobal();
+    }
+
+    function cambiarPestana(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-tabs .tab-btn').forEach(el => el.classList.remove('active'));
+      const target = document.getElementById('tab-' + tabId);
+      if(target) target.classList.add('active');
+      event.currentTarget.classList.add('active');
+      if(tabId === 'ventas' || tabId === 'balance') {
+        renderizarVentas();
+        renderizarBalanceGeneral();
       }
     }
 
     function toggleDarkMode() {
-      const isDark = document.body.classList.toggle('dark-mode');
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
       localStorage.setItem('theme_dark', isDark);
       const btnT = document.getElementById('btnTheme');
-      if(btnT) btnT.innerHTML = isDark ? '<i class="fa-solid fa-circle-half-stroke"></i> HUD CLARO' : '<i class="fa-solid fa-circle-half-stroke"></i> HUD OSCURO';
-      actualizarGraficas();
+      if(btnT) {
+        btnT.innerHTML = isDark ? '<i class="fa-solid fa-circle-half-stroke"></i> HUD CLARO' : '<i class="fa-solid fa-circle-half-stroke"></i> HUD OSCURO';
+      }
     }
 
-    function cambiarPestana(p) {
-      if (p === 'vendedores' && categoriaActual !== 'dulces') return;
-      if (p === 'clientes' && categoriaActual === 'dulces') return;
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-
-      const tabs = ['ventas', 'vendedores', 'clientes', 'productos', 'balance', 'ia', 'ajustes'];
-      const idx = tabs.indexOf(p);
-      if(idx !== -1) {
-        const btnList = document.querySelectorAll('.tab-btn');
-        if(btnList[idx]) btnList[idx].classList.add('active');
-        const tabTarget = document.getElementById(`tab-${p}`);
-        if(tabTarget) tabTarget.classList.add('active');
+    function renderizarProductosSelectVenta() {
+      const select = document.getElementById('vProducto');
+      if(!select) return;
+      select.innerHTML = '';
+      const prods = BD_PRODUCTOS[categoriaActual] || {};
+      for(let id in prods) {
+        const p = prods[id];
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = `${p.nombre} - Stock: ${p.stock} ($${p.precio})`;
+        select.appendChild(opt);
       }
-      if(p === 'ventas') actualizarGraficas();
-      if(p === 'balance') renderizarBalanceGeneral();
+    }
+
+    function renderizarVendedoresSelect() {
+      const select = document.getElementById('vVendedor');
+      const selectFiltro = document.getElementById('fVendedor');
+      if(!select) return;
+      select.innerHTML = '';
+      if(selectFiltro) selectFiltro.innerHTML = '<option value="">TODOS LOS OPERADORES</option>';
+      for(let v in vendedores) {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+        if(selectFiltro) {
+          const optF = document.createElement('option');
+          optF.value = v;
+          optF.textContent = v;
+          selectFiltro.appendChild(optF);
+        }
+      }
+    }
+
+    function renderizarClientesSelect() {
+      const select = document.getElementById('vClienteSelect');
+      if(!select) return;
+      select.innerHTML = '';
+      for(let c in clientesRestock) {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.textContent = `${c} (${clientesRestock[c].direccion})`;
+        select.appendChild(opt);
+      }
+    }
+
+    function renderizarProductos() {
+      const tbody = document.getElementById('tablaProductos');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+      const prods = BD_PRODUCTOS[categoriaActual] || {};
+      for(let id in prods) {
+        const p = prods[id];
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${p.nombre}</strong></td>
+          <td><span style="color: ${p.stock <= 5 ? 'var(--danger)' : 'inherit'}; font-weight:800;">${p.stock}</span></td>
+          <td>$${p.precio.toLocaleString()}</td>
+          <td>$${p.costo.toLocaleString()}</td>
+          <td>
+            <button class="btn btn-stock" onclick="modificarStockRapido('${id}', 1)">+</button>
+            <button class="btn btn-stock" onclick="modificarStockRapido('${id}', -1)">-</button>
+            <button class="btn btn-warning" style="padding: 4px 8px; font-size: 0.7rem;" onclick="editarProducto('${id}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      }
+      renderizarProductosSelectVenta();
+      verificarStockCriticoGlobal();
+    }
+
+    function modificarStockRapido(id, delta) {
+      if(BD_PRODUCTOS[categoriaActual] && BD_PRODUCTOS[categoriaActual][id]) {
+        BD_PRODUCTOS[categoriaActual][id].stock += delta;
+        if(BD_PRODUCTOS[categoriaActual][id].stock < 0) BD_PRODUCTOS[categoriaActual][id].stock = 0;
+        guardarLocalStorageTodo();
+        renderizarProductos();
+      }
+    }
+
+    function guardarProducto() {
+      const nombre = document.getElementById('pNombre').value.trim();
+      const stock = parseInt(document.getElementById('pStock').value) || 0;
+      const precio = parseFloat(document.getElementById('pPrecio').value) || 0;
+      const costo = parseFloat(document.getElementById('pCosto').value) || 0;
+
+      if(!nombre) { alert("Ingresa el nombre del artículo."); return; }
+
+      if(editandoProductoId) {
+        BD_PRODUCTOS[categoriaActual][editandoProductoId] = { nombre, stock, precio, costo };
+        editandoProductoId = null;
+        document.getElementById('btnTxtProducto').textContent = "AÑADIR AL ALMACÉN";
+        document.getElementById('tituloInvCard').innerHTML = '<i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK';
+        document.getElementById('btnCancelarEdicionProd').style.display = 'none';
+      } else {
+        const newId = 'prod_' + Date.now();
+        if(!BD_PRODUCTOS[categoriaActual]) BD_PRODUCTOS[categoriaActual] = {};
+        BD_PRODUCTOS[categoriaActual][newId] = { nombre, stock, precio, costo };
+      }
+
+      document.getElementById('pNombre').value = '';
+      document.getElementById('pStock').value = '';
+      document.getElementById('pPrecio').value = '';
+      document.getElementById('pCosto').value = '';
+
+      guardarLocalStorageTodo();
+      renderizarProductos();
+    }
+
+    function editarProducto(id) {
+      const p = BD_PRODUCTOS[categoriaActual][id];
+      if(!p) return;
+      document.getElementById('pNombre').value = p.nombre;
+      document.getElementById('pStock').value = p.stock;
+      document.getElementById('pPrecio').value = p.precio;
+      document.getElementById('pCosto').value = p.costo;
+      editandoProductoId = id;
+      document.getElementById('btnTxtProducto').textContent = "ACTUALIZAR ARTÍCULO";
+      document.getElementById('tituloInvCard').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> EDITAR ARTÍCULO';
+      document.getElementById('btnCancelarEdicionProd').style.display = 'inline-block';
+    }
+
+    function cancelarEdicionProducto() {
+      editandoProductoId = null;
+      document.getElementById('pNombre').value = '';
+      document.getElementById('pStock').value = '';
+      document.getElementById('pPrecio').value = '';
+      document.getElementById('pCosto').value = '';
+      document.getElementById('btnTxtProducto').textContent = "AÑADIR AL ALMACÉN";
+      document.getElementById('tituloInvCard').innerHTML = '<i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK';
+      document.getElementById('btnCancelarEdicionProd').style.display = 'none';
+    }
+
+    function eliminarProducto(id) {
+      if(confirm("¿Estás seguro de eliminar este artículo del almacén?")) {
+        delete BD_PRODUCTOS[categoriaActual][id];
+        guardarLocalStorageTodo();
+        renderizarProductos();
+      }
+    }
+
+    function registrarVenta() {
+      const prodId = document.getElementById('vProducto').value;
+      const cantidad = parseInt(document.getElementById('vCantidad').value) || 1;
+      const operadorInput = document.getElementById('vUsuario').value.trim() || 'FRANKLIN';
+      const vendedor = categoriaActual === 'huevos' ? 'SISTEMA' : document.getElementById('vVendedor').value;
+      const zonaCliente = categoriaActual === 'huevos' ? document.getElementById('vClienteSelect').value : (document.getElementById('vUni').value.trim() || 'GENERAL');
+
+      if(!prodId || !BD_PRODUCTOS[categoriaActual][prodId]) {
+        alert("Selecciona un producto válido.");
+        return;
+      }
+
+      const pObj = BD_PRODUCTOS[categoriaActual][prodId];
+      if(pObj.stock < cantidad) {
+        alert("¡Stock insuficiente en el almacén!");
+        return;
+      }
+
+      pObj.stock -= cantidad;
+
+      const totalVenta = pObj.precio * cantidad;
+      const costoTotal = pObj.costo * cantidad;
+      let comisionMonto = 0;
+
+      if(categoriaActual !== 'huevos' && vendedores[vendedor]) {
+        const porcentaje = vendedores[vendedor].comisionPorcentaje || 0;
+        comisionMonto = (totalVenta * porcentaje) / 100;
+        vendedores[vendedor].acumuladoComisiones = (vendedores[vendedor].acumuladoComisiones || 0) + comisionMonto;
+      }
+
+      const gananciaNeta = (totalVenta - costoTotal) - comisionMonto;
+
+      const ventaRecord = {
+        fecha: new Date().toLocaleString(),
+        producto: pObj.nombre,
+        cantidad: cantidad,
+        operador: operadorInput,
+        vendedorAsignado: vendedor,
+        destino: zonaCliente,
+        total: totalVenta,
+        comision: comisionMonto,
+        ganancia: gananciaNeta
+      };
+
+      if(!BD_VENTAS[categoriaActual]) BD_VENTAS[categoriaActual] = [];
+      BD_VENTAS[categoriaActual].unshift(ventaRecord);
+
+      guardarLocalStorageTodo();
+      renderizarProductos();
+      renderizarVentas();
+      renderizarVendedoresLista();
+      renderizarBalanceGeneral();
+      alert("¡Transacción registrada con éxito!");
+    }
+
+    function renderizarVentas() {
+      const tbody = document.getElementById('tablaVentas');
+      if(!tbody) return;
+      tbody.innerHTML = '';
+
+      const ventas = BD_VENTAS[categoriaActual] || [];
+      const fVend = document.getElementById('fVendedor') ? document.getElementById('fVendedor').value : '';
+      const fSede = document.getElementById('fSede') ? document.getElementById('fSede').value.toLowerCase() : '';
+
+      let sumVentas = 0, sumGanancias = 0, sumComisiones = 0, sumUnidades = 0;
+
+      ventas.forEach(v => {
+        if(fVend && v.vendedorAsignado !== fVend) return;
+        if(fSede && !v.destino.toLowerCase().includes(fSede)) return;
+
+        sumVentas += v.total;
+        sumGanancias += v.ganancia;
+        sumComisiones += (v.comision || 0);
+        sumUnidades += v.cantidad;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${v.fecha}</td>
+          <td>${v.producto}</td>
+          <td>${v.cantidad}</td>
+          <td>${v.vendedorAsignado || v.operador}</td>
+          <td>${v.destino}</td>
+          <td>$${v.total.toLocaleString()}</td>
+          <td style="color: var(--warning);">$${(v.comision || 0).toLocaleString()}</td>
+          <td style="color: var(--success); font-weight: 800;">$${v.ganancia.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      if(document.getElementById('totalVentas')) document.getElementById('totalVentas').textContent = '$' + sumVentas.toLocaleString();
+      if(document.getElementById('totalGanancias')) document.getElementById('totalGanancias').textContent = '$' + sumGanancias.toLocaleString();
+      if(document.getElementById('totalComisiones')) document.getElementById('totalComisiones').textContent = '$' + sumComisiones.toLocaleString();
+      if(document.getElementById('totalUnidades')) document.getElementById('totalUnidades').textContent = sumUnidades.toLocaleString();
+
+      actualizarGraficasConChartJS(ventas);
+    }
+
+    function actualizarGraficasConChartJS(ventas) {
+      if(categoriaActual === 'huevos') return;
+
+      const ctxV = document.getElementById('chartVendedores');
+      const ctxP = document.getElementById('chartProductos');
+      if(!ctxV || !ctxP) return;
+
+      let ventasPorOperador = {};
+      let unidadesPorProducto = {};
+
+      ventas.forEach(v => {
+        let op = v.vendedorAsignado || v.operador;
+        ventasPorOperador[op] = (ventasPorOperador[op] || 0) + v.total;
+        unidadesPorProducto[v.producto] = (unidadesPorProducto[v.producto] || 0) + v.cantidad;
+      });
+
+      if(chartVendedoresInstancia) chartVendedoresInstancia.destroy();
+      if(chartProductosInstancia) chartProductosInstancia.destroy();
+
+      chartVendedoresInstancia = new Chart(ctxV, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(ventasPorOperador),
+          datasets: [{
+            label: 'Ventas Totales ($)',
+            data: Object.values(ventasPorOperador),
+            backgroundColor: '#facc15'
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+      });
+
+      chartProductosInstancia = new Chart(ctxP, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(unidadesPorProducto),
+          datasets: [{
+            data: Object.values(unidadesPorProducto),
+            backgroundColor: ['#facc15', '#22c55e', '#a855f7', '#ef4444', '#3b82f6']
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    function limpiarHistorial() {
+      if(confirm("¿Estás seguro de limpiar todo el registro de movimientos para esta categoría?")) {
+        BD_VENTAS[categoriaActual] = [];
+        guardarLocalStorageTodo();
+        renderizarVentas();
+        renderizarBalanceGeneral();
+      }
+    }
+
+    function exportarExcel() {
+      const ventas = BD_VENTAS[categoriaActual] || [];
+      let csv = "FECHA,PRODUCTO,CANTIDAD,OPERADOR,DESTINO,TOTAL,COMISION,GANANCIA\n";
+      ventas.forEach(v => {
+        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedorAsignado || v.operador}","${v.destino}",${v.total},${v.comision},${v.ganancia}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reporte_ventas_${categoriaActual}.csv`;
+      a.click();
+    }
+
+    function enviarCuadreWhatsApp() {
+      const ventas = BD_VENTAS[categoriaActual] || [];
+      let total = 0;
+      ventas.forEach(v => total += v.total);
+      const texto = `*REPORTE KOSMIK ENTERPRISE - (${categoriaActual.toUpperCase())}*\nTotal Ventas: $${total.toLocaleString()}\nOperador: ${document.getElementById('vUsuario').value}`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+
+    function guardarVendedor() {
+      const nombre = document.getElementById('vendNombre').value.trim().toUpperCase();
+      const sede = document.getElementById('vendSede').value.trim();
+      const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
+      const comisionPorcentaje = parseFloat(document.getElementById('vendComision').value) || 0;
+
+      if(!nombre) { alert("Ingresa el nombre del operador."); return; }
+
+      vendedores[nombre] = { sede, meta, comisionPorcentaje, acumuladoComisiones: vendedores[nombre]?.acumuladoComisiones || 0 };
+      document.getElementById('vendNombre').value = '';
+      document.getElementById('vendSede').value = '';
+      document.getElementById('vendMeta').value = '';
+      document.getElementById('vendComision').value = '';
+
+      guardarLocalStorageTodo();
+      renderizarVendedoresSelect();
+      renderizarVendedoresLista();
+      alert("Operador guardado correctamente.");
+    }
+
+    function renderizarVendedoresLista() {
+      const contenedor = document.getElementById('listaVendedores');
+      if(!contenedor) return;
+      contenedor.innerHTML = '';
+
+      for(let v in vendedores) {
+        const data = vendedores[v];
+        const div = document.createElement('div');
+        div.className = 'seller-card';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${v} (ZONA: ${data.sede})</strong>
+            <span style="color:var(--warning);">Comisiones acumuladas: $${(data.acumuladoComisiones || 0).toLocaleString()}</span>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:6px;">Meta semanal: $${data.meta.toLocaleString()} (${data.comisionPorcentaje}% comisión)</div>
+        `;
+        contenedor.appendChild(div);
+      }
+    }
+
+    function liquidarTodasComisiones() {
+      if(confirm("¿Liquidar y reiniciar el acumulado de comisiones de todos los operadores?")) {
+        for(let v in vendedores) {
+          vendedores[v].acumuladoComisiones = 0;
+        }
+        guardarLocalStorageTodo();
+        renderizarVendedoresLista();
+        renderizarVentas();
+        alert("Comisiones liquidadas con éxito.");
+      }
+    }
+
+    function guardarCliente() {
+      const nombre = document.getElementById('cliNombre').value.trim().toUpperCase();
+      const direccion = document.getElementById('cliDireccion').value.trim();
+      const telefono = document.getElementById('cliTelefono').value.trim();
+      const frecuenciaDias = parseInt(document.getElementById('cliFrecuencia').value) || 7;
+
+      if(!nombre) { alert("Ingresa el nombre del cliente."); return; }
+
+      clientesRestock[nombre] = { direccion, telefono, frecuenciaDias, ultimaCompra: new Date().toLocaleDateString() };
+      document.getElementById('cliNombre').value = '';
+      document.getElementById('cliDireccion').value = '';
+      document.getElementById('cliTelefono').value = '';
+
+      guardarLocalStorageTodo();
+      renderizarClientesSelect();
+      renderizarClientesLista();
+      alert("Cliente guardado en ruta.");
+    }
+
+    function renderizarClientesLista() {
+      const contenedor = document.getElementById('listaClientesRestock');
+      if(!contenedor) return;
+      contenedor.innerHTML = '';
+
+      for(let c in clientesRestock) {
+        const data = clientesRestock[c];
+        const div = document.createElement('div');
+        div.className = 'client-card';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong>${c}</strong>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="eliminarCliente('${c}')"><i class="fa-solid fa-trash"></i></button>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px;">Dirección: ${data.direccion} | Tel: ${data.telefono} | Frecuencia: c/${data.frecuenciaDias} días</div>
+        `;
+        contenedor.appendChild(div);
+      }
+    }
+
+    function eliminarCliente(key) {
+      if(confirm(`¿Eliminar al cliente ${key} de la ruta?`)) {
+        delete clientesRestock[key];
+        guardarLocalStorageTodo();
+        renderizarClientesSelect();
+        renderizarClientesLista();
+      }
+    }
+
+    function cancelarEdicionCliente() {
+      editandoClienteKey = null;
+      document.getElementById('cliNombre').value = '';
+      document.getElementById('cliDireccion').value = '';
+      document.getElementById('cliTelefono').value = '';
+      document.getElementById('btnTxtCliente').textContent = "GUARDAR CLIENTE EN RUTA";
+      document.getElementById('tituloClienteCard').innerHTML = '<i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK)';
+      document.getElementById('btnCancelarEdicionCliente').style.display = 'none';
+    }
+
+    function copiarTextoRutaCompleta() {
+      let texto = "*RUTA DE RESTOCK - KOSMIK*\n";
+      for(let c in clientesRestock) {
+        texto += `- ${c}: ${clientesRestock[c].direccion} (Tel: ${clientesRestock[c].telefono})\n`;
+      }
+      navigator.clipboard.writeText(texto);
+      alert("¡Ruta copiada al portapapeles!");
+    }
+
+    function renderizarBalanceGeneral() {
+      const contenedor = document.getElementById('contenidoBalanceGeneral');
+      if(!contenedor) return;
+      
+      const ventas = BD_VENTAS[categoriaActual] || [];
+      let totalBruto = 0;
+      let totalCostos = 0;
+      let totalComisiones = 0;
+      let totalNeto = 0;
+
+      ventas.forEach(v => {
+        totalBruto += v.total;
+        totalComisiones += (v.comision || 0);
+        totalNeto += v.ganancia;
+      });
+
+      contenedor.innerHTML = `
+        <p style="font-size:0.85rem; margin-bottom:14px;">Categoría activa: <strong>${categoriaActual.toUpperCase()}</strong></p>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div style="background:var(--table-header); padding:12px; border-radius:4px;">
+            <div style="font-size:0.7rem; color:var(--text-muted)">VENTAS BRUTAS</div>
+            <div style="font-size:1.2rem; font-weight:900;">$${totalBruto.toLocaleString()}</div>
+          </div>
+          <div style="background:var(--table-header); padding:12px; border-radius:4px;">
+            <div style="font-size:0.7rem; color:var(--text-muted)">COMISIONES PAGADAS</div>
+            <div style="font-size:1.2rem; font-weight:900; color:var(--warning);">$${totalComisiones.toLocaleString()}</div>
+          </div>
+          <div style="background:var(--table-header); padding:12px; border-radius:4px;">
+            <div style="font-size:0.7rem; color:var(--text-muted)">GANANCIA NETA REAL</div>
+            <div style="font-size:1.2rem; font-weight:900; color:var(--success);">$${totalNeto.toLocaleString()}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function verificarStockCriticoGlobal() {
+      const banner = document.getElementById('bannerAlerta');
+      const lista = document.getElementById('listaAlertaStock');
+      if(!banner || !lista) return;
+
+      let criticos = [];
+      for(let cat in BD_PRODUCTOS) {
+        for(let id in BD_PRODUCTOS[cat]) {
+          if(BD_PRODUCTOS[cat][id].stock <= 5) {
+            criticos.push(`[${cat.toUpperCase()}] ${BD_PRODUCTOS[cat][id].nombre} (Stock: ${BD_PRODUCTOS[cat][id].stock})`);
+          }
+        }
+      }
+
+      if(criticos.length > 0) {
+        banner.style.display = 'block';
+        lista.innerHTML = criticos.join('<br>');
+      } else {
+        banner.style.display = 'none';
+      }
     }
 
     function guardarConexionFirebase() {
@@ -574,761 +1042,45 @@
         messagingSenderId: document.getElementById('fbMessagingSenderId').value.trim(),
         appId: document.getElementById('fbAppId').value.trim()
       };
-      if (!config.apiKey || !config.projectId) return alert('Ingresa API Key y Project ID.');
       localStorage.setItem('kosmik_fb_config', JSON.stringify(config));
       firebaseConfig = config;
       inicializarFirebaseCloud(config);
-      alert('Configuración de Firebase guardada con éxito.');
+      alert("Configuración de Firebase guardada.");
     }
 
-    function inicializarFirebaseCloud(config) {
+    function inicializarFirebaseCloud(cfg) {
       try {
-        if (typeof firebase !== 'undefined' && !firebase.apps.length) {
-          firebase.initializeApp(config);
-          dbFirebase = firebase.firestore();
-          const badge = document.getElementById('cloudStatusBadge');
-          if(badge) {
-            badge.className = 'badge-status badge-online';
-            badge.innerText = 'ONLINE';
-          }
-          sincronizarDatosCloud();
+        if(!firebase.apps.length) {
+          firebase.initializeApp(cfg);
         }
-      } catch (e) {
-        console.error("Error inicializando Firebase:", e);
-      }
-    }
-
-    function sincronizarDatosCloud() {
-      if (!dbFirebase) return;
-
-      dbFirebase.collection('kosmik_cloud').doc('inventario').onSnapshot((doc) => {
-        if (doc.exists) {
-          BD_PRODUCTOS = doc.data();
-          guardarLocalStorageLocalOnly();
-          renderizarProductos();
+        dbFirebase = firebase.firestore();
+        const badge = document.getElementById('cloudStatusBadge');
+        if(badge) {
+          badge.textContent = "ONLINE (CLOUD)";
+          badge.className = "badge-status badge-online";
         }
-      });
-
-      dbFirebase.collection('kosmik_cloud').doc('ventas').onSnapshot((doc) => {
-        if (doc.exists) {
-          BD_VENTAS = doc.data();
-          guardarLocalStorageLocalOnly();
-          renderizarVentas();
-        }
-      });
-
-      dbFirebase.collection('kosmik_cloud').doc('vendedores').onSnapshot((doc) => {
-        if (doc.exists) {
-          vendedores = doc.data();
-          guardarLocalStorageLocalOnly();
-          renderizarVendedoresSelect();
-          renderizarVendedoresLista();
-        }
-      });
-
-      dbFirebase.collection('kosmik_cloud').doc('clientes').onSnapshot((doc) => {
-        if (doc.exists) {
-          clientesRestock = doc.data();
-          guardarLocalStorageLocalOnly();
-          renderizarClientesSelect();
-          renderizarClientesLista();
-        }
-      });
-    }
-
-    async function subirDatosCloud() {
-      if (!dbFirebase) return;
-      try {
-        await dbFirebase.collection('kosmik_cloud').doc('inventario').set(BD_PRODUCTOS);
-        await dbFirebase.collection('kosmik_cloud').doc('ventas').set(BD_VENTAS);
-        await dbFirebase.collection('kosmik_cloud').doc('vendedores').set(vendedores);
-        await dbFirebase.collection('kosmik_cloud').doc('clientes').set(clientesRestock);
-      } catch (e) {
-        console.error("Error subiendo datos a la nube:", e);
+      } catch(e) {
+        console.error("Error al conectar Firebase:", e);
       }
     }
 
     function guardarApiKeyIA() {
       const key = document.getElementById('aiApiKey').value.trim();
-      if(!key) return alert('Ingresa una API Key válida.');
       localStorage.setItem('kosmik_ai_key', key);
       geminiApiKey = key;
-      alert('API Key guardada correctamente.');
-    }
-
-    function guardarLocalStorageLocalOnly() {
-      localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
-      localStorage.setItem('cat_vends', JSON.stringify(vendedores));
-      localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
-      localStorage.setItem('kosmik_clientes', JSON.stringify(clientesRestock));
-    }
-
-    function guardarLocalStorage() {
-      guardarLocalStorageLocalOnly();
-      subirDatosCloud();
-    }
-
-    function renderizarClientesSelect() {
-      const selC = document.getElementById('vClienteSelect');
-      if(!selC) return;
-      selC.innerHTML = '<option value="">-- SELECCIONAR CLIENTE / CASA --</option>';
-      Object.keys(clientesRestock).forEach(nombre => {
-        const c = clientesRestock[nombre];
-        selC.innerHTML += `<option value="${nombre}">${nombre} [${c.direccion}]</option>`;
-      });
-    }
-
-    function prepararEdicionCliente(nombre) {
-      const c = clientesRestock[nombre];
-      if(!c) return;
-      editandoClienteKey = nombre;
-      document.getElementById('cliNombre').value = nombre;
-      document.getElementById('cliDireccion').value = c.direccion;
-      document.getElementById('cliTelefono').value = c.telefono;
-      document.getElementById('cliFrecuencia').value = c.frecuenciaDias;
-
-      document.getElementById('tituloClienteCard').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> EDITAR CLIENTE / CASA`;
-      document.getElementById('btnTxtCliente').innerText = 'ACTUALIZAR CLIENTE';
-      document.getElementById('btnCancelarEdicionCliente').style.display = 'block';
-    }
-
-    function cancelarEdicionCliente() {
-      editandoClienteKey = null;
-      document.getElementById('cliNombre').value = '';
-      document.getElementById('cliDireccion').value = '';
-      document.getElementById('cliTelefono').value = '';
-      document.getElementById('cliFrecuencia').value = '7';
-
-      document.getElementById('tituloClienteCard').innerHTML = `<i class="fa-solid fa-house-chimney-user"></i> REGISTRAR CLIENTE / CASA (RESTOCK)`;
-      document.getElementById('btnTxtCliente').innerText = 'GUARDAR CLIENTE EN RUTA';
-      document.getElementById('btnCancelarEdicionCliente').style.display = 'none';
-    }
-
-    function guardarCliente() {
-      const nombre = document.getElementById('cliNombre').value.trim().toUpperCase();
-      const direccion = document.getElementById('cliDireccion').value.trim().toUpperCase();
-      const telefono = document.getElementById('cliTelefono').value.trim();
-      const frecuenciaDias = parseInt(document.getElementById('cliFrecuencia').value) || 7;
-
-      if(!nombre || !direccion) {
-        alert('Ingresa el nombre y la dirección del cliente.');
-        return;
-      }
-
-      if (editandoClienteKey) {
-        if (editandoClienteKey !== nombre) {
-          delete clientesRestock[editandoClienteKey];
-        }
-        clientesRestock[nombre] = {
-          direccion,
-          telefono,
-          frecuenciaDias,
-          ultimaCompra: clientesRestock[editandoClienteKey]?.ultimaCompra || new Date().toLocaleDateString()
-        };
-        alert('¡Cliente actualizado con éxito!');
-        cancelarEdicionCliente();
-      } else {
-        clientesRestock[nombre] = {
-          direccion,
-          telefono,
-          frecuenciaDias,
-          ultimaCompra: new Date().toLocaleDateString()
-        };
-        alert('¡Cliente registrado en la ruta de restock!');
-        document.getElementById('cliNombre').value = '';
-        document.getElementById('cliDireccion').value = '';
-        document.getElementById('cliTelefono').value = '';
-      }
-
-      guardarLocalStorage();
-      renderizarClientesSelect();
-      renderizarClientesLista();
-    }
-
-    function eliminarCliente(nombre) {
-      if(confirm(`¿Eliminar a ${nombre} de la ruta de restock?`)) {
-        delete clientesRestock[nombre];
-        guardarLocalStorage();
-        renderizarClientesSelect();
-        renderizarClientesLista();
-      }
-    }
-
-    function calcularDiasTranscurridos(fechaStr) {
-      if(!fechaStr) return 0;
-      const partes = fechaStr.split('/');
-      if(partes.length !== 3) return 0;
-      const fechaC = new Date(partes[2], partes[1] - 1, partes[0]);
-      const hoy = new Date();
-      const diffTime = hoy - fechaC;
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    }
-
-    function renderizarClientesLista() {
-      const container = document.getElementById('listaClientesRestock');
-      if(!container) return;
-      container.innerHTML = '';
-
-      Object.keys(clientesRestock).forEach(nombre => {
-        const c = clientesRestock[nombre];
-        const diasPasados = calcularDiasTranscurridos(c.ultimaCompra);
-        const vencido = diasPasados >= c.frecuenciaDias;
-        const claseCard = vencido ? 'client-card vencido' : 'client-card';
-        const badgeVencido = vencido ? `<span class="badge-status badge-offline" style="margin-left: 6px;">¡RESTOCK VENCIDO (${diasPasados} DÍAS)!</span>` : `<span style="color: var(--success); font-size: 0.75rem;">ÚLTIMO: ${c.ultimaCompra}</span>`;
-        const urlGps = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.direccion + ' Bogota')}`;
-
-        container.innerHTML += `
-          <div class="${claseCard}">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div>
-                <strong style="font-size: 0.95rem; color: var(--gta-yellow);">${nombre}</strong> 
-                <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">[DIR: ${c.direccion}]</span>
-              </div>
-              <div>${badgeVencido}</div>
-            </div>
-            <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <span style="font-size: 0.75rem; color: var(--text-muted);">TEL: ${c.telefono || 'N/A'} | FRECUENCIA: CADA ${c.frecuenciaDias} DÍAS</span>
-              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                <a href="${urlGps}" target="_blank" class="btn btn-gps" style="padding: 4px 8px; font-size: 0.7rem; text-decoration: none;"><i class="fa-solid fa-map-location-dot"></i> GPS</a>
-                <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="enviarMensajeRestockWhatsApp('${nombre}')"><i class="fa-brands fa-whatsapp"></i> AVISAR</button>
-                <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.7rem;" onclick="prepararEdicionCliente('${nombre}')"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.7rem;" onclick="eliminarCliente('${nombre}')"><i class="fa-solid fa-trash"></i></button>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function copiarTextoRutaCompleta() {
-      let texto = `📋 *RUTA DE DOMICILIOS Y RESTOCK - KOSMIK* 🎮\n\n`;
-      Object.keys(clientesRestock).forEach((nombre, idx) => {
-        const c = clientesRestock[nombre];
-        texto += `${idx + 1}. *${nombre}*\n   📍 Dir: ${c.direccion}\n   📞 Tel: ${c.telefono || 'N/A'}\n   ⏱️ Frecuencia: Cada ${c.frecuenciaDias} días (Último: ${c.ultimaCompra})\n\n`;
-      });
-
-      navigator.clipboard.writeText(texto).then(() => {
-        alert('¡Texto de la ruta copiado al portapapeles con éxito!');
-      }).catch(err => {
-        alert('Error al copiar el texto.');
-      });
-    }
-
-    function enviarMensajeRestockWhatsApp(nombre) {
-      const c = clientesRestock[nombre];
-      if(!c) return;
-      const tipoProd = categoriaActual === 'huevos' ? 'huevos' : 'vapes';
-      let mensaje = `¡Hola ${nombre}! 👋 Te saluda Kosmik Enterprise. Notamos que ya es tiempo de hacerte un nuevo *restock* en casa (${c.direccion}). ¿Te enviamos de una vez tu pedido habitual de ${tipoProd}? 🥚💨`;
-      let url = `https://api.whatsapp.com/send?phone=${c.telefono}&text=${encodeURIComponent(mensaje)}`;
-      window.open(url, '_blank');
-    }
-
-    function renderizarBalanceGeneral() {
-      const container = document.getElementById('contenidoBalanceGeneral');
-      if(!container) return;
-
-      let totalVentasDulces = BD_VENTAS.dulces.reduce((acc, curr) => acc + curr.total, 0);
-      let totalGananciaDulces = BD_VENTAS.dulces.reduce((acc, curr) => acc + curr.ganancia, 0);
-      let totalComisionesDulces = BD_VENTAS.dulces.reduce((acc, curr) => acc + (curr.comision || 0), 0);
-
-      let totalVentasHuevos = BD_VENTAS.huevos.reduce((acc, curr) => acc + curr.total, 0);
-      let totalGananciaHuevos = BD_VENTAS.huevos.reduce((acc, curr) => acc + curr.ganancia, 0);
-
-      let totalVentasVapes = BD_VENTAS.vapes.reduce((acc, curr) => acc + curr.total, 0);
-      let totalGananciaVapes = BD_VENTAS.vapes.reduce((acc, curr) => acc + curr.ganancia, 0);
-
-      let granTotalVentas = totalVentasDulces + totalVentasHuevos + totalVentasVapes;
-      let granTotalGananciaNeta = totalGananciaDulces + totalGananciaHuevos + totalGananciaVapes;
-
-      container.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
-          <div style="background: var(--table-header); padding: 16px; border-radius: var(--radius); border-left: 3px solid var(--gta-yellow);">
-            <h4 style="color: var(--gta-yellow); margin-bottom: 10px;">🍬 DULCES & SNACKS</h4>
-            <div style="font-size: 0.8rem; line-height: 1.6;">
-              • Ingresos Totales: <strong>$${totalVentasDulces.toLocaleString()}</strong><br>
-              • Comisiones Pagadas: <strong style="color: var(--warning);">-$${totalComisionesDulces.toLocaleString()}</strong><br>
-              • Ganancia Neta Categoría: <strong style="color: var(--success);">$${totalGananciaDulces.toLocaleString()}</strong>
-            </div>
-          </div>
-          <div style="background: var(--table-header); padding: 16px; border-radius: var(--radius); border-left: 3px solid var(--gta-yellow);">
-            <h4 style="color: var(--gta-yellow); margin-bottom: 10px;">🥚 HUEVOS</h4>
-            <div style="font-size: 0.8rem; line-height: 1.6;">
-              • Ingresos Totales: <strong>$${totalVentasHuevos.toLocaleString()}</strong><br>
-              • Costos / Reinversión: <strong>-$${(totalVentasHuevos - totalGananciaHuevos).toLocaleString()}</strong><br>
-              • Ganancia Neta Categoría: <strong style="color: var(--success);">$${totalGananciaHuevos.toLocaleString()}</strong>
-            </div>
-          </div>
-          <div style="background: var(--table-header); padding: 16px; border-radius: var(--radius); border-left: 3px solid var(--gta-yellow);">
-            <h4 style="color: var(--gta-yellow); margin-bottom: 10px;">💨 VAPES</h4>
-            <div style="font-size: 0.8rem; line-height: 1.6;">
-              • Ingresos Totales: <strong>$${totalVentasVapes.toLocaleString()}</strong><br>
-              • Costos / Reinversión: <strong>-$${(totalVentasVapes - totalGananciaVapes).toLocaleString()}</strong><br>
-              • Ganancia Neta Categoría: <strong style="color: var(--success);">$${totalGananciaVapes.toLocaleString()}</strong>
-            </div>
-          </div>
-        </div>
-        <div style="background: #111b12; border: 2px solid var(--success); padding: 20px; border-radius: var(--radius); text-align: center;">
-          <div style="font-size: 0.8rem; color: var(--text-muted); font-weight: 800; margin-bottom: 6px;">SUMA GLOBAL / UTILIDAD NETA REAL DEL IMPERIO</div>
-          <div style="font-size: 2.2rem; font-weight: 900; color: var(--success);">$${granTotalGananciaNeta.toLocaleString()}</div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;">(Ingresos Brutos Globales: $${granTotalVentas.toLocaleString()})</div>
-        </div>
-      `;
-    }
-
-    function renderizarProductos() {
-      const selectProd = document.getElementById('vProducto');
-      const tablaProds = document.getElementById('tablaProductos');
-      const bannerAlerta = document.getElementById('bannerAlerta');
-      const listaAlerta = document.getElementById('listaAlertaStock');
-      if(!selectProd || !tablaProds) return;
-
-      selectProd.innerHTML = '';
-      tablaProds.innerHTML = '';
-      let alertasHTML = '';
-      let hayCriticos = false;
-
-      const prodsCat = BD_PRODUCTOS[categoriaActual] || {};
-      Object.keys(prodsCat).forEach(id => {
-        const p = prodsCat[id];
-        selectProd.innerHTML += `<option value="${id}">${p.nombre} (STOCK: ${p.stock}) - $${p.precio.toLocaleString()}</option>`;
-        
-        let badgeStock = p.stock <= 5 ? `<span class="badge-status badge-offline" style="margin-left: 8px;">CRÍTICO (${p.stock})</span>` : p.stock;
-        tablaProds.innerHTML += `<tr>
-          <td><strong>${p.nombre}</strong></td>
-          <td>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span>${badgeStock}</span>
-              <button class="btn btn-stock" onclick="ajustarStock('${id}', -1)">-</button>
-              <button class="btn btn-stock" onclick="ajustarStock('${id}', 1)">+</button>
-            </div>
-          </td>
-          <td>$${p.precio.toLocaleString()}</td>
-          <td>$${p.costo.toLocaleString()}</td>
-          <td>
-            <button class="btn btn-primary" style="padding: 4px 8px; font-size: 0.65rem;" onclick="prepararEdicionProducto('${id}')"><i class="fa-solid fa-pen"></i></button>
-            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.65rem;" onclick="eliminarProducto('${id}')"><i class="fa-solid fa-trash"></i></button>
-          </td>
-        </tr>`;
-
-        if (p.stock <= 5) {
-          hayCriticos = true;
-          alertasHTML += `<div>• <strong>${p.nombre}</strong> (${categoriaActual.toUpperCase()}) tiene stock crítico: <strong>${p.stock}</strong> unds.</div>`;
-        }
-      });
-
-      if (hayCriticos) {
-        bannerAlerta.style.display = 'block';
-        listaAlerta.innerHTML = alertasHTML;
-      } else {
-        bannerAlerta.style.display = 'none';
-      }
-    }
-
-    function ajustarStock(id, cambio) {
-      const prod = BD_PRODUCTOS[categoriaActual][id];
-      if (prod) {
-        prod.stock = Math.max(0, prod.stock + cambio);
-        guardarLocalStorage();
-        renderizarProductos();
-      }
-    }
-
-    function prepararEdicionProducto(id) {
-      const prod = BD_PRODUCTOS[categoriaActual][id];
-      if (!prod) return;
-      editandoProductoId = id;
-      document.getElementById('pNombre').value = prod.nombre;
-      document.getElementById('pStock').value = prod.stock;
-      document.getElementById('pPrecio').value = prod.precio;
-      document.getElementById('pCosto').value = prod.costo;
-
-      document.getElementById('tituloInvCard').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> EDITAR ARTÍCULO`;
-      document.getElementById('btnTxtProducto').innerText = 'ACTUALIZAR ARTÍCULO';
-      document.getElementById('btnCancelarEdicionProd').style.display = 'block';
-    }
-
-    function cancelarEdicionProducto() {
-      editandoProductoId = null;
-      document.getElementById('pNombre').value = '';
-      document.getElementById('pStock').value = '';
-      document.getElementById('pPrecio').value = '';
-      document.getElementById('pCosto').value = '';
-
-      document.getElementById('tituloInvCard').innerHTML = `<i class="fa-solid fa-boxes-packing"></i> CONTROL DE ALMACÉN Y STOCK`;
-      document.getElementById('btnTxtProducto').innerText = 'AÑADIR AL ALMACÉN';
-      document.getElementById('btnCancelarEdicionProd').style.display = 'none';
-    }
-
-    function guardarProducto() {
-      const nombre = document.getElementById('pNombre').value.trim();
-      const stock = parseInt(document.getElementById('pStock').value);
-      const precio = parseFloat(document.getElementById('pPrecio').value);
-      const costo = parseFloat(document.getElementById('pCosto').value);
-
-      if(!nombre || isNaN(stock) || isNaN(precio) || isNaN(costo)) {
-        alert('Por favor completa todos los campos correctamente.');
-        return;
-      }
-
-      if (editandoProductoId) {
-        BD_PRODUCTOS[categoriaActual][editandoProductoId] = { nombre, stock, precio, costo };
-        alert('¡Artículo actualizado con éxito!');
-        cancelarEdicionProducto();
-      } else {
-        const id = 'prod_' + Date.now();
-        BD_PRODUCTOS[categoriaActual][id] = { nombre, stock, precio, costo };
-        alert('¡Artículo añadido al almacén!');
-        document.getElementById('pNombre').value = '';
-        document.getElementById('pStock').value = '';
-        document.getElementById('pPrecio').value = '';
-        document.getElementById('pCosto').value = '';
-      }
-
-      guardarLocalStorage();
-      renderizarProductos();
-    }
-
-    function eliminarProducto(id) {
-      if(confirm('¿Eliminar este artículo del almacén?')) {
-        delete BD_PRODUCTOS[categoriaActual][id];
-        guardarLocalStorage();
-        renderizarProductos();
-      }
-    }
-
-    function renderizarVendedoresSelect() {
-      const selV = document.getElementById('vVendedor');
-      const selFiltro = document.getElementById('fVendedor');
-      if(!selV || !selFiltro) return;
-
-      selV.innerHTML = '';
-      selFiltro.innerHTML = '<option value="">-- TODOS LOS OPERADORES --</option>';
-
-      Object.keys(vendedores).forEach(nombre => {
-        selV.innerHTML += `<option value="${nombre}">${nombre} (${vendedores[nombre].sede})</option>`;
-        selFiltro.innerHTML += `<option value="${nombre}">${nombre}</option>`;
-      });
-    }
-
-    function guardarVendedor() {
-      const nombre = document.getElementById('vendNombre').value.trim();
-      const sede = document.getElementById('vendSede').value.trim();
-      const meta = parseFloat(document.getElementById('vendMeta').value) || 0;
-      const comisionPorcentaje = parseFloat(document.getElementById('vendComision').value) || 10;
-
-      if(!nombre || !sede) {
-        alert('Ingresa al menos el nombre y la zona del operador.');
-        return;
-      }
-
-      if(!vendedores[nombre]) {
-        vendedores[nombre] = { sede, meta, comisionPorcentaje, acumuladoComisiones: 0 };
-      } else {
-        vendedores[nombre].sede = sede;
-        vendedores[nombre].meta = meta;
-        vendedores[nombre].comisionPorcentaje = comisionPorcentaje;
-      }
-
-      guardarLocalStorage();
-      renderizarVendedoresSelect();
-      renderizarVendedoresLista();
-
-      document.getElementById('vendNombre').value = '';
-      document.getElementById('vendSede').value = '';
-      document.getElementById('vendMeta').value = '';
-      document.getElementById('vendComision').value = '';
-      alert('Operador guardado correctamente.');
-    }
-
-    function liquidarComisionSocio(nombre) {
-      if (confirm(`¿Liquidar y vaciar las comisiones acumuladas de ${nombre}?`)) {
-        if (vendedores[nombre]) {
-          vendedores[nombre].acumuladoComisiones = 0;
-          guardarLocalStorage();
-          renderizarVendedoresLista();
-          alert(`Comisión de ${nombre} liquidada con éxito.`);
-        }
-      }
-    }
-
-    function liquidarTodasComisiones() {
-      if (confirm('¿Estás seguro de liquidar y vaciar las comisiones de TODOS los operadores?')) {
-        Object.keys(vendedores).forEach(nombre => {
-          vendedores[nombre].acumuladoComisiones = 0;
-        });
-        guardarLocalStorage();
-        renderizarVendedoresLista();
-        alert('Todas las comisiones han sido liquidadas.');
-      }
-    }
-
-    function renderizarVendedoresLista() {
-      const container = document.getElementById('listaVendedores');
-      if(!container) return;
-      container.innerHTML = '';
-
-      Object.keys(vendedores).forEach(nombre => {
-        const v = vendedores[nombre];
-        const ventasVendedor = BD_VENTAS.dulces.filter(tx => tx.vendedor === nombre);
-        const totalVendidoV = ventasVendedor.reduce((acc, curr) => acc + curr.total, 0);
-        const porcentajeProgreso = v.meta > 0 ? Math.min(100, (totalVendidoV / v.meta) * 100).toFixed(1) : 0;
-
-        container.innerHTML += `
-          <div class="seller-card">
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-              <div>
-                <strong style="font-size: 0.95rem; color: var(--gta-yellow);">${nombre}</strong> 
-                <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">[ZONA: ${v.sede}]</span>
-              </div>
-              <div style="font-weight: 800; font-size: 0.85rem;">
-                VENTAS: $${totalVendidoV.toLocaleString()} / META: $${v.meta.toLocaleString()} (${porcentajeProgreso}%)
-              </div>
-            </div>
-            <div class="progress-bar-bg">
-              <div class="progress-bar-fill" style="width: ${porcentajeProgreso}%;"></div>
-            </div>
-            <div style="margin-top: 10px; font-size: 0.75rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-              <span>COMISIÓN: ${v.comisionPorcentaje}% | <strong style="color: var(--warning);">ACUMULADO: $${v.acumuladoComisiones.toLocaleString()}</strong></span>
-              <button class="btn btn-success" style="padding: 4px 10px; font-size: 0.7rem;" onclick="liquidarComisionSocio('${nombre}')"><i class="fa-solid fa-check"></i> LIQUIDAR PAGO</button>
-            </div>
-          </div>
-        `;
-      });
-    }
-
-    function registrarVenta() {
-      const prodId = document.getElementById('vProducto').value;
-      const cantidad = parseInt(document.getElementById('vCantidad').value);
-      
-      let destino = 'PRINCIPAL';
-      if(categoriaActual === 'dulces') {
-        destino = document.getElementById('vUni').value.trim() || 'PRINCIPAL';
-      } else {
-        destino = document.getElementById('vClienteSelect').value;
-        if(!destino) {
-          alert('Selecciona un cliente destino para el restock.');
-          return;
-        }
-        if(clientesRestock[destino]) {
-          clientesRestock[destino].ultimaCompra = new Date().toLocaleDateString();
-        }
-      }
-
-      const vendedor = categoriaActual === 'dulces' ? document.getElementById('vVendedor').value : 'DIRECTO';
-
-      if(!prodId || isNaN(cantidad) || cantidad <= 0) {
-        alert('Selecciona un producto y cantidad válida.');
-        return;
-      }
-
-      const productoObj = BD_PRODUCTOS[categoriaActual][prodId];
-      if(!productoObj || productoObj.stock < cantidad) {
-        alert('Stock insuficiente en el almacén.');
-        return;
-      }
-
-      productoObj.stock -= cantidad;
-      const totalVenta = productoObj.precio * cantidad;
-      const costoTotal = productoObj.costo * cantidad;
-      const gananciaBruta = totalVenta - costoTotal;
-
-      let comisionMonto = 0;
-      if(categoriaActual === 'dulces' && vendedor && vendedores[vendedor]) {
-        const porcentaje = vendedores[vendedor].comisionPorcentaje || 0;
-        comisionMonto = (totalVenta * porcentaje) / 100;
-        vendedores[vendedor].acumuladoComisiones += comisionMonto;
-      }
-
-      const gananciaNeta = gananciaBruta - comisionMonto;
-
-      const nuevaTx = {
-        id: 'tx_' + Date.now(),
-        fecha: new Date().toLocaleString(),
-        producto: productoObj.nombre,
-        cantidad,
-        vendedor: vendedor || 'DIRECTO',
-        sede: destino,
-        total: totalVenta,
-        comision: comisionMonto,
-        ganancia: gananciaNeta
-      };
-
-      BD_VENTAS[categoriaActual].unshift(nuevaTx);
-      guardarLocalStorage();
-      renderizarProductos();
-      renderizarVentas();
-      renderizarVendedoresLista();
-      renderizarClientesLista();
-      renderizarBalanceGeneral();
-
-      document.getElementById('vCantidad').value = '1';
-      if(document.getElementById('vUni')) document.getElementById('vUni').value = '';
-      alert(`¡TRANSACCIÓN EXITOSA!\nTOTAL: $${totalVenta.toLocaleString()}`);
-    }
-
-    function renderizarVentas() {
-      const tbody = document.getElementById('tablaVentas');
-      if(!tbody) return;
-      tbody.innerHTML = '';
-
-      let ventasFiltradas = BD_VENTAS[categoriaActual] || [];
-      
-      if(categoriaActual === 'dulces') {
-        const filtroV = document.getElementById('fVendedor').value;
-        const filtroS = document.getElementById('fSede').value.toLowerCase();
-        
-        if(filtroV) ventasFiltradas = ventasFiltradas.filter(tx => tx.vendedor === filtroV);
-        if(filtroS) ventasFiltradas = ventasFiltradas.filter(tx => tx.sede.toLowerCase().includes(filtroS));
-      }
-
-      let totalV = 0, totalG = 0, totalC = 0, totalU = 0;
-
-      ventasFiltradas.forEach(tx => {
-        totalV += tx.total;
-        totalG += tx.ganancia;
-        totalC += tx.comision || 0;
-        totalU += tx.cantidad;
-
-        if(categoriaActual === 'dulces') {
-          tbody.innerHTML += `<tr>
-            <td>${tx.fecha}</td>
-            <td><strong>${tx.producto}</strong></td>
-            <td>${tx.cantidad}</td>
-            <td>${tx.vendedor}</td>
-            <td>${tx.sede}</td>
-            <td style="font-weight: 800;">$${tx.total.toLocaleString()}</td>
-            <td style="color: var(--warning);">$${(tx.comision || 0).toLocaleString()}</td>
-            <td style="color: var(--success); font-weight: 800;">$${tx.ganancia.toLocaleString()}</td>
-          </tr>`;
-        } else {
-          tbody.innerHTML += `<tr>
-            <td>${tx.fecha}</td>
-            <td><strong>${tx.producto}</strong></td>
-            <td>${tx.cantidad}</td>
-            <td>${tx.sede}</td>
-            <td style="font-weight: 800;">$${tx.total.toLocaleString()}</td>
-            <td style="color: var(--success); font-weight: 800;">$${tx.ganancia.toLocaleString()}</td>
-          </tr>`;
-        }
-      });
-
-      document.getElementById('totalVentas').innerText = '$' + totalV.toLocaleString();
-      document.getElementById('totalGanancias').innerText = '$' + totalG.toLocaleString();
-      document.getElementById('totalComisiones').innerText = '$' + totalC.toLocaleString();
-      document.getElementById('totalUnidades').innerText = totalU.toLocaleString();
-
-      actualizarGraficas();
-    }
-
-    function limpiarHistorial() {
-      if(confirm('¿Eliminar todos los registros de esta categoría?')) {
-        BD_VENTAS[categoriaActual] = [];
-        guardarLocalStorage();
-        renderizarVentas();
-        renderizarBalanceGeneral();
-      }
-    }
-
-    function exportarExcel() {
-      const ventas = BD_VENTAS[categoriaActual] || [];
-      if(ventas.length === 0) return alert('No hay registros para exportar.');
-      
-      let csv = 'FECHA,PRODUCTO,CANTIDAD,OPERADOR,DESTINO,TOTAL,COMISION,GANANCIA\n';
-      ventas.forEach(v => {
-        csv += `"${v.fecha}","${v.producto}",${v.cantidad},"${v.vendedor || 'DIRECTO'}","${v.sede}",${v.total},${v.comision || 0},${v.ganancia}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.setAttribute('href', url);
-      a.setAttribute('download', `kosmik_hud_${categoriaActual}.csv`);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-
-    function enviarCuadreWhatsApp() {
-      const ventas = BD_VENTAS[categoriaActual] || [];
-      const totalV = ventas.reduce((acc, curr) => acc + curr.total, 0);
-      const totalG = ventas.reduce((acc, curr) => acc + curr.ganancia, 0);
-      const operador = document.getElementById('vUsuario').value || 'OPERADOR';
-
-      let mensaje = `*REPORTE TÁCTICO - KOSMIK ENTERPRISE* 🎮\n`;
-      mensaje += `• CATEGORÍA: ${categoriaActual.toUpperCase()}\n`;
-      mensaje += `• OPERADOR: ${operador}\n`;
-      mensaje += `• TOTAL VENTAS: $${totalV.toLocaleString()}\n`;
-      mensaje += `• GANANCIA NETA: $${totalG.toLocaleString()}\n`;
-      mensaje += `• TRANSACCIONES: ${ventas.length}\n`;
-
-      const urlWapp = `https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}`;
-      window.open(urlWapp, '_blank');
-    }
-
-    function actualizarGraficas() {
-      const ctxV = document.getElementById('chartVendedores');
-      const ctxP = document.getElementById('chartProductos');
-      if(!ctxV || !ctxP) return;
-
-      const ventas = BD_VENTAS[categoriaActual] || [];
-
-      const ventasPorVendedor = {};
-      ventas.forEach(tx => {
-        const v = tx.vendedor || 'DIRECTO';
-        ventasPorVendedor[v] = (ventasPorVendedor[v] || 0) + tx.total;
-      });
-
-      if(chartV) chartV.destroy();
-      chartV = new Chart(ctxV, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(ventasPorVendedor),
-          datasets: [{
-            label: 'VENTAS ($)',
-            data: Object.values(ventasPorVendedor),
-            backgroundColor: '#facc15',
-            borderRadius: 4
-          }]
-        },
-        options: { 
-          responsive: true, 
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: '#a1a1aa', font: { family: 'Inter', size: 10 } } },
-            y: { ticks: { color: '#a1a1aa', font: { family: 'Inter', size: 10 } } }
-          }
-        }
-      });
-
-      const ventasPorProducto = {};
-      ventas.forEach(tx => {
-        ventasPorProducto[tx.producto] = (ventasPorProducto[tx.producto] || 0) + tx.cantidad;
-      });
-
-      if(chartP) chartP.destroy();
-      chartP = new Chart(ctxP, {
-        type: 'doughnut',
-        data: {
-          labels: Object.keys(ventasPorProducto),
-          datasets: [{
-            data: Object.values(ventasPorProducto),
-            backgroundColor: ['#facc15', '#22c55e', '#f59e0b', '#ef4444', '#a855f7']
-          }]
-        },
-        options: { responsive: true }
-      });
+      alert("API Key de Gemini guardada.");
     }
 
     async function consultarIA() {
-      const input = document.getElementById('aiPromptInput');
-      const caja = document.getElementById('aiResponseBox');
-      const prompt = input.value.trim();
-      if(!prompt) return alert('Escribe una consulta táctica.');
-
-      caja.innerHTML = `> CONECTANDO CON LESTER AI...\n> ANALIZANDO DATOS DE ${categoriaActual.toUpperCase()}...`;
+      const prompt = document.getElementById('aiPromptInput').value.trim();
+      if(!prompt) return;
+      const box = document.getElementById('aiResponseBox');
+      box.textContent = "> Procesando consulta táctica con Lester AI...";
 
       if(!geminiApiKey) {
-        caja.innerHTML = `> [MODO SIMULACIÓN LESTER AI]\n> ANÁLISIS DE LA OPERACIÓN:\n- El flujo de caja es estable.\n- Revisa el almacén para evitar quiebres en artículos clave.\n- Mantén la presión en las zonas de alta conversión.`;
+        setTimeout(() => {
+          box.textContent = `> [LESTER AI - MODO LOCAL]: No se ha configurado la API Key de Gemini. Análisis simulado: Operaciones estables para ${categoriaActual}. Las métricas actuales indican rendimiento óptimo.`;
+        }, 800);
         return;
       }
 
@@ -1337,32 +1089,31 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            contents: [{ parts: [{ text: `Actúa como Lester Crest de GTA V, un estratega criminal y financiero analítico y directo. Responde de forma ejecutiva en español y estilo táctico a la consulta sobre el negocio de ${categoriaActual}: ${prompt}` }] }]
+            contents: [{ parts: [{ text: `Actúa como Lester Crest, el estratega criminal y experto en logística y finanzas de GTA V. Analiza la siguiente consulta para Kosmik Enterprise (categoría actual: ${categoriaActual}): ${prompt}` }] }]
           })
         });
         const data = await response.json();
-        const textoRespuesta = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar respuesta.';
-        caja.innerText = textoRespuesta;
+        const textoRespuesta = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo procesar la respuesta de la red.";
+        box.textContent = `> [LESTER COPILOT]:\n${textoRespuesta}`;
       } catch (err) {
-        caja.innerText = '> ERROR CRÍTICO DE CONEXIÓN CON LA API.';
+        box.textContent = `> Error de conexión con el satélite de IA: ${err.message}`;
       }
     }
 
     function ejecutarPromptAccion(tipo) {
-      const inputsAccion = {
-        'diagnostico_financiero': 'Haz un diagnóstico financiero de ventas, costos y márgenes actuales.',
-        'proyecciones_metas': '¿Cómo va el cumplimiento de metas de los operadores?',
-        'calculadora_descuentos': '¿Es viable un descuento del 10% por volumen en artículos principales?',
-        'auditoria_comisiones': 'Realiza una auditoría de las comisiones acumuladas por los operadores.',
-        'ranking_vendedores': 'Muéstrame un ranking analítico del rendimiento de cada operador.',
-        'rendimiento_sedes': 'Analiza qué zonas presentan mejor desempeño comercial.',
-        'guiones_venta': 'Genera guiones de abordaje táctico para los clientes en campo.',
-        'analizar_stock': 'Analiza el almacén y dame alertas de reabastecimiento urgente.',
-        'promo_whatsapp': 'Redacta copys persuasivos para promocionar combos.',
-        'detector_anomalias': 'Busca anomalías o inconsistencias en los registros.'
+      const promptsPredefinidos = {
+        diagnostico_financiero: "Realiza un diagnóstico financiero completo de las ventas netas y márgenes de ganancia actuales.",
+        proyecciones_metas: "Evalúa el ritmo de operaciones y el cumplimiento de metas de los operadores.",
+        calculadora_descuentos: "Calcula los márgenes aplicando un descuento sugerido del 10% en volumen.",
+        auditoria_comisiones: "Realiza una auditoría de las comisiones acumuladas por los operadores.",
+        ranking_vendedores: "Genera un ranking de rendimiento operativo de la tripulación.",
+        rendimiento_sedes: "Analiza el flujo de distribución por zonas y sedes.",
+        guiones_venta: "Redacta un guion táctico de abordaje comercial para los operadores.",
+        analizar_stock: "Revisa los niveles críticos en el almacén y sugiere prioridades de reabastecimiento.",
+        promo_whatsapp: "Redacta un copy promocional de alto impacto para enviar por WhatsApp.",
+        detector_anomalias: "Busca posibles anomalías o desviaciones en el registro de movimientos."
       };
-
-      document.getElementById('aiPromptInput').value = inputsAccion[tipo] || '';
+      document.getElementById('aiPromptInput').value = promptsPredefinidos[tipo] || tipo;
       consultarIA();
     }
 
@@ -1371,6 +1122,13 @@
         e.preventDefault();
         consultarIA();
       }
+    }
+
+    function guardarLocalStorageTodo() {
+      localStorage.setItem('kosmik_bd_prods', JSON.stringify(BD_PRODUCTOS));
+      localStorage.setItem('cat_vends', JSON.stringify(vendedores));
+      localStorage.setItem('kosmik_clientes', JSON.stringify(clientesRestock));
+      localStorage.setItem('kosmik_bd_vnts', JSON.stringify(BD_VENTAS));
     }
   </script>
 </body>
