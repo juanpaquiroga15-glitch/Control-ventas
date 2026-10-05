@@ -307,23 +307,21 @@
           <button class="control-btn btn-minimize"></button>
           <button class="control-btn btn-maximize" onclick="togglePantallaCompleta(event, 'cuentas')"></button>
         </div>
-        <span class="window-title">Cuentas y Finanzas</span>
+        <span class="window-title">Cuentas y Finanzas (Automático)</span>
       </div>
       <div class="window-body">
-        <div class="mac-box" style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <span style="font-size: 0.75rem; color: var(--mac-text-muted); text-transform: uppercase;">Balance Total</span>
-            <h2 id="balanceTotal" style="font-size: 1.5rem; color: var(--mac-success);">$0.00</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="mac-box">
+            <span style="font-size: 0.7rem; color: var(--mac-text-muted); text-transform: uppercase;">Proyección Venta Total</span>
+            <h3 id="totalVentaProyectada" style="font-size: 1.2rem; color: var(--mac-accent);">$0.00</h3>
           </div>
-          <i class="fa-solid fa-wallet" style="font-size: 2rem; color: var(--mac-success); opacity: 0.8;"></i>
-        </div>
-        <div class="mac-box">
-          <input type="text" id="conceptoCuenta" class="mac-input" placeholder="Concepto de transacción">
-          <input type="number" id="montoCuenta" class="mac-input" placeholder="Monto ($ positivo o negativo)">
-          <button class="mac-btn" style="background: var(--mac-success);" onclick="registrarTransaccion()">Registrar Transacción</button>
+          <div class="mac-box">
+            <span style="font-size: 0.7rem; color: var(--mac-text-muted); text-transform: uppercase;">Ganancia Potencial</span>
+            <h3 id="totalGananciaPotencial" style="font-size: 1.2rem; color: var(--mac-success);">$0.00</h3>
+          </div>
         </div>
         <div class="mac-box" style="flex: 1;">
-          <h4 style="font-size: 0.8rem; color: var(--mac-text-muted); margin-bottom: 6px; text-transform: uppercase;">Historial Financiero</h4>
+          <h4 style="font-size: 0.8rem; color: var(--mac-text-muted); margin-bottom: 6px; text-transform: uppercase;">Resumen Automático por Producto</h4>
           <div id="listaCuentas"></div>
         </div>
       </div>
@@ -428,22 +426,20 @@
     // Datos y LocalStorage
     let stock = JSON.parse(localStorage.getItem('mac_stock')) || [];
     let clientes = JSON.parse(localStorage.getItem('mac_clientes')) || [];
-    let cuentas = JSON.parse(localStorage.getItem('mac_cuentas')) || [];
 
     function sincronizar() {
       localStorage.setItem('mac_stock', JSON.stringify(stock));
       localStorage.setItem('mac_clientes', JSON.stringify(clientes));
-      localStorage.setItem('mac_cuentas', JSON.stringify(cuentas));
       renderizarTodo();
     }
 
     function agregarProducto() {
       const nombre = document.getElementById('nombreProducto').value;
-      const cantidad = document.getElementById('stockProducto').value;
-      const costo = document.getElementById('costoProducto').value;
-      const precio = document.getElementById('precioProducto').value;
+      const cantidad = parseInt(document.getElementById('stockProducto').value);
+      const costo = parseFloat(document.getElementById('costoProducto').value);
+      const precio = parseFloat(document.getElementById('precioProducto').value);
       
-      if(!nombre || !cantidad || !costo || !precio) return alert('Completa todos los campos del producto.');
+      if(!nombre || isNaN(cantidad) || isNaN(costo) || isNaN(precio)) return alert('Completa todos los campos del producto con valores válidos.');
       
       stock.push({ nombre, cantidad, costo, precio });
       
@@ -459,16 +455,16 @@
       if(stock.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin stock registrado.</span>'; return; }
       
       contenedor.innerHTML = stock.map(p => {
-        const ganancia = (parseFloat(p.precio) - parseFloat(p.costo)).toFixed(2);
+        const gananciaUnit = (p.precio - p.costo).toFixed(2);
         return `
           <div class="list-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
-            <div style="display: flex; justify-content: space-width; width: 100%; align-items: center; justify-content: space-between;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
               <strong>${p.nombre}</strong>
               <span style="color:var(--mac-success); font-weight:600;">Venta: $${p.precio}</span>
             </div>
             <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.75rem; color: var(--mac-text-muted);">
               <span>Stock: ${p.cantidad} | Costo: $${p.costo}</span>
-              <span style="color: #5856d6;">Ganancia: $${ganancia}</span>
+              <span style="color: #5856d6;">Ganancia/u: $${gananciaUnit}</span>
             </div>
           </div>
         `;
@@ -518,34 +514,40 @@
       }).join('');
     }
 
-    function registrarTransaccion() {
-      const concepto = document.getElementById('conceptoCuenta').value;
-      const monto = parseFloat(document.getElementById('montoCuenta').value);
-      if(!concepto || isNaN(monto)) return alert('Ingresa un concepto y un monto válido.');
-      cuentas.push({ concepto, monto });
-      document.getElementById('conceptoCuenta').value = '';
-      document.getElementById('montoCuenta').value = '';
-      sincronizar();
-    }
-
     function renderCuentas() {
       const contenedor = document.getElementById('listaCuentas');
-      let total = 0;
-      if(cuentas.length === 0) {
-        contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin transacciones.</span>';
-        document.getElementById('balanceTotal').innerText = '$0.00';
+      let totalVenta = 0;
+      let totalGanancia = 0;
+
+      if(stock.length === 0) {
+        contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin datos financieros automáticos (añade productos al stock).</span>';
+        document.getElementById('totalVentaProyectada').innerText = '$0.00';
+        document.getElementById('totalGananciaPotencial').innerText = '$0.00';
         return;
       }
-      contenedor.innerHTML = cuentas.map(t => {
-        total += t.monto;
+
+      contenedor.innerHTML = stock.map(p => {
+        const subtotalVenta = p.cantidad * p.precio;
+        const subtotalGanancia = p.cantidad * (p.precio - p.costo);
+        totalVenta += subtotalVenta;
+        totalGanancia += subtotalGanancia;
+
         return `
-          <div class="list-row">
-            <span>${t.concepto}</span>
-            <span style="color: ${t.monto >= 0 ? 'var(--mac-success)' : 'var(--mac-red)'}; font-weight:600;">$${t.monto}</span>
+          <div class="list-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <strong>${p.nombre}</strong>
+              <span style="color:var(--mac-success); font-weight:600;">Ganancia: $${subtotalGanancia.toFixed(2)}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.75rem; color: var(--mac-text-muted);">
+              <span>Cant: ${p.cantidad} | Venta u.: $${p.precio}</span>
+              <span>Total Venta: $${subtotalVenta.toFixed(2)}</span>
+            </div>
           </div>
         `;
       }).join('');
-      document.getElementById('balanceTotal').innerText = `$${total.toFixed(2)}`;
+
+      document.getElementById('totalVentaProyectada').innerText = `$${totalVenta.toFixed(2)}`;
+      document.getElementById('totalGananciaPotencial').innerText = `$${totalGanancia.toFixed(2)}`;
     }
 
     function renderizarTodo() {
