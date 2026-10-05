@@ -63,8 +63,8 @@
     /* VENTANAS MACOS */
     .mac-window {
       position: absolute;
-      width: 600px;
-      height: 450px;
+      width: 580px;
+      height: 440px;
       background: var(--mac-window-bg);
       backdrop-filter: blur(30px);
       border: 1px solid var(--mac-border);
@@ -78,7 +78,7 @@
     }
     .mac-window.active { display: flex; }
 
-    /* BARRA DE TÍTULO (ÁREA DE ARRASTRE) */
+    /* BARRA DE TÍTULO */
     .window-header {
       height: 38px;
       background: rgba(255, 255, 255, 0.03);
@@ -104,7 +104,7 @@
       font-size: 0.8rem; 
       font-weight: 600; 
       color: var(--mac-text-muted); 
-      pointer-events: none; /* Permite arrastrar desde cualquier parte del título */
+      pointer-events: none; 
     }
 
     .window-body {
@@ -214,7 +214,7 @@
   <div class="desktop" id="desktop">
 
     <!-- VENTANA 1: STOCK -->
-    <div class="mac-window active" id="win-stock" style="top: 40px; left: 50px;" onclick="enfocarVentana('stock')">
+    <div class="mac-window active" id="win-stock" style="top: 50px; left: 50px;" onmousedown="enfocarVentana('stock')">
       <div class="window-header" onmousedown="iniciarArrastre(event, 'win-stock')">
         <div class="window-controls">
           <button class="control-btn btn-close" onclick="cerrarVentana(event, 'stock')"></button>
@@ -238,7 +238,7 @@
     </div>
 
     <!-- VENTANA 2: CLIENTES -->
-    <div class="mac-window" id="win-clientes" style="top: 80px; left: 120px;" onclick="enfocarVentana('clientes')">
+    <div class="mac-window" id="win-clientes" style="top: 90px; left: 130px;" onmousedown="enfocarVentana('clientes')">
       <div class="window-header" onmousedown="iniciarArrastre(event, 'win-clientes')">
         <div class="window-controls">
           <button class="control-btn btn-close" onclick="cerrarVentana(event, 'clientes')"></button>
@@ -261,7 +261,7 @@
     </div>
 
     <!-- VENTANA 3: CUENTAS -->
-    <div class="mac-window" id="win-cuentas" style="top: 120px; left: 190px;" onclick="enfocarVentana('cuentas')">
+    <div class="mac-window" id="win-cuentas" style="top: 130px; left: 210px;" onmousedown="enfocarVentana('cuentas')">
       <div class="window-header" onmousedown="iniciarArrastre(event, 'win-cuentas')">
         <div class="window-controls">
           <button class="control-btn btn-close" onclick="cerrarVentana(event, 'cuentas')"></button>
@@ -344,40 +344,36 @@
       document.getElementById(`dock-${nombre}`).classList.remove('open');
     }
 
-    // Motor de arrastre libre optimizado en todo el escritorio
+    // Sistema de Arrastre Libre Directo y Corregido
     let ventanaActiva = null;
-    let startX = 0, startY = 0;
-    let initialLeft = 0, initialTop = 0;
+    let offsetX = 0, offsetY = 0;
 
     function iniciarArrastre(e, idVentana) {
-      if(e.target.classList.contains('control-btn')) return; // No arrastrar si hace clic en los botones de cerrar/minimizar
+      if(e.target.classList.contains('control-btn')) return;
       
       ventanaActiva = document.getElementById(idVentana);
       enfocarVentana(idVentana.replace('win-', ''));
 
-      startX = e.clientX;
-      startY = e.clientY;
-      initialLeft = ventanaActiva.offsetLeft;
-      initialTop = ventanaActiva.offsetTop;
+      // Calcular posición inicial exacta respecto al mouse dentro de la ventana
+      offsetX = e.clientX - ventanaActiva.offsetLeft;
+      offsetY = e.clientY - ventanaActiva.offsetTop;
 
       document.addEventListener('mousemove', arrastrarVentana);
       document.addEventListener('mouseup', detenerArrastre);
+      e.preventDefault();
     }
 
     function arrastrarVentana(e) {
       if(!ventanaActiva) return;
-      
-      let deltaX = e.clientX - startX;
-      let deltaY = e.clientY - startY;
 
-      let newLeft = initialLeft + deltaX;
-      let newTop = initialTop + deltaY;
+      let x = e.clientX - offsetX;
+      let y = e.clientY - offsetY;
 
-      // Permitir moverse libremente por la pantalla (respetando la barra superior de menús)
-      if(newTop < 28) newTop = 28;
+      // Evitar que la ventana suba por encima de la barra de menú superior
+      if(y < 28) y = 28;
 
-      ventanaActiva.style.left = newLeft + 'px';
-      ventanaActiva.style.top = newTop + 'px';
+      ventanaActiva.style.left = x + 'px';
+      ventanaActiva.style.top = y + 'px';
     }
 
     function detenerArrastre() {
