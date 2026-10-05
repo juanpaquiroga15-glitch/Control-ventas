@@ -65,7 +65,7 @@
     .mac-window {
       position: absolute;
       width: 580px;
-      height: 460px;
+      height: 480px;
       background: var(--mac-window-bg);
       backdrop-filter: blur(30px);
       border: 1px solid var(--mac-border);
@@ -261,8 +261,11 @@
       <div class="window-body">
         <div class="mac-box">
           <input type="text" id="nombreProducto" class="mac-input" placeholder="Nombre del producto">
-          <input type="number" id="stockProducto" class="mac-input" placeholder="Cantidad">
-          <input type="number" id="precioProducto" class="mac-input" placeholder="Precio ($)">
+          <input type="number" id="stockProducto" class="mac-input" placeholder="Cantidad en stock">
+          <div style="display: flex; gap: 8px;">
+            <input type="number" id="costoProducto" class="mac-input" placeholder="Precio de costo ($)">
+            <input type="number" id="precioProducto" class="mac-input" placeholder="Precio de venta ($)">
+          </div>
           <button class="mac-btn" onclick="agregarProducto()">Añadir al Inventario</button>
         </div>
         <div class="mac-box" style="flex: 1;">
@@ -437,11 +440,16 @@
     function agregarProducto() {
       const nombre = document.getElementById('nombreProducto').value;
       const cantidad = document.getElementById('stockProducto').value;
+      const costo = document.getElementById('costoProducto').value;
       const precio = document.getElementById('precioProducto').value;
-      if(!nombre || !cantidad || !precio) return alert('Completa todos los campos.');
-      stock.push({ nombre, cantidad, precio });
+      
+      if(!nombre || !cantidad || !costo || !precio) return alert('Completa todos los campos del producto.');
+      
+      stock.push({ nombre, cantidad, costo, precio });
+      
       document.getElementById('nombreProducto').value = '';
       document.getElementById('stockProducto').value = '';
+      document.getElementById('costoProducto').value = '';
       document.getElementById('precioProducto').value = '';
       sincronizar();
     }
@@ -449,19 +457,29 @@
     function renderStock() {
       const contenedor = document.getElementById('listaStock');
       if(stock.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin stock registrado.</span>'; return; }
-      contenedor.innerHTML = stock.map(p => `
-        <div class="list-row">
-          <span><strong>${p.nombre}</strong><br><small style="color:var(--mac-text-muted);">Stock: ${p.cantidad}</small></span>
-          <span style="color:var(--mac-success); font-weight:600;">$${p.precio}</span>
-        </div>
-      `).join('');
+      
+      contenedor.innerHTML = stock.map(p => {
+        const ganancia = (parseFloat(p.precio) - parseFloat(p.costo)).toFixed(2);
+        return `
+          <div class="list-row" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <div style="display: flex; justify-content: space-width; width: 100%; align-items: center; justify-content: space-between;">
+              <strong>${p.nombre}</strong>
+              <span style="color:var(--mac-success); font-weight:600;">Venta: $${p.precio}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; width: 100%; font-size: 0.75rem; color: var(--mac-text-muted);">
+              <span>Stock: ${p.cantidad} | Costo: $${p.costo}</span>
+              <span style="color: #5856d6;">Ganancia: $${ganancia}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function agregarCliente() {
       const nombre = document.getElementById('nombreCliente').value;
       const tel = document.getElementById('telCliente').value;
       const dir = document.getElementById('dirCliente').value;
-      if(!nombre || !tel || !dir) return alert('Completa todos los datos del cliente (Nombre, Teléfono y Dirección).');
+      if(!nombre || !tel || !dir) return alert('Completa todos los datos del cliente.');
       clientes.push({ nombre, tel, dir });
       document.getElementById('nombreCliente').value = '';
       document.getElementById('telCliente').value = '';
@@ -474,7 +492,7 @@
       if(clientes.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin clientes registrados.</span>'; return; }
       
       contenedor.innerHTML = clientes.map(c => {
-        const cleanTel = c.tel.replace(/\D/g, ''); // Limpia caracteres especiales para enlace de WhatsApp
+        const cleanTel = c.tel.replace(/\D/g, '');
         const waUrl = `https://wa.me/${cleanTel}`;
         const callUrl = `tel:${c.tel}`;
         const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.dir)}`;
