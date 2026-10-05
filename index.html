@@ -19,6 +19,7 @@
       --mac-accent: #0a84ff;
       --mac-success: #32d74b;
       --mac-red: #ff453a;
+      --mac-whatsapp: #25d366;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
@@ -64,7 +65,7 @@
     .mac-window {
       position: absolute;
       width: 580px;
-      height: 440px;
+      height: 460px;
       background: var(--mac-window-bg);
       backdrop-filter: blur(30px);
       border: 1px solid var(--mac-border);
@@ -162,11 +163,33 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
+      padding: 10px 0;
       border-bottom: 1px solid var(--mac-border);
       font-size: 0.85rem;
     }
     .list-row:last-child { border-bottom: none; }
+
+    /* BOTONES DE ACCIÓN PARA CLIENTES */
+    .client-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .client-action-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .client-action-btn:hover { opacity: 0.85; transform: scale(1.05); }
+    .btn-wa { background: var(--mac-whatsapp); }
+    .btn-call { background: var(--mac-success); }
+    .btn-maps { background: var(--mac-accent); }
 
     /* DOCK INFERIOR */
     .dock-container {
@@ -263,6 +286,7 @@
         <div class="mac-box">
           <input type="text" id="nombreCliente" class="mac-input" placeholder="Nombre completo">
           <input type="text" id="telCliente" class="mac-input" placeholder="Teléfono / Contacto">
+          <input type="text" id="dirCliente" class="mac-input" placeholder="Dirección completa">
           <button class="mac-btn" onclick="agregarCliente()">Registrar Cliente</button>
         </div>
         <div class="mac-box" style="flex: 1;">
@@ -356,7 +380,6 @@
       document.getElementById(`dock-${nombre}`).classList.remove('open');
     }
 
-    // Maximizar / Pantalla Completa estilo Mac
     function togglePantallaCompleta(event, nombre) {
       event.stopPropagation();
       const win = document.getElementById(`win-${nombre}`);
@@ -370,9 +393,8 @@
 
     function iniciarArrastre(e, idVentana) {
       if(e.target.classList.contains('control-btn')) return;
-      
       const win = document.getElementById(idVentana);
-      if(win.classList.contains('fullscreen')) return; // No arrastrar si está en pantalla completa
+      if(win.classList.contains('fullscreen')) return;
 
       ventanaActiva = win;
       enfocarVentana(idVentana.replace('win-', ''));
@@ -387,12 +409,9 @@
 
     function arrastrarVentana(e) {
       if(!ventanaActiva) return;
-
       let x = e.clientX - offsetX;
       let y = e.clientY - offsetY;
-
       if(y < 28) y = 28;
-
       ventanaActiva.style.left = x + 'px';
       ventanaActiva.style.top = y + 'px';
     }
@@ -441,22 +460,44 @@
     function agregarCliente() {
       const nombre = document.getElementById('nombreCliente').value;
       const tel = document.getElementById('telCliente').value;
-      if(!nombre || !tel) return alert('Completa los datos del cliente.');
-      clientes.push({ nombre, tel });
+      const dir = document.getElementById('dirCliente').value;
+      if(!nombre || !tel || !dir) return alert('Completa todos los datos del cliente (Nombre, Teléfono y Dirección).');
+      clientes.push({ nombre, tel, dir });
       document.getElementById('nombreCliente').value = '';
       document.getElementById('telCliente').value = '';
+      document.getElementById('dirCliente').value = '';
       sincronizar();
     }
 
     function renderClientes() {
       const contenedor = document.getElementById('listaClientes');
-      if(clientes.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin clientes.</span>'; return; }
-      contenedor.innerHTML = clientes.map(c => `
-        <div class="list-row">
-          <span><strong>${c.nombre}</strong></span>
-          <span style="color:var(--mac-text-muted);">${c.tel}</span>
-        </div>
-      `).join('');
+      if(clientes.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin clientes registrados.</span>'; return; }
+      
+      contenedor.innerHTML = clientes.map(c => {
+        const cleanTel = c.tel.replace(/\D/g, ''); // Limpia caracteres especiales para enlace de WhatsApp
+        const waUrl = `https://wa.me/${cleanTel}`;
+        const callUrl = `tel:${c.tel}`;
+        const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.dir)}`;
+        
+        return `
+          <div class="list-row" style="flex-direction: column; align-items: flex-start; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+              <div>
+                <strong>${c.nombre}</strong><br>
+                <small style="color:var(--mac-text-muted);"><i class="fa-solid fa-phone"></i> ${c.tel}</small>
+              </div>
+              <div class="client-actions">
+                <a href="${waUrl}" target="_blank" class="client-action-btn btn-wa" title="Enviar WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="${callUrl}" class="client-action-btn btn-call" title="Llamar por teléfono"><i class="fa-solid fa-phone"></i></a>
+                <a href="${mapsUrl}" target="_blank" class="client-action-btn btn-maps" title="Ver dirección en Google Maps"><i class="fa-solid fa-map-location-dot"></i></a>
+              </div>
+            </div>
+            <div style="font-size: 0.75rem; color: var(--mac-text-muted);">
+              <i class="fa-solid fa-location-dot" style="color: var(--mac-accent);"></i> ${c.dir}
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function registrarTransaccion() {
