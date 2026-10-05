@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>iOS Business HUD - Control y Stock</title>
+  <title>macOS Business HUD - Control y Stock</title>
   
-  <!-- Google Fonts: Inter / SF Pro style -->
+  <!-- Google Fonts: Inter / San Francisco style -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -15,324 +15,428 @@
 
   <style>
     :root {
-      --ios-bg: #000000;
-      --ios-card: rgba(28, 28, 30, 0.75);
-      --ios-card-hover: rgba(44, 44, 46, 0.85);
-      --ios-border: rgba(255, 255, 255, 0.1);
-      --ios-text: #f5f5f7;
-      --ios-text-muted: #86868b;
-      --ios-accent: #0a84ff; /* Azul iOS */
-      --ios-success: #32d74b;
-      --ios-orange: #ff9f0a;
-      --ios-red: #ff453a;
-      --radius-widget: 18px;
+      --mac-bg: #1e1e24;
+      --mac-window-bg: rgba(30, 30, 35, 0.85);
+      --mac-border: rgba(255, 255, 255, 0.12);
+      --mac-text: #f5f5f7;
+      --mac-text-muted: #98989d;
+      --mac-accent: #0a84ff;
+      --mac-success: #32d74b;
+      --mac-orange: #ff9f0a;
+      --mac-red: #ff453a;
+      --mac-purple: #bf5af2;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
-    body { background-color: var(--ios-bg); color: var(--ios-text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow-x: hidden; background-image: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #000000 70%); }
+    
+    /* ESCRITORIO MACBOOK */
+    body { 
+      background-color: #0d0d12;
+      background-image: radial-gradient(circle at 30% 20%, #2b1055 0%, #7597de 0%, #111425 100%), url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop');
+      background-size: cover;
+      background-position: center;
+      color: var(--mac-text); 
+      height: 100vh; 
+      overflow: hidden; 
+      display: flex; 
+      flex-direction: column; 
+    }
 
-    /* CONTENEDOR TIPO IPHONE / HUD */
-    .iphone-container { width: 100%; max-width: 430px; height: 100vh; max-height: 900px; background: rgba(0,0,0,0.7); border: 1px solid var(--ios-border); border-radius: 40px; display: flex; flex-direction: column; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.8); overflow: hidden; backdrop-filter: blur(20px); }
-    @media (max-width: 480px) { .iphone-container { max-height: 100vh; border-radius: 0; border: none; } }
+    /* BARRA DE MENÚ SUPERIOR (MENUBAR) */
+    .menu-bar {
+      height: 28px;
+      background: rgba(20, 20, 25, 0.65);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--mac-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      z-index: 1000;
+    }
+    .menu-left, .menu-right { display: flex; align-items: center; gap: 16px; }
+    .menu-item { cursor: pointer; transition: opacity 0.2s; }
+    .menu-item:hover { opacity: 0.8; }
+    .apple-logo { font-size: 0.9rem; }
 
-    /* BARRA DE ESTADO SUPERIOR */
-    .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px 8px 24px; font-size: 0.85rem; font-weight: 600; z-index: 10; }
-    .status-icons { display: flex; gap: 6px; font-size: 0.8rem; }
+    /* ÁREA DE TRABAJO (ESCRITORIO) */
+    .desktop {
+      flex: 1;
+      position: relative;
+      padding: 20px;
+      overflow: hidden;
+    }
 
-    /* ÁREA DE CONTENIDO DINÁMICO */
-    .screen-content { flex: 1; padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 16px; position: relative; }
-    .screen-content.active { display: flex; }
+    /* VENTANAS ESTILO MACOS */
+    .mac-window {
+      position: absolute;
+      top: 40px;
+      left: 60px;
+      width: 650px;
+      height: 480px;
+      background: var(--mac-window-bg);
+      backdrop-filter: blur(30px);
+      border: 1px solid var(--mac-border);
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      display: none; /* Ocultas por defecto hasta abrirlas */
+      z-index: 10;
+      resize: both;
+      overflow: hidden;
+    }
+    .mac-window.active { display: flex; }
 
-    /* WIDGETS Y TARJETAS ESTILO APPLE */
-    .ios-widget { background: var(--ios-card); border: 1px solid var(--ios-border); border-radius: var(--radius-widget); padding: 18px; backdrop-filter: blur(20px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-    .widget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .widget-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ios-text-muted); font-weight: 700; }
+    /* BARRA DE TÍTULO DE LA VENTANA */
+    .window-header {
+      height: 38px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--mac-border);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      position: relative;
+      cursor: grab;
+    }
+    .window-controls { display: flex; gap: 8px; }
+    .control-btn { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: none; }
+    .btn-close { background: #ff5f56; }
+    .btn-minimize { background: #ffbd2e; }
+    .btn-maximize { background: #27c93f; }
+    .window-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 0.8rem; font-weight: 600; color: var(--mac-text-muted); }
 
-    /* CUADRÍCULA DE APLICACIONES (SPRINGBOARD) */
-    .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 10px 0; }
-    .app-icon-wrapper { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; text-align: center; }
-    .app-icon { width: 64px; height: 64px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.4); transition: transform 0.2s; }
-    .app-icon:hover { transform: scale(1.08); }
-    .app-label { font-size: 0.7rem; font-weight: 500; color: var(--ios-text); }
+    /* CONTENIDO INTERNO DE LA VENTANA */
+    .window-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
 
-    /* BOTÓN DE RETROCESO */
-    .back-nav { display: flex; align-items: center; gap: 8px; color: var(--ios-accent); font-weight: 600; font-size: 0.9rem; cursor: pointer; margin-bottom: 4px; background: none; border: none; }
+    /* WIDGETS Y FORMULARIOS MACOS */
+    .mac-box {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--mac-border);
+      border-radius: 10px;
+      padding: 14px;
+    }
+    .mac-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--mac-border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--mac-text);
+      font-size: 0.85rem;
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .mac-input:focus { border-color: var(--mac-accent); }
+    .mac-btn {
+      background: var(--mac-accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .mac-btn:hover { opacity: 0.85; }
 
-    /* FORMULARIOS Y TABLAS ESTILO iOS */
-    .ios-input { width: 100%; background: rgba(255,255,255,0.06); border: 1px solid var(--ios-border); border-radius: 10px; padding: 10px 14px; color: var(--ios-text); font-size: 0.9rem; outline: none; margin-bottom: 10px; }
-    .ios-input:focus { border-color: var(--ios-accent); }
-    .ios-btn { width: 100%; background: var(--ios-accent); color: #fff; border: none; border-radius: 12px; padding: 12px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s; }
-    .ios-btn:active { opacity: 0.8; }
+    .list-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--mac-border);
+      font-size: 0.85rem;
+    }
+    .list-row:last-child { border-bottom: none; }
 
-    .list-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--ios-border); font-size: 0.85rem; }
-    .list-item:last-child { border-bottom: none; }
-
-    /* DOCK INFERIOR */
-    .dock { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--ios-border); border-radius: 30px; margin: 10px 16px 20px 16px; padding: 12px; display: flex; justify-content: space-around; backdrop-filter: blur(30px); }
-    .dock-icon { width: 50px; height: 50px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; cursor: pointer; transition: transform 0.2s; }
-    .dock-icon:hover { transform: scale(1.1); }
+    /* DOCK INFERIOR ESTILO MACOS */
+    .dock-container {
+      position: absolute;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--mac-border);
+      border-radius: 20px;
+      padding: 8px 12px;
+      display: flex;
+      gap: 12px;
+      z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .dock-app {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.2s, width 0.2s;
+      position: relative;
+    }
+    .dock-app:hover {
+      transform: scale(1.25) translateY(-6px);
+    }
+    .dock-dot {
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      position: absolute;
+      bottom: -4px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="iphone-container">
-    
-    <!-- BARRA DE ESTADO -->
-    <div class="status-bar">
-      <span id="relojStatus">9:41</span>
-      <div class="status-icons">
-        <i class="fa-solid fa-signal"></i>
-        <i class="fa-solid fa-wifi"></i>
-        <i class="fa-solid fa-battery-full"></i>
-      </div>
+  <!-- MENUBAR SUPERIOR -->
+  <div class="menu-bar">
+    <div class="menu-left">
+      <span class="menu-item apple-logo"><i class="fa-brands fa-apple"></i></span>
+      <span class="menu-item" style="font-weight: 700;">macOS HUD</span>
+      <span class="menu-item">Archivo</span>
+      <span class="menu-item">Edición</span>
+      <span class="menu-item">Vista</span>
     </div>
-
-    <!-- PANTALLA 1: HOME (SPRINGBOARD) -->
-    <div id="screen-home" class="screen-content active">
-      
-      <!-- Widget de Resumen Ejecutivo -->
-      <div class="ios-widget" style="background: linear-gradient(135deg, rgba(10,132,255,0.2), rgba(50,215,75,0.2)); border-color: rgba(10,132,255,0.3);">
-        <div class="widget-title">CENTRAL DE NEGOCIO</div>
-        <h2 style="font-size: 1.3rem; font-weight: 700; margin-top: 4px;">Control Activo</h2>
-        <p style="font-size: 0.82rem; color: var(--ios-text-muted); margin-top: 4px;">Gestiona tu inventario, cuentas y clientes desde un solo lugar.</p>
-      </div>
-
-      <div class="widget-title" style="margin-top: 5px;">MÓDULOS</div>
-      
-      <!-- Cuadrícula de Apps -->
-      <div class="app-grid">
-        <div class="app-icon-wrapper" onclick="abrirApp('stock')">
-          <div class="app-icon" style="background: linear-gradient(135deg, #ff9f0a, #ff453a);"><i class="fa-solid fa-boxes-stacked"></i></div>
-          <span class="app-label">Stock</span>
-        </div>
-        <div class="app-icon-wrapper" onclick="abrirApp('clientes')">
-          <div class="app-icon" style="background: linear-gradient(135deg, #0a84ff, #5856d6);"><i class="fa-solid fa-users"></i></div>
-          <span class="app-label">Clientes</span>
-        </div>
-        <div class="app-icon-wrapper" onclick="abrirApp('cuentas')">
-          <div class="app-icon" style="background: linear-gradient(135deg, #32d74b, #30b0c7);"><i class="fa-solid fa-wallet"></i></div>
-          <span class="app-label">Cuentas</span>
-        </div>
-        <div class="app-icon-wrapper" onclick="abrirApp('ventas')">
-          <div class="app-icon" style="background: linear-gradient(135deg, #bf5af2, #ff375f);"><i class="fa-solid fa-cash-register"></i></div>
-          <span class="app-label">Ventas</span>
-        </div>
-      </div>
-
-      <!-- Widget Estado Rápido -->
-      <div class="ios-widget" style="margin-top: auto;">
-        <div class="widget-header">
-          <span class="widget-title"><i class="fa-solid fa-bolt"></i> Estado del Sistema</span>
-          <span style="color: var(--ios-success); font-size: 0.75rem; font-weight: 700;">● SINCRONIZADO</span>
-        </div>
-        <p style="font-size: 0.8rem; color: var(--ios-text-muted);">Los datos se guardan de forma local en tu dispositivo automáticamente.</p>
-      </div>
-
+    <div class="menu-right">
+      <span class="menu-item"><i class="fa-solid fa-wifi"></i></span>
+      <span class="menu-item" id="relojMac">00:00</span>
     </div>
+  </div>
 
-    <!-- PANTALLA 2: STOCK / INVENTARIO -->
-    <div id="screen-stock" class="screen-content">
-      <button class="back-nav" onclick="irHome()"><i class="fa-solid fa-chevron-left"></i> Inicio</button>
-      <h2 style="font-size: 1.2rem; font-weight: 700;"><i class="fa-solid fa-boxes-stacked" style="color: var(--ios-orange);"></i> Control de Stock</h2>
-      
-      <div class="ios-widget">
-        <input type="text" id="nombreProducto" class="ios-input" placeholder="Nombre del producto">
-        <input type="number" id="stockProducto" class="ios-input" placeholder="Cantidad disponible">
-        <input type="number" id="precioProducto" class="ios-input" placeholder="Precio unitario ($)">
-        <button class="ios-btn" onclick="agregarProducto()">Añadir Producto</button>
+  <!-- ESCRITORIO -->
+  <div class="desktop" id="desktop">
+
+    <!-- VENTANA 1: STOCK -->
+    <div class="mac-window active" id="win-stock" style="top: 30px; left: 40px;">
+      <div class="window-header">
+        <div class="window-controls">
+          <button class="control-btn btn-close" onclick="cerrarVentana('stock')"></button>
+          <button class="control-btn btn-minimize"></button>
+          <button class="control-btn btn-maximize"></button>
+        </div>
+        <span class="window-title">Control de Stock - Inventario</span>
       </div>
-
-      <div class="ios-widget">
-        <div class="widget-title">Inventario Actual</div>
-        <div id="listaStock" style="margin-top: 10px;">
-          <!-- Se llena dinámicamente -->
+      <div class="window-body">
+        <div class="mac-box">
+          <input type="text" id="nombreProducto" class="mac-input" placeholder="Nombre del producto">
+          <input type="number" id="stockProducto" class="mac-input" placeholder="Cantidad">
+          <input type="number" id="precioProducto" class="mac-input" placeholder="Precio ($)">
+          <button class="mac-btn" onclick="agregarProducto()">Añadir al Inventario</button>
+        </div>
+        <div class="mac-box" style="flex: 1;">
+          <h4 style="font-size: 0.8rem; color: var(--mac-text-muted); margin-bottom: 6px; text-transform: uppercase;">Productos Registrados</h4>
+          <div id="listaStock"></div>
         </div>
       </div>
     </div>
 
-    <!-- PANTALLA 3: CLIENTES -->
-    <div id="screen-clientes" class="screen-content">
-      <button class="back-nav" onclick="irHome()"><i class="fa-solid fa-chevron-left"></i> Inicio</button>
-      <h2 style="font-size: 1.2rem; font-weight: 700;"><i class="fa-solid fa-users" style="color: var(--ios-accent);"></i> Base de Clientes</h2>
-      
-      <div class="ios-widget">
-        <input type="text" id="nombreCliente" class="ios-input" placeholder="Nombre del cliente">
-        <input type="text" id="telCliente" class="ios-input" placeholder="Teléfono o contacto">
-        <button class="ios-btn" onclick="agregarCliente()">Registrar Cliente</button>
+    <!-- VENTANA 2: CLIENTES -->
+    <div class="mac-window" id="win-clientes" style="top: 60px; left: 100px;">
+      <div class="window-header">
+        <div class="window-controls">
+          <button class="control-btn btn-close" onclick="cerrarVentana('clientes')"></button>
+          <button class="control-btn btn-minimize"></button>
+          <button class="control-btn btn-maximize"></button>
+        </div>
+        <span class="window-title">Directorio de Clientes</span>
       </div>
-
-      <div class="ios-widget">
-        <div class="widget-title">Clientes Registrados</div>
-        <div id="listaClientes" style="margin-top: 10px;">
-          <!-- Se llena dinámicamente -->
+      <div class="window-body">
+        <div class="mac-box">
+          <input type="text" id="nombreCliente" class="mac-input" placeholder="Nombre completo">
+          <input type="text" id="telCliente" class="mac-input" placeholder="Teléfono / Contacto">
+          <button class="mac-btn" onclick="agregarCliente()">Registrar Cliente</button>
+        </div>
+        <div class="mac-box" style="flex: 1;">
+          <h4 style="font-size: 0.8rem; color: var(--mac-text-muted); margin-bottom: 6px; text-transform: uppercase;">Clientes Activos</h4>
+          <div id="listaClientes"></div>
         </div>
       </div>
     </div>
 
-    <!-- PANTALLA 4: CUENTAS / FINANZAS -->
-    <div id="screen-cuentas" class="screen-content">
-      <button class="back-nav" onclick="irHome()"><i class="fa-solid fa-chevron-left"></i> Inicio</button>
-      <h2 style="font-size: 1.2rem; font-weight: 700;"><i class="fa-solid fa-wallet" style="color: var(--ios-success);"></i> Cuentas y Cobros</h2>
-      
-      <div class="ios-widget">
-        <div class="widget-title">Balance General</div>
-        <h3 id="balanceTotal" style="font-size: 1.8rem; font-weight: 700; margin-top: 5px; color: var(--ios-success);">$0.00</h3>
+    <!-- VENTANA 3: CUENTAS Y FINANZAS -->
+    <div class="mac-window" id="win-cuentas" style="top: 90px; left: 160px;">
+      <div class="window-header">
+        <div class="window-controls">
+          <button class="control-btn btn-close" onclick="cerrarVentana('cuentas')"></button>
+          <button class="control-btn btn-minimize"></button>
+          <button class="control-btn btn-maximize"></button>
+        </div>
+        <span class="window-title">Cuentas y Finanzas</span>
       </div>
-
-      <div class="ios-widget">
-        <input type="text" id="conceptoCuenta" class="ios-input" placeholder="Concepto (Ej: Venta de mercancía)">
-        <input type="number" id="montoCuenta" class="ios-input" placeholder="Monto ($)">
-        <button class="ios-btn" style="background: var(--ios-success);" onclick="registrarTransaccion()">Registrar Transacción</button>
-      </div>
-
-      <div class="ios-widget">
-        <div class="widget-title">Historial de Cuentas</div>
-        <div id="listaCuentas" style="margin-top: 10px;">
-          <!-- Se llena dinámicamente -->
+      <div class="window-body">
+        <div class="mac-box" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <span style="font-size: 0.75rem; color: var(--mac-text-muted); text-transform: uppercase;">Balance Total</span>
+            <h2 id="balanceTotal" style="font-size: 1.5rem; color: var(--mac-success);">$0.00</h2>
+          </div>
+          <i class="fa-solid fa-wallet" style="font-size: 2rem; color: var(--mac-success); opacity: 0.8;"></i>
+        </div>
+        <div class="mac-box">
+          <input type="text" id="conceptoCuenta" class="mac-input" placeholder="Concepto de transacción">
+          <input type="number" id="montoCuenta" class="mac-input" placeholder="Monto ($ positivo o negativo)">
+          <button class="mac-btn" style="background: var(--mac-success);" onclick="registrarTransaccion()">Registrar Transacción</button>
+        </div>
+        <div class="mac-box" style="flex: 1;">
+          <h4 style="font-size: 0.8rem; color: var(--mac-text-muted); margin-bottom: 6px; text-transform: uppercase;">Historial Financiero</h4>
+          <div id="listaCuentas"></div>
         </div>
       </div>
-    </div>
-
-    <!-- PANTALLA 5: VENTAS (REGISTRO RÁPIDO) -->
-    <div id="screen-ventas" class="screen-content">
-      <button class="back-nav" onclick="irHome()"><i class="fa-solid fa-chevron-left"></i> Inicio</button>
-      <h2 style="font-size: 1.2rem; font-weight: 700;"><i class="fa-solid fa-cash-register" style="color: var(--ios-purple);"></i> Caja de Ventas</h2>
-      
-      <div class="ios-widget">
-        <p style="font-size: 0.85rem; color: var(--ios-text-muted);">Aquí podrás procesar ventas rápidas descontando stock automáticamente en futuras mejoras.</p>
-      </div>
-    </div>
-
-    <!-- DOCK INFERIOR -->
-    <div class="dock">
-      <div class="dock-icon" style="background: #ff9f0a;" onclick="abrirApp('stock')"><i class="fa-solid fa-boxes-stacked"></i></div>
-      <div class="dock-icon" style="background: #0a84ff;" onclick="abrirApp('clientes')"><i class="fa-solid fa-users"></i></div>
-      <div class="dock-icon" style="background: #32d74b;" onclick="abrirApp('cuentas')"><i class="fa-solid fa-wallet"></i></div>
-      <div class="dock-icon" style="background: #bf5af2;" onclick="abrirApp('ventas')"><i class="fa-solid fa-cash-register"></i></div>
     </div>
 
   </div>
 
+  <!-- DOCK INFERIOR MACOS -->
+  <div class="dock-container">
+    <div class="dock-app" style="background: linear-gradient(135deg, #ff9f0a, #ff453a);" onclick="abrirVentana('stock')" title="Stock">
+      <i class="fa-solid fa-boxes-stacked"></i>
+      <div class="dock-dot" id="dot-stock"></div>
+    </div>
+    <div class="dock-app" style="background: linear-gradient(135deg, #0a84ff, #5856d6);" onclick="abrirVentana('clientes')" title="Clientes">
+      <i class="fa-solid fa-users"></i>
+      <div class="dock-dot" id="dot-clientes"></div>
+    </div>
+    <div class="dock-app" style="background: linear-gradient(135deg, #32d74b, #30b0c7);" onclick="abrirVentana('cuentas')" title="Cuentas">
+      <i class="fa-solid fa-wallet"></i>
+      <div class="dock-dot" id="dot-cuentas"></div>
+    </div>
+  </div>
+
   <script>
-    // Reloj dinámico
+    // Reloj en tiempo real barra superior
     function actualizarReloj() {
       const ahora = new Date();
       let horas = ahora.getHours();
       let minutos = ahora.getMinutes();
       minutos = minutos < 10 ? '0' + minutos : minutos;
-      document.getElementById('relojStatus').innerText = `${horas}:${minutos}`;
+      document.getElementById('relojMac').innerText = `${horas}:${minutos}`;
     }
     setInterval(actualizarReloj, 1000);
     actualizarReloj();
 
-    // Navegación entre apps
-    function abrirApp(nombreApp) {
-      document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
-      const target = document.getElementById(`screen-${nombreApp}`);
-      if(target) target.classList.add('active');
+    // Gestión de ventanas
+    function abrirVentana(nombre) {
+      document.getElementById(`win-${nombre}`).classList.add('active');
     }
 
-    function irHome() {
-      document.querySelectorAll('.screen-content').forEach(s => s.classList.remove('active'));
-      document.getElementById('screen-home').classList.add('active');
+    function cerrarVentana(nombre) {
+      document.getElementById(`win-${nombre}`).classList.remove('active');
     }
 
-    // Lógica de Datos LocalStorage
-    let stock = JSON.parse(localStorage.getItem('ios_stock')) || [];
-    let clientes = JSON.parse(localStorage.getItem('ios_clientes')) || [];
-    let cuentas = JSON.parse(localStorage.getItem('ios_cuentas')) || [];
+    // Datos y LocalStorage
+    let stock = JSON.parse(localStorage.getItem('mac_stock')) || [];
+    let clientes = JSON.parse(localStorage.getItem('mac_clientes')) || [];
+    let cuentas = JSON.parse(localStorage.getItem('mac_cuentas')) || [];
 
-    function guardarYRenderizar() {
-      localStorage.setItem('ios_stock', JSON.stringify(stock));
-      localStorage.setItem('ios_clientes', JSON.stringify(clientes));
-      localStorage.setItem('ios_cuentas', JSON.stringify(cuentas));
-      renderStock();
-      renderClientes();
-      renderCuentas();
+    function sincronizar() {
+      localStorage.setItem('mac_stock', JSON.stringify(stock));
+      localStorage.setItem('mac_clientes', JSON.stringify(clientes));
+      localStorage.setItem('mac_cuentas', JSON.stringify(cuentas));
+      renderizarTodo();
     }
 
-    // Funciones de Stock
+    // Stock
     function agregarProducto() {
       const nombre = document.getElementById('nombreProducto').value;
       const cantidad = document.getElementById('stockProducto').value;
       const precio = document.getElementById('precioProducto').value;
-      if(!nombre || !cantidad || !precio) return alert('Completa todos los campos');
+      if(!nombre || !cantidad || !precio) return alert('Por favor llena todos los campos del producto.');
       
       stock.push({ nombre, cantidad, precio });
       document.getElementById('nombreProducto').value = '';
       document.getElementById('stockProducto').value = '';
       document.getElementById('precioProducto').value = '';
-      guardarYRenderizar();
+      sincronizar();
     }
 
     function renderStock() {
       const contenedor = document.getElementById('listaStock');
-      if(stock.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--ios-text-muted);">Sin productos en stock.</span>'; return; }
+      if(stock.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin stock registrado.</span>'; return; }
       contenedor.innerHTML = stock.map(p => `
-        <div class="list-item">
-          <span><strong>${p.nombre}</strong><br><small style="color:var(--ios-text-muted);">Cant: ${p.cantidad}</small></span>
-          <span style="color:var(--ios-success); font-weight:600;">$${p.precio}</span>
+        <div class="list-row">
+          <span><strong>${p.nombre}</strong><br><small style="color:var(--mac-text-muted);">Stock: ${p.cantidad}</small></span>
+          <span style="color:var(--mac-success); font-weight:600;">$${p.precio}</span>
         </div>
       `).join('');
     }
 
-    // Funciones de Clientes
+    // Clientes
     function agregarCliente() {
       const nombre = document.getElementById('nombreCliente').value;
       const tel = document.getElementById('telCliente').value;
-      if(!nombre || !tel) return alert('Completa los datos del cliente');
+      if(!nombre || !tel) return alert('Por favor llena los datos del cliente.');
 
       clientes.push({ nombre, tel });
       document.getElementById('nombreCliente').value = '';
       document.getElementById('telCliente').value = '';
-      guardarYRenderizar();
+      sincronizar();
     }
 
     function renderClientes() {
       const contenedor = document.getElementById('listaClientes');
-      if(clientes.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--ios-text-muted);">No hay clientes registrados.</span>'; return; }
+      if(clientes.length === 0) { contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">No hay clientes registrados.</span>'; return; }
       contenedor.innerHTML = clientes.map(c => `
-        <div class="list-item">
-          <span><strong>${c.name || c.nombre}</strong></span>
-          <span style="color:var(--ios-text-muted);">${c.tel}</span>
+        <div class="list-row">
+          <span><strong>${c.nombre}</strong></span>
+          <span style="color:var(--mac-text-muted);">${c.tel}</span>
         </div>
       `).join('');
     }
 
-    // Funciones de Cuentas
+    // Cuentas
     function registrarTransaccion() {
       const concepto = document.getElementById('conceptoCuenta').value;
       const monto = parseFloat(document.getElementById('montoCuenta').value);
-      if(!concepto || isNaN(monto)) return alert('Ingresa un concepto y un monto válido');
+      if(!concepto || isNaN(monto)) return alert('Ingresa un concepto y un monto válido.');
 
       cuentas.push({ concepto, monto });
       document.getElementById('conceptoCuenta').value = '';
       document.getElementById('montoCuenta').value = '';
-      guardarYRenderizar();
+      sincronizar();
     }
 
     function renderCuentas() {
       const contenedor = document.getElementById('listaCuentas');
       let total = 0;
-      if(cuentas.length === 0) { 
-        contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--ios-text-muted);">Sin transacciones recientes.</span>'; 
+      if(cuentas.length === 0) {
+        contenedor.innerHTML = '<span style="font-size:0.8rem; color:var(--mac-text-muted);">Sin transacciones recientes.</span>';
         document.getElementById('balanceTotal').innerText = '$0.00';
-        return; 
+        return;
       }
       contenedor.innerHTML = cuentas.map(t => {
         total += t.monto;
         return `
-          <div class="list-item">
+          <div class="list-row">
             <span>${t.concepto}</span>
-            <span style="color: ${t.monto >= 0 ? 'var(--ios-success)' : 'var(--ios-red)'}; font-weight:600;">$${t.monto}</span>
+            <span style="color: ${t.monto >= 0 ? 'var(--mac-success)' : 'var(--mac-red)'}; font-weight:600;">$${t.monto}</span>
           </div>
         `;
       }).join('');
       document.getElementById('balanceTotal').innerText = `$${total.toFixed(2)}`;
     }
 
-    // Cargar datos iniciales al abrir
-    guardarYRenderizar();
+    function renderizarTodo() {
+      renderStock();
+      renderClientes();
+      renderCuentas();
+    }
+
+    renderizarTodo();
   </script>
 
 </body>
