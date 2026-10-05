@@ -75,8 +75,19 @@
       display: none;
       z-index: 10;
       overflow: hidden;
+      transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease, border-radius 0.25s ease;
     }
     .mac-window.active { display: flex; }
+
+    /* ESTADO DE PANTALLA COMPLETA DE VENTANA */
+    .mac-window.fullscreen {
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: calc(100vh - 28px) !important;
+      border-radius: 0 !important;
+      border: none;
+    }
 
     /* BARRA DE TÍTULO */
     .window-header {
@@ -90,6 +101,7 @@
       cursor: grab;
       user-select: none;
     }
+    .mac-window.fullscreen .window-header { cursor: default; }
     .window-header:active { cursor: grabbing; }
     .window-controls { display: flex; gap: 8px; z-index: 5; }
     .control-btn { width: 12px; height: 12px; border-radius: 50%; cursor: pointer; border: none; }
@@ -219,7 +231,7 @@
         <div class="window-controls">
           <button class="control-btn btn-close" onclick="cerrarVentana(event, 'stock')"></button>
           <button class="control-btn btn-minimize"></button>
-          <button class="control-btn btn-maximize"></button>
+          <button class="control-btn btn-maximize" onclick="togglePantallaCompleta(event, 'stock')"></button>
         </div>
         <span class="window-title">Control de Stock - Inventario</span>
       </div>
@@ -243,7 +255,7 @@
         <div class="window-controls">
           <button class="control-btn btn-close" onclick="cerrarVentana(event, 'clientes')"></button>
           <button class="control-btn btn-minimize"></button>
-          <button class="control-btn btn-maximize"></button>
+          <button class="control-btn btn-maximize" onclick="togglePantallaCompleta(event, 'clientes')"></button>
         </div>
         <span class="window-title">Directorio de Clientes</span>
       </div>
@@ -266,7 +278,7 @@
         <div class="window-controls">
           <button class="control-btn btn-close" onclick="cerrarVentana(event, 'cuentas')"></button>
           <button class="control-btn btn-minimize"></button>
-          <button class="control-btn btn-maximize"></button>
+          <button class="control-btn btn-maximize" onclick="togglePantallaCompleta(event, 'cuentas')"></button>
         </div>
         <span class="window-title">Cuentas y Finanzas</span>
       </div>
@@ -344,17 +356,27 @@
       document.getElementById(`dock-${nombre}`).classList.remove('open');
     }
 
-    // Sistema de Arrastre Libre Directo y Corregido
+    // Maximizar / Pantalla Completa estilo Mac
+    function togglePantallaCompleta(event, nombre) {
+      event.stopPropagation();
+      const win = document.getElementById(`win-${nombre}`);
+      win.classList.toggle('fullscreen');
+      enfocarVentana(nombre);
+    }
+
+    // Sistema de Arrastre Libre Directo
     let ventanaActiva = null;
     let offsetX = 0, offsetY = 0;
 
     function iniciarArrastre(e, idVentana) {
       if(e.target.classList.contains('control-btn')) return;
       
-      ventanaActiva = document.getElementById(idVentana);
+      const win = document.getElementById(idVentana);
+      if(win.classList.contains('fullscreen')) return; // No arrastrar si está en pantalla completa
+
+      ventanaActiva = win;
       enfocarVentana(idVentana.replace('win-', ''));
 
-      // Calcular posición inicial exacta respecto al mouse dentro de la ventana
       offsetX = e.clientX - ventanaActiva.offsetLeft;
       offsetY = e.clientY - ventanaActiva.offsetTop;
 
@@ -369,7 +391,6 @@
       let x = e.clientX - offsetX;
       let y = e.clientY - offsetY;
 
-      // Evitar que la ventana suba por encima de la barra de menú superior
       if(y < 28) y = 28;
 
       ventanaActiva.style.left = x + 'px';
